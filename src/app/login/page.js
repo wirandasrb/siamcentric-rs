@@ -3,6 +3,7 @@ import { ErrorOutline, Person, Visibility, VisibilityOff } from "@mui/icons-mate
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React from "react";
+import { object, string } from "yup";
 
 const LoginPage = () => {
     // const [username, setUsername] = React.useState("");
@@ -11,6 +12,7 @@ const LoginPage = () => {
     const [error, setError] = React.useState("");
 
     const handleSignin = async (values) => {
+        console.log(values);
     };
 
     const formik = useFormik({
@@ -18,6 +20,10 @@ const LoginPage = () => {
             username: "",
             password: "",
         },
+        validationSchema: object({
+            username: string().required("กรุณากรอกชื่อผู้ใช้"),
+            password: string().required("กรุณากรอกรหัสผ่าน"),
+        }),
         onSubmit: (values) => {
             handleSignin(values)
         },
@@ -131,6 +137,8 @@ const LoginPage = () => {
                                 ),
                             },
                         }}
+                        helperText={formik.touched.username && formik.errors.username ? formik.errors.username : null}
+                        error={formik.touched.username && Boolean(formik.errors.username)}
                     />
                     <TextField
                         label="รหัสผ่าน"
@@ -151,6 +159,11 @@ const LoginPage = () => {
                                 ),
                             },
                         }}
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        name="password"
+                        helperText={formik.touched.password && formik.errors.password ? formik.errors.password : null}
+                        error={formik.touched.password && Boolean(formik.errors.password)}
                     />
                     <Button
                         sx={{
