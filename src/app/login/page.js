@@ -4,16 +4,30 @@ import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import React from "react";
 import { object, string } from "yup";
+import authService from "../../services/authService";
+import { useRouter } from "next/navigation";
+
 
 const LoginPage = () => {
     // const [username, setUsername] = React.useState("");
     // const [password, setPassword] = React.useState("");
     const [isShowPassword, setIsShowPassword] = React.useState(false);
     const [error, setError] = React.useState("");
+    const router = useRouter();
 
     const handleSignin = async (values) => {
         console.log(values);
-    };
+        try {
+            const response = await authService.login(values.username, values.password);
+            if (response.status === 200) {
+                router.push("/admin/dashboard");
+            } else {
+                throw new Error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+            }
+        } catch (error) {
+            setError("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+        }
+    }
 
     const formik = useFormik({
         initialValues: {

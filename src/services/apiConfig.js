@@ -8,7 +8,7 @@ const apiWithoutAuth = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 10000,
-    withCredentials: true,
+    // withCredentials: true,
 })
 
 const apiWithAuth = axios.create({
@@ -17,7 +17,7 @@ const apiWithAuth = axios.create({
         'Content-Type': 'application/json',
     },
     timeout: 10000,
-    withCredentials: true,
+    // withCredentials: true,
 })
 
 apiWithAuth.interceptors.request.use(
