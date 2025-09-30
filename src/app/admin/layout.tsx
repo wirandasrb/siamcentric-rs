@@ -11,20 +11,34 @@ import {
   List,
   ListItem,
   ListItemButton,
+  ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
+import {
+  AccountCircle,
+  Dashboard,
+  Group,
+  InsertDriveFile,
+  MenuOpen,
+  Person,
+  PersonAdd,
+} from "@mui/icons-material";
 
-const drawerWidth = 240;
-
+const drawerWidth = 240; // ตอน open
+const miniWidth = 64; // ตอน close
+const basePath = "/admin";
 const menuItems = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Form", path: "/form" },
-  { label: "Survey", path: "/survey" },
+  { label: "Dashboard", path: `${basePath}/dashboard`, icon: <Dashboard /> },
+  { label: "แบบสอบถาม", path: `${basePath}/forms`, icon: <InsertDriveFile /> },
+  { label: "ผู้ใช้งาน", path: `${basePath}/users`, icon: <Group /> },
 ];
 
 export default function WithLayout({
@@ -32,10 +46,20 @@ export default function WithLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(true);
+
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleDrawerToggle = () => {
+    setMenuOpen(!menuOpen);
     setMobileOpen(!mobileOpen);
   };
 
@@ -45,12 +69,22 @@ export default function WithLayout({
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem key={item.path} disablePadding>
+          <ListItem key={item.path}>
             <ListItemButton
               component={Link}
               href={item.path}
-              selected={pathname.startsWith(item.path)} // ✅ highlight active
+              selected={pathname.startsWith(item.path)}
+              sx={{
+                "&.Mui-selected": {
+                  backgroundColor: "primary.main",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "primary.dark",
+                  },
+                },
+              }}
             >
+              <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.label} />
             </ListItemButton>
           </ListItem>
@@ -65,24 +99,90 @@ export default function WithLayout({
       {/* Header */}
       <AppBar
         position="fixed"
-        sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          height: "64px",
+          boxShadow: "none",
+          textAlign: "center",
+        }}
       >
         <Toolbar>
           <IconButton
-            color="inherit"
             edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2 }}
+            onClick={() => {
+              handleDrawerToggle();
+            }}
+            sx={{ mr: 2, color: "white" }}
           >
-            <MenuIcon />
+            {menuOpen ? <MenuOpen /> : <MenuIcon />}
           </IconButton>
-          <Typography variant="h6" noWrap>
-            My App
+          <Image
+            src="/images/contact-form.png"
+            alt="Logo"
+            width={40}
+            height={40}
+            style={{ marginRight: 16 }}
+          />
+          <Typography
+            sx={{
+              fontSize: 20,
+              fontWeight: "bold",
+              color: "white",
+            }}
+          >
+            Siam Centric Research
           </Typography>
+          <div style={{ marginLeft: "auto" }}>
+            <IconButton
+              size="large"
+              onClick={handleMenu}
+              color="inherit"
+              sx={{ p: 0 }}
+            >
+              <AccountCircle fontSize="large" />
+            </IconButton>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+              sx={{ mt: 1 }}
+              PaperProps={{ style: { width: 200 } }}
+            >
+              {/* Header ของเมนู */}
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography fontWeight="bold">System Owner</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  superadmin
+                </Typography>
+              </Box>
+              <Divider
+                sx={{
+                  mb: 1,
+                }}
+              />
+              <MenuItem onClick={handleClose}>
+                <ListItemIcon>
+                  <Person fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Profile" />
+              </MenuItem>
+              <MenuItem onClick={handleClose}>
+                <ListItemIcon>
+                  <PersonAdd fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Create Account" />
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleClose}>ออกจากระบบ</MenuItem>
+            </Menu>
+          </div>
         </Toolbar>
       </AppBar>
       {/* Content area below header */}
-      <Toolbar /> {/* spacer for header */}
+      {/* <Toolbar /> */}
       <Box sx={{ display: "flex", flexGrow: 1 }}>
         {/* Sidebar - Mobile */}
         <Drawer
@@ -98,16 +198,64 @@ export default function WithLayout({
           {drawer}
         </Drawer>
 
-        {/* Sidebar - Desktop (always visible) */}
+        {/* Sidebar - Desktop */}
         <Drawer
           variant="permanent"
+          open={menuOpen}
           sx={{
             display: { xs: "none", md: "block" },
-            "& .MuiDrawer-paper": { width: drawerWidth, top: "64px" }, // ✅ อยู่ใต้ Header
+            "& .MuiDrawer-paper": {
+              width: menuOpen ? drawerWidth : miniWidth,
+              top: "64px",
+              overflowX: "hidden",
+              transition: (theme) =>
+                theme.transitions.create("width", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.standard,
+                }),
+            },
           }}
-          open
         >
-          {drawer}
+          <Divider />
+          <List>
+            {menuItems.map((item) => (
+              <ListItem
+                key={item.path}
+                disablePadding
+                sx={{ display: "block" }}
+              >
+                <ListItemButton
+                  component={Link}
+                  href={item.path}
+                  selected={pathname.startsWith(item.path)}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: menuOpen ? "initial" : "center",
+                    px: 2.5,
+                    "&.Mui-selected": {
+                      backgroundColor: "primary.main",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "primary.dark",
+                      },
+                    },
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: menuOpen ? 2 : "auto",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {/* โชว์เฉพาะตอน open */}
+                  {menuOpen && <ListItemText primary={item.label} />}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
         </Drawer>
 
         {/* Main Content */}
@@ -115,8 +263,17 @@ export default function WithLayout({
           component="main"
           sx={{
             flexGrow: 1,
-            p: 3,
-            width: { md: `calc(100% - ${drawerWidth}px)` },
+            mt: "64px",
+            minHeight: "calc(100vh - 64px)",
+            transition: (theme) =>
+              theme.transitions.create(["margin", "width"], {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.standard,
+              }),
+            width: {
+              md: `calc(100% - ${menuOpen ? drawerWidth : miniWidth}px)`,
+            },
+            ml: { md: `${menuOpen ? drawerWidth : miniWidth}px` },
           }}
         >
           {children}
