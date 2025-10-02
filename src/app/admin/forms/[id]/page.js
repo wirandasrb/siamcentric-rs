@@ -34,10 +34,19 @@ const FormCreatePage = () => {
     const [colorPickerTarget, setColorPickerTarget] = useState("primary");
 
     const [sections, setSections] = useState([
-        { id: 'section-1', title: '', description: '' },
-        { id: 'section-2', title: '', description: '' },
+        {
+            id: 'section-1', title: '', description: '', questions: [{ id: 'question-1', text: '', type: 'short_text', type_id: 1 },
+            { id: 'question-2', text: '', type: 'long_text', type_id: 2 },
+            {
+                id: 'question-3', text: '', type: 'single_choice', type_id: 3, options: [
+                    { id: 'option-1', label: 'ตัวเลือกที่ 1' },
+                    { id: 'option-2', label: 'ตัวเลือกที่ 2' },
+                    { id: 'option-3', label: 'ตัวเลือกที่ 3' },
+                ]
+            },]
+        },
+        { id: 'section-2', title: '', description: '', questions: [] },
     ]);
-
     const handleLogoChange = (event) => {
         if (event.target.files?.[0]) setLogo(event.target.files[0]);
     };
@@ -200,7 +209,6 @@ const FormCreatePage = () => {
                                     placeholder="ตัวอย่าง: กรุณาระบุเพศของคุณ"
                                 />
                                 <Autocomplete
-
                                     options={questionTypes}
                                     getOptionLabel={(option) => option.label}
                                     value={questionTypes[0]}

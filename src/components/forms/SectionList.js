@@ -1,13 +1,14 @@
 "use client";
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { DragHandle } from "@mui/icons-material";
-import { Box, IconButton, TextField } from "@mui/material";
+import { Add, Close, DragHandle, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { Box, Button, Chip, Divider, IconButton, TextField, Tooltip } from "@mui/material";
 import { CSS } from "@dnd-kit/utilities";
 import { arrayMove } from "@dnd-kit/sortable";
 import React from "react";
+import QuestionDragAndDrop from "./Question";
 
-function SortableItem({ section }) {
+function SortableItem({ section, setSections }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id });
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -16,7 +17,6 @@ function SortableItem({ section }) {
         p: 2,
         borderRadius: 8,
         backgroundColor: "white",
-
     };
 
     return (
@@ -32,9 +32,24 @@ function SortableItem({ section }) {
                 boxShadow: 3,
             }}>
                 <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <IconButton {...listeners} {...attributes} sx={{ p: 0 }}>
-                        <DragHandle />
-                    </IconButton>
+                    <Box sx={{ display: "flex", flexGrow: 1 }} >
+                        <Chip label={`ส่วนที่ ${section.id}`} size="small" color="default"
+                            sx={{ width: 'fit-content' }}
+                        />
+                    </Box>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                        <Tooltip title="ลากเพื่อเปลี่ยนลำดับ">
+                            <IconButton {...listeners} {...attributes} sx={{ p: 0 }}>
+                                <DragHandle />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                        <IconButton sx={{ p: 0 }}>
+                            <ExpandLess />
+                        </IconButton>
+                        <IconButton sx={{ p: 0 }}><ExpandMore /></IconButton>
+                    </Box>
                 </Box>
                 <TextField
                     fullWidth
@@ -51,6 +66,18 @@ function SortableItem({ section }) {
                     InputLabelProps={{ shrink: true }}
                     placeholder="ตัวอย่าง: ส่วนนี้เป็นข้อมูลทั่วไปเกี่ยวกับผู้ตอบแบบสอบถาม"
                 />
+                <QuestionDragAndDrop questions={section.questions} onChange={(newQuestions) => {
+                    setSections((prev) =>
+                        prev.map((s) =>
+                            s.id === section.id ? { ...s, questions: newQuestions } : s
+                        )
+                    );
+                }} />
+                <Divider />
+                <Box sx={{ display: "flex", flexDirection: "row", gap: 1, justifyContent: "flex-end", alignItems: "center", p: 1 }}>
+                    <Button variant="outlined" color="error" startIcon={<Close />}>ลบส่วนนี้</Button>
+                    <Button variant="outlined" color="primary" startIcon={<Add />}>เพิ่มคำถาม</Button>
+                </Box>
             </Box>
         </Box>
     );
@@ -72,7 +99,7 @@ const SectionList = ({ sections, setSections }) => {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={sections} strategy={verticalListSortingStrategy}>
                 {sections.map((section) => (
-                    <SortableItem key={section.id} section={section} />
+                    <SortableItem key={section.id} section={section} setSections={setSections} />
                 ))}
             </SortableContext>
         </DndContext>
