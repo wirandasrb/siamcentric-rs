@@ -9,19 +9,13 @@ export const metadata: Metadata = {
   icons: { icon: "/images/contact-form.png" },
 };
 
-const sarabun = Sarabun({ subsets: ["latin"], weight: ["400", "700"] });
-const prompt = Prompt({ subsets: ["latin"], weight: ["400", "700"] });
+// const sarabun = Sarabun({ subsets: ["latin"], weight: ["400", "700"] });
+// const prompt = Prompt({ subsets: ["latin"], weight: ["400", "700"] });
 
 export default function AdminServerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="en" className={prompt.className}>
-      <body>
-        <AdminWithLayout>{children}</AdminWithLayout>
-      </body>
-    </html>
-  );
+  return <AdminWithLayout>{children}</AdminWithLayout>;
 }

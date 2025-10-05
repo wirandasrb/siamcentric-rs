@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   AccountCircle,
@@ -31,6 +31,7 @@ import {
   Person,
   PersonAdd,
 } from "@mui/icons-material";
+import authService from "@/services/authService";
 
 const drawerWidth = 240; // ตอน open
 const miniWidth = 64; // ตอน close
@@ -47,6 +48,7 @@ export default function AdminWithLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(true);
 
@@ -61,6 +63,15 @@ export default function AdminWithLayout({
   const handleDrawerToggle = () => {
     setMenuOpen(!menuOpen);
     setMobileOpen(!mobileOpen);
+  };
+
+  const signOut = () => {
+    // Logic for signing out the user
+    try {
+      authService.logout();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   // Sidebar
@@ -169,14 +180,26 @@ export default function AdminWithLayout({
                 </ListItemIcon>
                 <ListItemText primary="Profile" />
               </MenuItem>
-              <MenuItem onClick={handleClose}>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  router.push("/admin/users");
+                }}
+              >
                 <ListItemIcon>
                   <PersonAdd fontSize="small" />
                 </ListItemIcon>
                 <ListItemText primary="Create Account" />
               </MenuItem>
               <Divider />
-              <MenuItem onClick={handleClose}>ออกจากระบบ</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  handleClose();
+                  signOut();
+                }}
+              >
+                ออกจากระบบ
+              </MenuItem>
             </Menu>
           </div>
         </Toolbar>
