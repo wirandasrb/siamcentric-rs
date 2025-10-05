@@ -72,5 +72,5 @@ apiWithAuth.interceptors.response.use(
     }
 );
 
-export { apiWithoutAuth, apiWithAuth }
+export { apiWithoutAuth, apiWithAuth };
 

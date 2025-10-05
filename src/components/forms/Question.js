@@ -2,26 +2,24 @@
 import { closestCenter, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { Add, AddCircle, Apps, CheckBox, Circle, Close, ColorLens, ContentCopy, Delete, DragHandle, DragIndicator, Event, ExpandCircleDown, ExpandLess, ExpandMore, FileUpload, LinearScale, Notes, Schedule, ShortText, StarHalf } from "@mui/icons-material";
-import { Autocomplete, Box, Button, Checkbox, Chip, Divider, IconButton, TextField, Tooltip, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Checkbox, Chip, Divider, FormControl, FormControlLabel, IconButton, Radio, RadioGroup, TextField, Tooltip, Typography } from "@mui/material";
 import { CSS } from "@dnd-kit/utilities";
 import OptionsList from "./Options";
+import RatingQuestion from "./RatingQuestion";
+import { questionTypes } from "../../contants/questionTypes";
+import { getRandomId } from "../../helpers/random";
+import LinearScaleQuestion from "./LinearScaleQuestion";
+import BarScaleQuestion from "./BarScaleQuestion";
+import { defaultScaleLabels } from "../../contants/scaleBarLabel";
 
-const questionTypes = [
-    { id: 1, label: "ข้อความสั้น", icon: <ShortText /> },
-    { id: 2, label: "ข้อความยาว", icon: <Notes /> },
-    { id: 3, label: "ตัวเลือกเดียว", icon: <Circle /> },
-    { id: 4, label: "หลายตัวเลือก", icon: <CheckBox /> },
-    { id: 5, label: "เลื่อนลง", icon: <ExpandCircleDown /> },
-    { id: 6, label: "คะแนน", icon: <StarHalf /> },
-    { id: 7, label: "สเกลเชิงเส้น", icon: <LinearScale /> },
-    { id: 8, label: "เมทริกซ์", icon: <Apps /> },
-    { id: 9, label: "อัปโหลดไฟล์", icon: <FileUpload /> },
-    { id: 10, label: "วันที่", icon: <Event /> },
-    { id: 11, label: "เวลา", icon: <Schedule /> },
+const externalSources = [
+    { id: 1, label: "จังหวัด" },
+    { id: 2, label: "อำเภอ" },
+    { id: 3, label: "ตำบล" },
 ];
 
-function QuestionItem({ question, onChange, onDelete, onAdd }) {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: question.id });
+function QuestionItem({ questions, question, onChange, onDelete, onAdd, onMove }) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: question.temp_id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -29,16 +27,48 @@ function QuestionItem({ question, onChange, onDelete, onAdd }) {
     };
 
     const handleAddOption = () => {
-        const newOption = { id: `option-${Date.now()}`, label: '' };
-        const newOptions = question.options ? [...question.options, newOption] : [newOption];
+        // ถ้าเพิ่ม option ใหม่ ให้เพิ่ม option_no ตามจำนวน option ปัจจุบัน แต่ถ้ามี option อื่นๆ (โปรดระบุ) อยู่แล้ว ให้ไม่นับรวม ให้แทรกหน้า option อื่นๆ (โปรดระบุ)
+        const hasOtherOption = question.options?.some(option => option.is_other);
+        const newOption = { temp_id: `option-${getRandomId()}`, option: '', option_no: question.options ? (hasOtherOption ? question.options.length : question.options.length + 1) : 1, is_other: false };
+        let newOptions = question.options ? [...question.options] : [];
+        if (hasOtherOption) {
+            const otherOptionIndex = newOptions.findIndex(option => option.is_other);
+            newOptions.splice(otherOptionIndex, 0, newOption);
+        } else {
+            newOptions.push(newOption);
+        }
         onChange({ ...question, options: newOptions });
     }
 
     const handleOptionOther = () => {
-        const newOption = { id: `option-${Date.now()}`, label: 'อื่นๆ (โปรดระบุ)' };
+        const newOption = { temp_id: `option-${getRandomId()}`, option: 'อื่นๆ (โปรดระบุ)', option_no: question.options ? question.options.length + 1 : 1, is_other: true };
         const newOptions = question.options ? [...question.options, newOption] : [newOption];
         onChange({ ...question, options: newOptions });
     }
+
+    const handleDuplicateQuestion = () => {
+        // สร้างคำถามใหม่โดยคัดลอกข้อมูลจากคำถามปัจจุบัน
+        const duplicatedQuestion = { ...question, temp_id: `question-${getRandomId()}` };
+        onAdd(question.temp_id, duplicatedQuestion); // เรียกใช้ฟังก์ชัน onAdd เพื่อเพิ่มคำถามใหม่
+    }
+
+    const handleMoveQuestionUp = () => {
+        const index = questions.findIndex((q) => q.temp_id === question.temp_id);
+        if (index > 0) {
+            const newQuestions = arrayMove(questions, index, index - 1)
+                .map((q, i) => ({ ...q, question_no: i + 1 }));
+            onMove(newQuestions); // 🔹 เรียก onMove แทน onChange
+        }
+    };
+
+    const handleMoveQuestionDown = () => {
+        const index = questions.findIndex((q) => q.temp_id === question.temp_id);
+        if (index < questions.length - 1) {
+            const newQuestions = arrayMove(questions, index, index + 1)
+                .map((q, i) => ({ ...q, question_no: i + 1 }));
+            onMove(newQuestions); // 🔹 เรียก onMove แทน onChange
+        }
+    };
 
     return (
         <Box
@@ -73,7 +103,7 @@ function QuestionItem({ question, onChange, onDelete, onAdd }) {
                     gap: 2,
                 }}
             >
-                <Chip label={`คำถามที่ ${question.id}`} size="small" color="primary"
+                <Chip label={`คำถามที่ ${question.question_no}`} size="small" color="primary"
                     sx={{ width: 'fit-content' }}
                 />
                 <TextField
@@ -82,107 +112,216 @@ function QuestionItem({ question, onChange, onDelete, onAdd }) {
                     variant="outlined"
                     InputLabelProps={{ shrink: true }}
                     placeholder="พิมพ์คำถามที่นี่"
-                    value={question.text || ""}
+                    value={question.question || ""}
                     sx={{
                         '& .MuiInputBase-root': { height: '40px' },
                     }}
+                    onChange={(e) => onChange({ ...question, question: e.target.value })}
                 />
                 <Autocomplete
                     options={questionTypes}
                     getOptionLabel={(option) => option.label}
-                    value={questionTypes.find((type) => type.id === question.type_id) || null}
+                    value={questionTypes.find((type) => type.id === question.question_type_id) || null}
                     onChange={(e, newValue) => {
                         if (!newValue) return;
+                        let formateddValue = question;
                         // ถ้าเปลี่ยนจากประเภทตัวเลือก ให้ลบ options ทิ้ง
-                        if (question.type_id === 3 || question.type_id === 4 || question.type_id === 5) {
+                        if (question.question_type_id === 3 || question.question_type_id === 4 || question.question_type_id === 5) {
                             if (!(newValue.id === 3 || newValue.id === 4 || newValue.id === 5)) {
-                                onChange({ ...question, type: newValue.label, type_id: newValue.id, options: [] });
+                                formateddValue = {
+                                    ...question,
+                                    question_type_id: newValue.id,
+                                    options: [],
+                                    dropdown_source_type: newValue.id === 5 ? 'internal' : null,
+                                    external_source_id: null,
+                                    rating_type_id: newValue.id === 6 ? 1 : null,
+                                    max_scale: newValue.id === 6 ? 5 : newValue.id === 7 ? 5 : null,
+                                    min_scale: newValue.id === 7 ? 1 : null,
+                                    scale_labels: newValue.id === 8 ? defaultScaleLabels : [],
+                                };
                             } else {
-                                onChange({ ...question, type: newValue.label, type_id: newValue.id });
+                                formateddValue = { ...question, question_type_id: newValue.id };
                             }
                         } else {
                             if (newValue.id === 3 || newValue.id === 4 || newValue.id === 5) {
-                                onChange({ ...question, type: newValue.label, type_id: newValue.id, options: [{ id: `option-${Date.now()}`, label: '' }] });
+                                formateddValue = {
+                                    ...question,
+                                    question_type_id: newValue.id,
+                                    options: [{ temp_id: `option-${getRandomId()}`, option: '', option_no: 1, is_other: false }],
+                                    dropdown_source_type: null,
+                                    external_source_id: null,
+                                    rating_type_id: null,
+                                    max_scale: null,
+                                    min_scale: null,
+                                    scale_labels: [],
+                                };
                             } else {
-                                onChange({ ...question, type: newValue.label, type_id: newValue.id });
+                                formateddValue = {
+                                    ...question,
+                                    question_type_id: newValue.id,
+                                    dropdown_source_type: newValue.id === 5 ? 'internal' : null,
+                                    external_source_id: null,
+                                    rating_type_id: newValue.id === 6 ? 1 : null,
+                                    max_scale: newValue.id === 6 ? 5 : newValue.id === 7 ? 5 : null,
+                                    min_scale: newValue.id === 7 ? 1 : null,
+                                    scale_labels: newValue.id === 8 ? defaultScaleLabels : [],
+                                };
                             }
                         }
+                        onChange(formateddValue);
                     }}
                     renderInput={(params) => <TextField {...params} label="ประเภทคำถาม" />}
-                    renderOption={(props, option) => (
-                        <Box component="li" {...props} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            {option.icon} {option.label}
-                        </Box>
-                    )}
+                    renderOption={(props, option) => {
+                        const { key, ...rest } = props;
+                        return (
+                            <Box
+                                key={key}
+                                component="li"
+                                {...rest}
+                                sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                            >
+                                {option.icon} {option.label}
+                            </Box>
+                        );
+                    }}
+                    sx={{
+                        '& .MuiInputBase-root': { height: '40px' },
+                    }}
                 />
-                {(question.type_id === 3 || question.type_id === 4 || question.type_id === 5) && (<>
-                    <OptionsList
-                        options={question.options || []}
-                        setOptions={(newOptions) => onChange({ ...question, options: newOptions })}
-                        question={question}
-                    />
-                    <Box sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center", ml: 4 }}>
-                        <Button
-                            sx={{
-                                textTransform: 'none',
-                                fontWeight: 'normal',
-                                color: 'primary.main',
-                                border: 'none',
-
-                                '&:hover': {
-                                    border: 'none',
-                                    color: 'primary.dark',
-                                },
+                {(question.question_type_id === 3 || question.question_type_id === 4 || question.question_type_id === 5) ? (<>
+                    {question.question_type_id === 5 && (
+                        <FormControl >
+                            <RadioGroup
+                                row
+                                name="radio-buttons-group"
+                                aria-labelledby="dropdown_source_type"
+                                value={question?.dropdown_source_type || "internal"}
+                                onChange={(e) => {
+                                    onChange({
+                                        ...question, dropdown_source_type: e.target.value,
+                                        options: e.target.value === 'internal' ? (question.options && question.options.length > 0 ? question.options : [{ temp_id: `option-${getRandomId()}`, option: '', option_no: 1, is_other: false }]) : []
+                                    });
+                                }}
+                                sx={{
+                                    fontSize: 14,
+                                    color: 'text.secondary',
+                                    '& .MuiSvgIcon-root': { fontSize: 16 },
+                                    '& .MuiFormControlLabel-root': { mr: 3 }
+                                }}
+                            >
+                                <FormControlLabel value="internal" control={<Radio />} label="สร้างตัวเลือกเอง (Customize)" />
+                                <FormControlLabel value="external" control={<Radio />} label="ดึงข้อมูลอัตโนมัติ (Autocomplete)" />
+                            </RadioGroup>
+                        </FormControl>
+                    )}
+                    {(question.question_type_id === 5 && question?.dropdown_source_type === "external") ? (<>
+                        <Autocomplete
+                            options={externalSources}
+                            getOptionLabel={(option) => option.label}
+                            value={externalSources.find((source) => source.id === question.external_source_id) || null}
+                            onChange={(e, newValue) => {
+                                onChange({ ...question, external_source_id: newValue?.id });
                             }}
-                            variant="outlined"
-                            startIcon={<Add />}
-                            onClick={handleAddOption}>
-                            เพิ่มตัวเลือก
-                        </Button>
-                        <Typography variant="caption" color="textSecondary" sx={{ ml: 2 }}>
-                            หรือ
-                        </Typography>
-                        <Button
-                            sx={{
-                                textTransform: 'none',
-                                fontWeight: 'normal',
-                                color: 'primary.main',
-                                border: 'none',
-                                '&:hover': {
-                                    border: 'none',
-                                    color: 'primary.dark',
-                                },
-                            }}
-                            variant="outlined"
-                            onClick={
-                                handleOptionOther
+                            renderInput={(params) =>
+                                <TextField
+                                    {...params}
+                                    label="แหล่งข้อมูลตัวเลือก (Dropdown Source)"
+                                    placeholder="กรุณาเลือกแหล่งข้อมูล เช่น จังหวัด"
+                                    InputLabelProps={{ shrink: true }}
+                                />
                             }
-                        >
-                            เพิ่มตัวเลือกอื่นๆ
-                        </Button>
-                    </Box>
+                            sx={{ '& .MuiInputBase-root': { height: '40px' } }}
+                        />
+                    </>) : (
+                        <>
+                            <OptionsList
+                                options={question.options || []}
+                                setOptions={(newOptions) => onChange({ ...question, options: newOptions })}
+                                question={question}
+                                questions={questions}
+                            />
+                            <Box sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center", ml: 4 }}>
+                                <Button
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontWeight: 'normal',
+                                        color: 'primary.main',
+                                        border: 'none',
+
+                                        '&:hover': {
+                                            border: 'none',
+                                            color: 'primary.dark',
+                                        },
+                                    }}
+                                    variant="outlined"
+                                    startIcon={<Add />}
+                                    onClick={handleAddOption}>
+                                    เพิ่มตัวเลือก
+                                </Button>
+                                <Typography variant="caption" color="textSecondary" sx={{ ml: 2 }}>
+                                    หรือ
+                                </Typography>
+                                <Button
+                                    sx={{
+                                        textTransform: 'none',
+                                        fontWeight: 'normal',
+                                        color: 'primary.main',
+                                        border: 'none',
+                                        '&:hover': {
+                                            border: 'none',
+                                            color: 'primary.dark',
+                                        },
+                                        '&:disabled': {
+                                            color: 'text.disabled',
+                                            border: 'none',
+                                        },
+                                    }}
+                                    variant="outlined"
+                                    onClick={
+                                        handleOptionOther
+                                    }
+                                    disabled={question.options?.some(option => option.option === 'อื่นๆ (โปรดระบุ)')}
+                                >
+                                    เพิ่มตัวเลือกอื่นๆ
+                                </Button>
+                            </Box>
+                        </>
+                    )}
                 </>
-                )}
+                ) : question.question_type_id === 6 ? (
+                    <RatingQuestion question={question} onChange={(newValue) => onChange({ ...question, ...newValue })} />
+                ) : question.question_type_id === 7 ? (
+                    <LinearScaleQuestion question={question} onChange={(newValue) => onChange({ ...question, ...newValue })} />
+                ) : question.question_type_id === 8 ? (
+                    <BarScaleQuestion question={question} onChange={(newValue) => onChange({ ...question, ...newValue })} />
+                ) : null}
 
                 <Divider />
                 <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Checkbox />
-                        <Typography variant="caption" color="textSecondary">บังคับตอบคำถาม</Typography>
+                        <FormControlLabel
+                            control={<Checkbox
+                                checked={question.is_required || false}
+                                onChange={(e) => onChange({ ...question, is_required: e.target.checked })}
+                            />}
+                            label="บังคับตอบคำถามนี้"
+                            sx={{ userSelect: 'none', '& .MuiTypography-root': { fontSize: 14 } }}
+                        />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 1 }}>
                         <Tooltip title="เพิ่มคำถามถัดไป">
-                            <IconButton aria-label="add-question-back" color="primary" sx={{ p: 0 }} onClick={() => onAdd(question.id)}>
+                            <IconButton aria-label="add-question-back" color="primary" sx={{ p: 0 }} onClick={() => onAdd(question.temp_id)}>
                                 <AddCircle />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="คัดลอกคำถาม">
-                            <IconButton aria-label="duplicate-question" color="default" sx={{ p: 0 }}>
+                            <IconButton aria-label="duplicate-question" color="default" sx={{ p: 0 }}
+                                onClick={handleDuplicateQuestion}>
                                 <ContentCopy />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="ลบคำถามนี้">
-                            <IconButton aria-label="delete-question" color="error" sx={{ p: 0 }} onClick={() => onDelete(question.id)}>
+                            <IconButton aria-label="delete-question" color="error" sx={{ p: 0 }} onClick={() => onDelete(question.temp_id)}>
                                 <Delete />
                             </IconButton>
                         </Tooltip>
@@ -190,12 +329,26 @@ function QuestionItem({ question, onChange, onDelete, onAdd }) {
                             borderLeft: 1, borderColor: 'divider', height: 24, ml: 2
                         }} />
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <IconButton aria-label="collapse-question" sx={{ p: 0 }}>
-                                <ExpandLess />
-                            </IconButton>
+                            <Tooltip title="เลื่อนขึ้น">
+                                <IconButton
+                                    disabled={question.question_no === 1}
+                                    aria-label="collapse-question"
+                                    onClick={handleMoveQuestionUp}
+                                    sx={{ p: 0 }}
+                                >
+                                    <ExpandLess />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="เลื่อนลง">
+                                <IconButton
+                                    aria-label="expand-question"
+                                    sx={{ p: 0 }}
+                                    onClick={handleMoveQuestionDown}>
+                                    <ExpandMore />
+                                </IconButton>
+                            </Tooltip>
                         </Box>
                     </Box>
-
                 </Box>
             </Box>
         </Box>
@@ -209,33 +362,55 @@ const QuestionDragAndDrop = ({ questions, onChange }) => {
         const { active, over } = event;
         if (!over) return;
         if (active.id !== over.id) {
-            const oldIndex = questions.findIndex((q) => q.id === active.id);
-            const newIndex = questions.findIndex((q) => q.id === over.id);
-            onChange(arrayMove(questions, oldIndex, newIndex));
+            const oldIndex = questions.findIndex((q) => q.temp_id === active.id);
+            const newIndex = questions.findIndex((q) => q.temp_id === over.id);
+            // question_no ต้องเรียงใหม่ด้วย
+            const updatedQuestions = arrayMove(questions, oldIndex, newIndex).map((q, i) => ({ ...q, question_no: i + 1 }));
+            onChange(updatedQuestions);
         }
     };
 
     const handleQuestionChange = (updatedQuestion) => {
-        onChange(questions.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q)));
+        onChange(questions.map((q) => (q.temp_id === updatedQuestion.temp_id ? updatedQuestion : q)));
     };
 
-    const handleQuestionDelete = (id) => {
-        onChange(questions.filter((q) => q.id !== id));
+    const handleQuestionDelete = (question_id) => {
+        onChange(questions.filter((q) => q.temp_id !== question_id));
     };
 
-    const handleAddQuestion = (question_id) => {
-        const newQuestion = { id: `question-${Date.now()}`, text: '', type: 'short_text', type_id: 1 };
-        const index = questions.findIndex((q) => q.id === question_id);
+    const handleAddQuestion = (question_id, duplicatedQuestion) => {
+
+        const index = questions.findIndex((q) => q.temp_id === question_id);
+
+        const newQuestion = duplicatedQuestion || {
+            temp_id: `question-${Date.now()}`,
+            question_no: index + 2,
+            question: '',
+            question_type_id: 1,
+            options: []
+        };
         const newQuestions = [...questions];
         newQuestions.splice(index + 1, 0, newQuestion);
-        onChange(newQuestions);
+        // ปรับ question_no ใหม่ทั้งหมดให้เรียงต่อกัน
+        const formatedQuestions = newQuestions.map((q, i) => ({ ...q, question_no: i + 1 }));
+        onChange(formatedQuestions);
     };
+
+
 
     return (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+            <SortableContext items={questions.map((q) => q.temp_id)} strategy={verticalListSortingStrategy}>
                 {questions.map((question) => (
-                    <QuestionItem key={question.id} question={question} onChange={handleQuestionChange} onDelete={handleQuestionDelete} onAdd={handleAddQuestion} />
+                    <QuestionItem
+                        key={question.temp_id}
+                        questions={questions}
+                        question={question}
+                        onChange={handleQuestionChange}
+                        onDelete={handleQuestionDelete}
+                        onAdd={handleAddQuestion}
+                        onMove={(newQuestions) => onChange(newQuestions)}
+                    />
                 ))}
             </SortableContext>
         </DndContext>
