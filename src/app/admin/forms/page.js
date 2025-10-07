@@ -52,6 +52,13 @@ const FormsPage = () => {
         }
     };
 
+    const handleCopyLink = (form) => {
+        // copy link to clipboard ต้องใช้ code_link ด้วย
+        const link = `${window.location.origin}/surveys/${form.id}?code=${form.code_link}`;
+        navigator.clipboard.writeText(link);
+        alert("คัดลอกลิงก์สำเร็จ: " + link);
+    }
+
     return (<Box sx={{ p: 2 }}>
         <Typography variant="h5">
             รายการแบบสอบถาม
@@ -142,12 +149,7 @@ const FormsPage = () => {
                                                 }
                                             },
                                             {
-                                                label: "คัดลอกลิงก์", icon: <OfflineShare />, onClick: () => {
-                                                    // copy link to clipboard
-                                                    const link = `${window.location.origin}/surveys/${row.id}`;
-                                                    navigator.clipboard.writeText(link);
-                                                    alert("คัดลอกลิงก์สำเร็จ: " + link);
-                                                }
+                                                label: "คัดลอกลิงก์", icon: <OfflineShare />, onClick: () => handleCopyLink(row)
                                             },
                                             {
                                                 label: "ลบ", icon: <Delete />, onClick: async () => {

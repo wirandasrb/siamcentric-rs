@@ -1,5 +1,5 @@
 "use client";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
 import React from "react";
 import { defaultScaleLabels } from "../../contants/scaleBarLabel";
 
@@ -25,6 +25,31 @@ const BarScaleQuestion = ({ question, onChange }) => {
                     InputLabelProps={{ shrink: true }}
                     value={question.max_scale || 5}
                     onChange={(e) => onChange({ ...question, max_scale: Number(e.target.value) })}
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={question.is_irrelevant || false}
+                            onChange={(e) => onChange({ ...question, is_irrelevant: e.target.checked })}
+                        />
+                    }
+                    label="อนุญาตให้ตอบไม่เกี่ยวข้อง"
+                />
+                <TextField
+                    variant="standard"
+                    label="ข้อความแสดงไม่เกี่ยวข้อง"
+                    disabled={!question.is_irrelevant}
+                    placeholder="เช่น ไม่ทราบ / ไม่ประสงค์ตอบ"
+                    InputLabelProps={{ shrink: true }}
+                    value={question.irrelevant_text || ""}
+                    onChange={(e) => onChange({ ...question, irrelevant_text: e.target.value })}
+                    sx={{
+                        flex: 1,
+                        '& .MuiInputBase-root': {
+                            height: '40px',
+                            width: '30%'
+                        }
+                    }}
                 />
             </Box>
             {[...Array(Number(question.max_scale) || 5)].map((_, index) => (
@@ -53,12 +78,15 @@ const BarScaleQuestion = ({ question, onChange }) => {
                     />
                 </Box>
             ))}
+            <Box sx={{ fontSize: 14, mt: 2, color: 'text.secondary' }}>
+                ตัวอย่าง: {question.max_scale || 5} ระดับ
+            </Box>
             <Box
                 sx={{
                     display: "flex",
                     alignItems: "center",
                     flexDirection: "row",
-                    mt: 1,
+
                     justifyContent: "center",
                     px: 2,
                 }}
@@ -88,8 +116,24 @@ const BarScaleQuestion = ({ question, onChange }) => {
                         </Button>
                     );
                 })}
-
             </Box>
+            {question.is_irrelevant && <Box sx={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 4,
+                ml: 4,
+            }}>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={false}
+                            disabled
+                        />
+                    }
+                    label={question.irrelevant_text || "ไม่ประสงค์ตอบ"}
+                />
+            </Box>}
+
         </Box>
     );
 };

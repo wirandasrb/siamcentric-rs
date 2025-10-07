@@ -9,7 +9,7 @@ import React from "react";
 import QuestionDragAndDrop from "./Question";
 import { getRandomId } from "../../helpers/random";
 
-function SortableItem({ section, setSections, onAdd }) {
+function SortableItem({ section, setSections, onAdd, sections }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: section.id });
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -143,7 +143,9 @@ function SortableItem({ section, setSections, onAdd }) {
                             s.temp_id === section.temp_id ? { ...s, questions: newQuestions } : s
                         )
                     );
-                }} />
+                }}
+                    sections={sections}
+                />
                 <Divider />
                 <Box sx={{ display: "flex", flexDirection: "row", gap: 1, justifyContent: "flex-end", alignItems: "center", p: 1 }}>
                     <Button variant="outlined" color="primary" startIcon={<Add />} onClick={handleAddQuestion}>เพิ่มคำถาม</Button>
@@ -207,7 +209,7 @@ const SectionList = ({ sections, setSections }) => {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={sections} strategy={verticalListSortingStrategy}>
                 {sections.map((section) => (
-                    <SortableItem key={section.temp_id} section={section} setSections={setSections} onAdd={handleAddSection} />
+                    <SortableItem key={section.temp_id} section={section} sections={sections} setSections={setSections} onAdd={handleAddSection} />
                 ))}
             </SortableContext>
         </DndContext>

@@ -53,6 +53,11 @@ const FormCreatePage = () => {
                     title: formData.title,
                     description: formData.description,
                     note: formData.note,
+                    allow_multiple_answers: formData.allow_multiple_answers,
+                    thank_you_message: formData.thank_you_message,
+                    show_facebook_share: formData.show_facebook_share,
+                    show_line_share: formData.show_line_share,
+                    meta_title: formData.meta_title,
                 });
                 let formSections = formData.sections.map((section, sIndex) => ({
                     ...section,
@@ -107,6 +112,12 @@ const FormCreatePage = () => {
         formData.append("second_color", secondColor);
         formData.append("image_url", logo);
         formData.append("sections", JSON.stringify(sections));
+        formData.append("allow_multiple_answers", formDetail.allow_multiple_answers || false);
+        formData.append("thank_you_message", formDetail.thank_you_message || "");
+        formData.append("show_facebook_share", formDetail.show_facebook_share || true);
+        formData.append("show_line_share", formDetail.show_line_share || true);
+        formData.append("meta_title", formDetail.meta_title || "");
+        formData.append("meta_description", formDetail.meta_description || "");
 
         if (id === "create") {
             // call create form API
@@ -140,6 +151,7 @@ const FormCreatePage = () => {
                         gap: 2,
                         transition: "all 0.3s ease",
                         marginRight: openThemeMenu ? "300px" : 0,
+                        mb: 6,
                     }}
                 >
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -164,7 +176,7 @@ const FormCreatePage = () => {
                     >
                         <TextField
                             fullWidth
-                            label="ชื่อแบบสอบถาม"
+                            label="หัวข้อแบบสอบถาม"
                             variant="outlined"
                             InputLabelProps={{ shrink: true }}
                             placeholder="ตัวอย่าง: แบบสอบถามความพึงพอใจ"
@@ -202,6 +214,17 @@ const FormCreatePage = () => {
                             <Box sx={{ mt: 1, pl: 4, display: "flex", flexDirection: "column", gap: 2 }}>
                                 {/** สวิตซ์เปิด - ปิด */}
 
+                                {/* ชื่อผู้จัดแสดงในแบบสอบถาม */}
+                                <TextField
+                                    fullWidth
+                                    label="Organizer/Title (แสดงในหน้าตอบแบบสอบถามและลิ้งค์ที่ถูกแชร์)"
+                                    variant="outlined"
+                                    InputLabelProps={{ shrink: true }}
+                                    placeholder="ตัวอย่าง: Survey Forms 2025"
+                                    value={formDetail.meta_title || ""}
+                                    onChange={(e) => setFormDetail({ ...formDetail, meta_title: e.target.value })}
+                                />
+
                                 {/* เลือกว่า สามารถตอบซ้ำได้หรือไม่ */}
                                 <FormControlLabel
                                     control={
@@ -212,16 +235,7 @@ const FormCreatePage = () => {
                                     }
                                     label="อนุญาตให้ตอบซ้ำ"
                                 />
-                                {/* ชื่อผู้จัดแสดงในแบบสอบถาม */}
-                                <TextField
-                                    fullWidth
-                                    label="กำหนดชื่อผู้จัดทำแบบสอบถาม (แสดงในหน้าตอบแบบสอบถามและลิ้งค์ที่ถูกแชร์)"
-                                    variant="outlined"
-                                    InputLabelProps={{ shrink: true }}
-                                    placeholder="ตัวอย่าง: บริษัท สยามเซ็นทริค จำกัด"
-                                    value={formDetail.organizer_name || ""}
-                                    onChange={(e) => setFormDetail({ ...formDetail, organizer_name: e.target.value })}
-                                />
+
                                 {/* ข้อความหลังส่งแบบฟอร์มเสร็จ */}
                                 <TextField
                                     fullWidth
@@ -396,29 +410,37 @@ const FormCreatePage = () => {
                     )
                 }
 
-                {/* save button form */}
-                <Box sx={{
-                    position: "fixed",
-                    bottom: 16,
-                    right: openThemeMenu ? 316 : 16,
-                    transition: "right 0.3s ease",
-                }}>
-                    <Box sx={{ display: "flex", gap: 2 }}>
-                        <Button variant="contained"
-                            sx={{
-                                backgroundColor: 'white',
-                                color: 'grey.700',
-                                boxShadow: 'none',
-                                '&:hover': { backgroundColor: 'grey.100', boxShadow: 'none' },
-                                borderRadius: 3,
-                                fontSize: 14,
-                                textTransform: 'none',
-                                border: '1px solid',
-                            }}
-                            onClick={() => router.push("/admin/forms")}>
-                            ยกเลิก
-                        </Button>
-                        <Button variant="contained" color="primary" onClick={handleSave} sx={{
+            </Box>
+
+
+            {/* save button form */}
+            <Box sx={{
+                position: "fixed",
+                bottom: 16,
+                right: openThemeMenu ? 316 : 16,
+                transition: "right 0.3s ease",
+            }}>
+                <Box sx={{ display: "flex", gap: 2 }}>
+                    <Button variant="contained"
+                        sx={{
+                            backgroundColor: 'white',
+                            color: 'grey.700',
+                            boxShadow: 'none',
+                            '&:hover': { backgroundColor: 'grey.100', boxShadow: 'none' },
+                            borderRadius: 3,
+                            fontSize: 14,
+                            textTransform: 'none',
+                            border: '1px solid',
+                            width: 100,
+                        }}
+                        onClick={() => router.push("/admin/forms")}>
+                        ยกเลิก
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleSave}
+                        color="success"
+                        sx={{
                             textTransform: "none",
                             borderRadius: 3,
                             boxShadow: "none",
@@ -427,10 +449,10 @@ const FormCreatePage = () => {
                             '&:hover': {
                                 boxShadow: "none",
                             },
+                            width: 100,
                         }}>
-                            บันทึก
-                        </Button>
-                    </Box>
+                        บันทึก
+                    </Button>
                 </Box>
             </Box>
         </>

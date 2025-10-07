@@ -1,7 +1,7 @@
 "use client";
 
 import { CircleOutlined } from "@mui/icons-material";
-import { Box, Grid, Menu, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Box, Checkbox, FormControlLabel, Grid, Menu, MenuItem, Select, TextField, Typography } from "@mui/material";
 
 const LinearScaleQuestion = ({ question, onChange }) => {
     return (
@@ -37,6 +37,31 @@ const LinearScaleQuestion = ({ question, onChange }) => {
                         </MenuItem>
                     ))}
                 </Select>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={question.is_irrelevant || false}
+                            onChange={(e) => onChange({ ...question, is_irrelevant: e.target.checked })}
+                        />
+                    }
+                    label="อนุญาตให้ตอบไม่เกี่ยวข้อง"
+                />
+                <TextField
+                    variant="standard"
+                    label="ข้อความแสดงไม่เกี่ยวข้อง"
+                    disabled={!question.is_irrelevant}
+                    placeholder="เช่น ไม่ทราบ / ไม่ประสงค์ตอบ"
+                    InputLabelProps={{ shrink: true }}
+                    value={question.irrelevant_text || ""}
+                    onChange={(e) => onChange({ ...question, irrelevant_text: e.target.value })}
+                    sx={{
+                        flex: 1,
+                        '& .MuiInputBase-root': {
+                            height: '40px',
+                            width: '30%'
+                        }
+                    }}
+                />
             </Box>
             <Box
                 sx={{
@@ -115,6 +140,7 @@ const LinearScaleQuestion = ({ question, onChange }) => {
                     flexDirection: "column",
                     gap: 1,
                     alignItems: "center",
+                    mb: 2,
                 }}>
                     {/* บรรทัดตัวเลข */}
                     <Box sx={{ display: "flex", flexDirection: "row", gap: 4 }} >
@@ -128,6 +154,13 @@ const LinearScaleQuestion = ({ question, onChange }) => {
                                 </Typography>
                             </Box>
                         ))}
+                        {question.is_irrelevant && (
+                            <Box sx={{ minWidth: 40, textAlign: "center" }}>
+                                <Typography variant="body2" color="textSecondary">
+                                    {question.irrelevant_text || "N/A"}
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
                     {/* บรรทัด icon */}
                     <Box sx={{ display: "flex", flexDirection: "row", gap: 4 }}>
@@ -136,6 +169,11 @@ const LinearScaleQuestion = ({ question, onChange }) => {
                                 <CircleOutlined fontSize="small" />
                             </Box>
                         ))}
+                        {question.is_irrelevant && (
+                            <Box sx={{ minWidth: 40, textAlign: "center" }}>
+                                <CircleOutlined fontSize="small" />
+                            </Box>
+                        )}
                     </Box>
                 </Box>
                 <Typography>{question.max_label || ""}</Typography>

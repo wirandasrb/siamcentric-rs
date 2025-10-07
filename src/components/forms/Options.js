@@ -8,7 +8,7 @@ import { getRandomId } from "../../helpers/random";
 import Actions from "../Actions";
 import SelectCondition from "./SelectCondition";
 
-function SortableItem({ option, question, questions, onChange, onDelete, onAdd }) {
+function SortableItem({ option, question, questions, onChange, onDelete, onAdd, sections }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: option.temp_id });
 
     return (
@@ -61,7 +61,7 @@ function SortableItem({ option, question, questions, onChange, onDelete, onAdd }
             </IconButton>
 
             {/* เงื่อนไข เช่น ข้ามคำถามข้อที่ ... หรือต้องตอบคำถามข้อที่ ... ด้วย */}
-            <SelectCondition option={option} questions={questions} onChange={onChange} />
+            <SelectCondition option={option} questions={questions} onChange={onChange} question={question} sections={sections} />
             {question.question_type_id === 4 && (
                 <FormControlLabel
                     control={
@@ -78,7 +78,7 @@ function SortableItem({ option, question, questions, onChange, onDelete, onAdd }
     );
 }
 
-const OptionsList = ({ options, setOptions, question, questions }) => {
+const OptionsList = ({ options, setOptions, question, questions, sections }) => {
     const sensors = useSensors(useSensor(PointerSensor));
 
     const handleDragEnd = (event) => {
@@ -123,6 +123,7 @@ const OptionsList = ({ options, setOptions, question, questions }) => {
                         option={option}
                         question={question}
                         questions={questions}
+                        sections={sections}
                         onChange={handleOptionChange}
                         onDelete={handleOptionDelete}
                         onAdd={handleAddOption}

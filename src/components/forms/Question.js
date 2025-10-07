@@ -18,7 +18,7 @@ const externalSources = [
     { id: 3, label: "ตำบล" },
 ];
 
-function QuestionItem({ questions, question, onChange, onDelete, onAdd, onMove }) {
+function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd, onMove }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: question.temp_id });
 
     const style = {
@@ -239,6 +239,7 @@ function QuestionItem({ questions, question, onChange, onDelete, onAdd, onMove }
                                 setOptions={(newOptions) => onChange({ ...question, options: newOptions })}
                                 question={question}
                                 questions={questions}
+                                sections={sections}
                             />
                             <Box sx={{ display: "flex", justifyContent: "flex-start", alignItems: "center", ml: 4 }}>
                                 <Button
@@ -355,7 +356,7 @@ function QuestionItem({ questions, question, onChange, onDelete, onAdd, onMove }
     );
 }
 
-const QuestionDragAndDrop = ({ questions, onChange }) => {
+const QuestionDragAndDrop = ({ questions, onChange, sections }) => {
     const sensors = useSensors(useSensor(PointerSensor));
 
     const handleDragEnd = (event) => {
@@ -404,6 +405,7 @@ const QuestionDragAndDrop = ({ questions, onChange }) => {
                 {questions.map((question) => (
                     <QuestionItem
                         key={question.temp_id}
+                        sections={sections}
                         questions={questions}
                         question={question}
                         onChange={handleQuestionChange}
