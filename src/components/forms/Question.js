@@ -11,6 +11,7 @@ import { getRandomId } from "../../helpers/random";
 import LinearScaleQuestion from "./LinearScaleQuestion";
 import BarScaleQuestion from "./BarScaleQuestion";
 import { defaultScaleLabels } from "../../contants/scaleBarLabel";
+import MatrixQuestion from "./MatrixQuestion";
 
 const externalSources = [
     { id: 1, label: "จังหวัด" },
@@ -295,6 +296,8 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
                     <LinearScaleQuestion question={question} onChange={(newValue) => onChange({ ...question, ...newValue })} />
                 ) : question.question_type_id === 8 ? (
                     <BarScaleQuestion question={question} onChange={(newValue) => onChange({ ...question, ...newValue })} />
+                ) : question.question_type_id === 9 ? (
+                    <MatrixQuestion question={question} onChange={(newValue) => onChange({ ...question, ...newValue })} />
                 ) : null}
 
                 <Divider />
