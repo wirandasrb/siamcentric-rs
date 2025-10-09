@@ -215,7 +215,7 @@ export default function AdminWithLayout({
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", md: "none" },
-            "& .MuiDrawer-paper": { width: drawerWidth },
+            "& .MuiDrawer-paper": { width: drawerWidth, top: "64px" },
           }}
         >
           {drawer}
@@ -294,10 +294,11 @@ export default function AdminWithLayout({
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.standard,
               }),
-            width: "100%",
-            // width: {
-            //   md: `calc(100% - ${menuOpen ? drawerWidth : miniWidth}px)`,
-            // },
+            // width: "100%",
+            width: {
+              xs: "100%",
+              md: `calc(100% - ${menuOpen ? drawerWidth : miniWidth}px)`,
+            },
             ml: { md: `${menuOpen ? drawerWidth : miniWidth}px` },
           }}
         >

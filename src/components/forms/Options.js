@@ -62,6 +62,8 @@ function SortableItem({ option, question, questions, onChange, onDelete, onAdd, 
 
             {/* เงื่อนไข เช่น ข้ามคำถามข้อที่ ... หรือต้องตอบคำถามข้อที่ ... ด้วย */}
             <SelectCondition option={option} questions={questions} onChange={onChange} question={question} sections={sections} />
+
+            {/* ถ้าเป็น checkbox ให้มีตัวเลือก exclusive ด้วย */}
             {question.question_type_id === 4 && (
                 <FormControlLabel
                     control={

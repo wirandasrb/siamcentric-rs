@@ -3,9 +3,32 @@ import { DatasetLinked, Download, ListAltOutlined, Person } from "@mui/icons-mat
 import { Box, Button, colors, Grid, Paper, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import Cardboard from "../../../../../components/Cardboard";
+import React, { useEffect } from "react";
+import useApi from "../../../../../services";
 
 const ReportPage = () => {
     const { id } = useParams();
+    const [details, setDetails] = React.useState(null);
+
+    useEffect(() => {
+        // ดึงข้อมูลรายงานจาก API โดยใช้ id
+        console.log("Fetch report data for survey ID:", id);
+        if (id) {
+            fetchData();
+        }
+    }, [id]);
+
+    const fetchData = async () => {
+        // ตัวอย่างการดึงข้อมูล
+        try {
+            const response = await useApi.reports.getAnswerFromResult(id);
+            console.log("Report data:", response);
+            setDetails(response.data);
+            // จัดการข้อมูลที่ได้รับ
+        } catch (error) {
+            // จัดการข้อผิดพลาด
+        }
+    };
 
     return (
         <Box sx={{ p: 2, width: "100%", flexGrow: 1 }}>
@@ -73,28 +96,35 @@ const ReportPage = () => {
 
             {/* ส่วนรายงาน */}
             <Box sx={{ mt: 2, mb: 2, width: "100%" }}>
-                <Grid container spacing={2} >
-                    <Grid item xs={12} md={3}>
+                <Grid container spacing={2} alignItems="stretch">
+                    <Grid item xs={12} md={3} sx={{ display: 'flex' }}>
                         <Cardboard
                             title="จำนวนผู้ตอบแบบสอบถาม"
-                            value="150"
+                            value={details ? details.count_respondents : 0}
                             icon={<Person />}
                             color={colors.lightGreen[700]}
                         />
                     </Grid>
-                    <Grid item xs={12} md={9}>
-                        <Paper
+                    <Grid item xs={12} md={9} sx={{ display: 'flex' }}>
+                        <Box
                             sx={{
                                 p: 2,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 1,
                                 backgroundColor: "white",
-                                boxShadow: 3,
-                                borderRadius: 2,
-                                width: "100%",
+                                boxShadow: "0 0 16px rgba(91, 71, 188, 0.2)",
+                                borderRadius: 3,
                                 minHeight: 200,
                             }}
                         >
-                            <Typography variant="h6">ชื่อแบบสอบถาม</Typography>
-                        </Paper>
+                            <Typography variant="h5">{details ? details.form?.title : ""}</Typography>
+                            <Typography variant="body1" sx={{
+                                mt: 1, whiteSpace: 'pre-line', color: 'text.secondary',
+                            }}>
+                                {details ? details.form?.description : ""}
+                            </Typography>
+                        </Box>
                     </Grid>
                 </Grid>
             </Box>

@@ -126,15 +126,20 @@ const QuestionSurvey = ({
                                             checked={answer ? answer.answer_option_id?.includes(option.id) : false}
                                             onChange={(e) => {
                                                 // is_exclusive ถ้าเลือกแล้วจะไม่สามารถเลือกตัวอื่นได้
-                                                if (option.is_exclusive) {
-                                                    // ถ้าเลือกตัวเลือกนี้ ให้ล้างตัวเลือกอื่นทั้งหมด
-                                                    let updatedOptionIds = [option.id];
-                                                    onChange({ ...question, answer: { ...answer, answer_option_id: updatedOptionIds } });
-                                                    return;
-                                                }
-                                                let updatedOptionIds = answer ? [...answer.answer_option_id] : [];
+                                                let updatedOptionIds = answer ? [...(answer.answer_option_id || [])] : [];
                                                 if (e.target.checked) {
-                                                    updatedOptionIds.push(option.id);
+                                                    // ถ้าเลือก is_exclusive ให้ล้างตัวเลือกอื่นๆ ออก
+                                                    if (option.is_exclusive) {
+                                                        updatedOptionIds = [option.id];
+                                                    }
+                                                    else {
+                                                        // ถ้าเลือกตัวอื่น ให้ลบ is_exclusive ออก
+                                                        updatedOptionIds = updatedOptionIds.filter(id => {
+                                                            let opt = question.options.find(o => o.id === id);
+                                                            return opt && !opt.is_exclusive;
+                                                        });
+                                                        updatedOptionIds.push(option.id);
+                                                    }
                                                 } else {
                                                     updatedOptionIds = updatedOptionIds.filter(id => id !== option.id);
                                                 }
@@ -154,6 +159,7 @@ const QuestionSurvey = ({
                                             }))}
                                         />
                                     }
+                                    label={option.option}
                                 />
                             ))}
                         </FormGroup>
@@ -161,6 +167,7 @@ const QuestionSurvey = ({
                         {question.options.find(option => option.is_other) && (
                             <TextField
                                 value={answer ? answer.answer_text : ""}
+                                variant="standard"
                                 onChange={(e) => {
                                     onChange({
                                         ...question,
@@ -170,7 +177,7 @@ const QuestionSurvey = ({
                                         }
                                     });
                                 }}
-                                disabled={!(answer && question.options.find(option => option.is_other && option.id === answer.answer_option_id))}
+                                disabled={!(answer && question.options.find(option => option.is_other && answer.answer_option_id?.includes(option.id)))}
                                 placeholder="โปรดระบุ"
                                 sx={{ mt: 1 }}
                             />
