@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Prompt, Sarabun } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "./theme";
 import RootClientLayout from "./layout.client";
+import EmotionRootProvider from "../EmotionRootProvider";
 
 const sarabun = Sarabun({ subsets: ["latin"], weight: ["400", "700"] });
 const prompt = Prompt({ subsets: ["latin"], weight: ["400", "700"] });
@@ -31,7 +32,9 @@ export default function RootLayout({
       >
         {/* <ThemeProvider theme={theme}>{children}</ThemeProvider> */}
         {/* {children} */}
-        <RootClientLayout>{children}</RootClientLayout>
+        <EmotionRootProvider>
+          <RootClientLayout>{children}</RootClientLayout>
+        </EmotionRootProvider>
       </body>
     </html>
   );

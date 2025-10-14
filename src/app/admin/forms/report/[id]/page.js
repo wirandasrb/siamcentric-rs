@@ -30,6 +30,44 @@ const ReportPage = () => {
         }
     };
 
+    const handleExportExcel = async () => {
+        // ตัวอย่างการส่งคำขอเพื่อดาวน์โหลดไฟล์ Excel
+        try {
+            const response = await useApi.reports.exportExcelSurvey(id);
+            if (response && response.file_url) {
+                // สมมติว่า response เป็น URL ของไฟล์ Excel ที่ดาวน์โหลดได้
+                const link = document.createElement('a');
+                link.href = response.file_url; // URL ของไฟล์ Excel
+                link.setAttribute('download', response.file_name); // ชื่อไฟล์ที่ต้องการดาวน์โหลด
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            // จัดการข้อผิดพลาด
+            console.error("Error exporting Excel:", error);
+        }
+    }
+
+    const handleExportDataCoding = async () => {
+        // ตัวอย่างการส่งคำขอเพื่อดาวน์โหลดไฟล์ Excel
+        try {
+            const response = await useApi.reports.exportExcelCoding(id);
+            if (response && response.file_url) {
+                // สมมติว่า response เป็น URL ของไฟล์ Excel ที่ดาวน์โหลดได้
+                const link = document.createElement("a");
+                link.href = response.file_url; // Accessing file_url directly from the response
+                link.setAttribute("download", response.file_name);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            // จัดการข้อผิดพลาด
+            console.error("Error exporting Excel:", error);
+        }
+    }
+
     return (
         <Box sx={{ p: 2, width: "100%", flexGrow: 1 }}>
             <Typography variant="h5">ผลสำรวจ</Typography>
@@ -71,6 +109,7 @@ const ReportPage = () => {
                         "&:hover": { backgroundColor: colors.green[600] },
                     }}
                     startIcon={<Download />}
+                    onClick={handleExportExcel}
                 >
                     Export Excel
                 </Button>
@@ -89,6 +128,7 @@ const ReportPage = () => {
                         },
                     }}
                     startIcon={<ListAltOutlined />}
+                    onClick={handleExportDataCoding}
                 >
                     Data Coding
                 </Button>

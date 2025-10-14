@@ -50,6 +50,11 @@ function SortableItem({ section, setSections, onAdd, sections }) {
             question: '',
             question_type_id: 1,
             options: [],
+            matrix_rows: [],
+            matrix_columns: [],
+            is_required: true,
+            is_have_condition: false,
+            conditions: [],
         };
         setSections((prev) => prev.map((s) => (s.temp_id === section.temp_id ? { ...s, questions: [...s.questions, newQuestion] } : s)));
     };
@@ -187,6 +192,12 @@ const SectionList = ({ sections, setSections }) => {
                     question: '',
                     question_type_id: 1,
                     options: [],
+                    matrix_rows: [],
+                    matrix_columns: [],
+                    is_required: true,
+                    is_have_condition: false,
+                    conditions: [],
+
                 },
             ],
         };

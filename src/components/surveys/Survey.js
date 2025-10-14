@@ -1,19 +1,23 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { AppBar, Box, createTheme, Divider, ThemeProvider, Toolbar, Typography } from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
+import { AppBar, Box, createTheme, CssBaseline, Divider, ThemeProvider, Toolbar, Typography, useTheme } from "@mui/material";
 import ProgressBarSection from "./ProgressBarSection";
 import SectionSurvey from "./SectionSurvey";
 
 const SurveyComponent = ({ survey, responses }) => {
-    const surveyTheme = createTheme({
-        typography: {
-            fontFamily: survey?.font_type || "Sarabun, sans-serif"
-        },
-        palette: {
-            primary: { main: survey?.primary_color || "#1976d2" },
-            secondary: { main: survey?.second_color || "#f5f5f5" },
-        },
-    });
+    const customTheme = useMemo(
+        () =>
+            createTheme({
+                typography: {
+                    fontFamily: survey?.font_type || "Sarabun, sans-serif",
+                },
+                palette: {
+                    primary: { main: survey?.primary_color || "#1976d2" },
+                    secondary: { main: survey?.second_color || "#f5f5f5" },
+                },
+            }),
+        [survey]
+    );
     const [activeStep, setActiveStep] = useState(0);
     const [answers, setAnswers] = useState(responses || []);
     const [conditionMap, setConditionMap] = useState({}); // เก็บเงื่อนไขของคำถาม
@@ -38,11 +42,14 @@ const SurveyComponent = ({ survey, responses }) => {
     }, [survey]);
 
     return (
-        <ThemeProvider theme={surveyTheme} >
+        <ThemeProvider theme={customTheme} >
+            <CssBaseline />
             <Box
                 sx={{
-                    backgroundColor: survey?.second_color || "#f5f5f5",
-                    backgroundImage: survey.background_image ? `url(${survey.background_image})` : "none",
+                    backgroundColor: customTheme.palette.secondary.main,
+                    backgroundImage: survey.background_image
+                        ? `url(${survey.background_image})`
+                        : "none",
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                     minHeight: "100vh",
@@ -53,7 +60,7 @@ const SurveyComponent = ({ survey, responses }) => {
             >
                 <AppBar
                     position="static"
-                    sx={{ backgroundColor: survey?.primary_color || "#1976d2" }}
+                    sx={{ backgroundColor: survey.primary_color || "#1976d2" }}
                 >
                     <Toolbar>
                         <Box

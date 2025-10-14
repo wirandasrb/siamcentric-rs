@@ -54,7 +54,7 @@ const FormsPage = () => {
 
     const handleCopyLink = (form) => {
         // copy link to clipboard ต้องใช้ code_link ด้วย
-        const link = `${window.location.origin}/surveys/${form.id}?code=${form.code_link}`;
+        const link = `${window.location.origin}/surveys/${form.code_link}`;
         navigator.clipboard.writeText(link);
         alert("คัดลอกลิงก์สำเร็จ: " + link);
     }
@@ -145,7 +145,7 @@ const FormsPage = () => {
                                             {
                                                 label: "ไปยังแบบสอบถาม", icon: <OpenInNew />, onClick: () => {
                                                     // open form in new tab
-                                                    window.open(`/surveys/${row.id}`, '_blank');
+                                                    window.open(`/surveys/${row.code_link}`, '_blank');
                                                 }
                                             },
                                             {

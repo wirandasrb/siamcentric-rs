@@ -1,3 +1,4 @@
+"use client";
 import { Circle, PowerInput, Add, Delete, Remove, Clear, CircleOutlined } from "@mui/icons-material";
 import {
     Box,
@@ -10,7 +11,7 @@ import {
     Button,
     Radio,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const matrixOptions = [
     { value: "single_choice", label: "ตัวเลือกเดี่ยว", icon: <CircleOutlined /> },
@@ -19,31 +20,99 @@ const matrixOptions = [
 
 const MatrixQuestion = ({ question, onChange }) => {
     // ใช้ state ภายในเพื่อควบคุม row/column list
-    const [rows, setRows] = useState(["แถวที่ 1"]);
-    const [columns, setColumns] = useState(["คอลัมน์ที่ 1"]);
+    const [rows, setRows] = useState(() => {
+        return question?.matrix_rows?.length
+            ? question.matrix_rows.map(r => ({ id: r.id || "", row_label: r.row_label, order: r.order || 1 }))
+            : [{ id: "", row_label: "แถวที่ 1", order: 1 }];
+    });
+
+    const [columns, setColumns] = useState(() => {
+        return question?.matrix_columns?.length
+            ? question.matrix_columns.map(c => ({ id: c.id || "", column_label: c.column_label, column_value: c.column_value || 1, order: c.order || 1 }))
+            : [{ id: "", column_label: "คอลัมน์ที่ 1", column_value: 1, order: 1 }];
+    });
 
     // เพิ่ม/ลบแถว
-    const addRow = () => setRows([...rows, `แถวที่ ${rows.length + 1}`]);
+    const addRow = () => setRows([...rows, {
+        id: "",
+        row_label: `แถวที่ ${rows.length + 1}`,
+        order: rows.length + 1
+    }]);
     const removeRow = (index) => setRows(rows.filter((_, i) => i !== index));
 
     // เพิ่ม/ลบคอลัมน์
     const addColumn = () =>
-        setColumns([...columns, `คอลัมน์ที่ ${columns.length + 1}`]);
+        setColumns([...columns, {
+            id: "",
+            column_label: `คอลัมน์ที่ ${columns.length + 1}`,
+            column_value: columns.length + 1,
+            order: columns.length + 1
+        }]);
     const removeColumn = (index) =>
         setColumns(columns.filter((_, i) => i !== index));
 
     // แก้ชื่อแถว/คอลัมน์
     const updateRow = (index, value) => {
         const updated = [...rows];
-        updated[index] = value;
+        updated[index] = { ...updated[index], ...value };
         setRows(updated);
     };
 
     const updateColumn = (index, value) => {
         const updated = [...columns];
-        updated[index] = value;
+        updated[index] = { ...updated[index], ...value };
         setColumns(updated);
     };
+
+    // เมื่อ rows หรือ columns เปลี่ยน ให้แจ้ง parent component ด้วย
+    useEffect(() => {
+        // matrix_rows และ matrix_columns จะเก็บเป็น array
+        // rows = [{ row_label: "แถวที่ 1", order: 1 }, { row_label: "แถวที่ 2", order: 2 }, ...]
+        // columns = [{ column_label: "คอลัมน์ที่ 1", column_value: 1, order: 1 }, ...]
+        if (!onChange) return;
+        if (rows.length > 0 && columns.length > 0) {
+            // ถ้ามี id ให้เก็บ id ด้วย (กรณีแก้ไขคำถามที่มีอยู่แล้ว) 
+            // ถ้าเป็นแถว/คอลัมน์ ใหม่ ให้ id เป็น "" (backend จะสร้าง id ใหม่ให้)
+            const rowsData = rows.map((row) => ({ id: row.id, row_label: row.row_label, order: row.order }));
+            const columnsData = columns.map((col) => ({ id: col.id, column_label: col.column_label, column_value: col.column_value, order: col.order }));
+            onChange({ ...question, matrix_rows: rowsData, matrix_columns: columnsData });
+        }
+
+    }, [rows, columns]);
+
+    // เมื่อ question.matrix_rows หรือ question.matrix_columns เปลี่ยน (เช่น โหลดคำถามเก่าเข้ามา)
+    // ให้ตั้งค่า rows/columns ใหม่
+    // useEffect(() => {
+    //     if (question?.matrix_rows && question.matrix_rows.length > 0) {
+    //         setRows(question.matrix_rows.map((row) => ({
+    //             id: row.id || "",
+    //             row_label: row.row_label || "",
+    //             order: row.order || 1
+    //         })));
+    //     } else {
+    //         setRows([{
+    //             id: "",
+    //             row_label: "แถวที่ 1",
+    //             order: 1
+    //         }]);
+    //     }
+    //     if (question?.matrix_columns && question.matrix_columns.length > 0) {
+    //         setColumns(question.matrix_columns.map((col) => ({
+    //             id: col.id || "",
+    //             column_label: col.column_label || "",
+    //             column_value: col.column_value || 1,
+    //             order: col.order || 1
+    //         })));
+    //     } else {
+    //         setColumns([{
+    //             id: "",
+    //             column_label: "คอลัมน์ที่ 1",
+    //             column_value: 1,
+    //             order: 1
+    //         }]);
+    //     }
+    // }, [question?.matrix_rows, question?.matrix_columns]);
+
 
     return (
         <Box sx={{ display: "flex", mb: 2, width: "100%", flexDirection: "column", gap: 2 }}>
@@ -63,8 +132,8 @@ const MatrixQuestion = ({ question, onChange }) => {
                     ประเภทตัวเลือก:
                 </Typography>
                 <Select
-                    value={question?.grid_type || "single_choice"}
-                    onChange={(e) => onChange({ grid_type: e.target.value })}
+                    value={question?.matrix_type || "single_choice"}
+                    onChange={(e) => onChange({ matrix_type: e.target.value })}
                     sx={{ minWidth: 200 }}
                     size="small"
                     MenuProps={{ PaperProps: { style: { maxHeight: 300 } } }}
@@ -110,8 +179,8 @@ const MatrixQuestion = ({ question, onChange }) => {
                                     fullWidth
                                     size="small"
                                     variant="standard"
-                                    value={row}
-                                    onChange={(e) => updateRow(index, e.target.value)}
+                                    value={row.row_label}
+                                    onChange={(e) => updateRow(index, { row_label: e.target.value })}
                                     placeholder={`แถวที่ ${index + 1}`}
                                 />
                                 <IconButton
@@ -161,8 +230,8 @@ const MatrixQuestion = ({ question, onChange }) => {
                                     fullWidth
                                     size="small"
                                     variant="standard"
-                                    value={col}
-                                    onChange={(e) => updateColumn(index, e.target.value)}
+                                    value={col.column_label}
+                                    onChange={(e) => updateColumn(index, { column_label: e.target.value })}
                                     placeholder={`คอลัมน์ที่ ${index + 1}`}
                                 />
                                 <IconButton
@@ -195,7 +264,7 @@ const MatrixQuestion = ({ question, onChange }) => {
                 px: 2,
             }}
             >
-                {question?.grid_type === "single_choice" ? (
+                {question?.matrix_type === "single_choice" ? (
                     <Box
                         sx={{
                             display: "flex",
@@ -229,7 +298,7 @@ const MatrixQuestion = ({ question, onChange }) => {
                                         color: "text.secondary",
                                     }}
                                 >
-                                    {col}
+                                    {col.column_label}
                                 </Typography>
                             ))}
                         </Box>
@@ -247,7 +316,7 @@ const MatrixQuestion = ({ question, onChange }) => {
                                 }}
                             >
                                 <Typography variant="body2" sx={{ color: "text.primary" }}>
-                                    {row}
+                                    {rowIndex + 1}. {row.row_label}
                                 </Typography>
 
                                 {columns.map((_, colIndex) => (
@@ -265,7 +334,7 @@ const MatrixQuestion = ({ question, onChange }) => {
                             </Box>
                         ))}
                     </Box>
-                ) : question?.grid_type === "rating_bar" ? (
+                ) : question?.matrix_type === "rating_bar" ? (
                     <Box
                         sx={{
                             display: "flex",
@@ -277,7 +346,7 @@ const MatrixQuestion = ({ question, onChange }) => {
                         {rows.map((row, rowIndex) => (
                             <Box key={rowIndex} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                                 <Typography variant="body2" color="text.secondary">
-                                    {rowIndex + 1}. {row}
+                                    {rowIndex + 1}. {row.row_label}
                                 </Typography>
                                 <Box
                                     sx={{
@@ -308,7 +377,7 @@ const MatrixQuestion = ({ question, onChange }) => {
                                                         fontSize: "12px",
                                                     }}
                                                 >
-                                                    {col}
+                                                    {col.column_label}
                                                 </Typography>
                                             </Button>
                                         );
