@@ -32,9 +32,9 @@ export default function RootLayout({
       >
         {/* <ThemeProvider theme={theme}>{children}</ThemeProvider> */}
         {/* {children} */}
-        <EmotionRootProvider>
-          <RootClientLayout>{children}</RootClientLayout>
-        </EmotionRootProvider>
+        {/* <EmotionRootProvider> */}
+        <RootClientLayout>{children}</RootClientLayout>
+        {/* </EmotionRootProvider> */}
       </body>
     </html>
   );
