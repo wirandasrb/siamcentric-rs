@@ -18,23 +18,27 @@ async function getSurvey(id) {
 
 // 🧠 สร้าง metadata สำหรับ social share
 export async function generateMetadata({ params }) {
-  const survey = await getSurvey(params.id);
+  const resolvedParams = await params; // ✅ ต้อง await ก่อน
+  const survey = await getSurvey(resolvedParams.id);
   return {
     title: (survey.meta_title ?? survey.title) || "Survey",
     description: survey.description || "แบบสอบถามออนไลน์",
+    icons: {
+      icon: survey.image_url || "/images/contact-form.png",
+    },
     openGraph: {
       title: survey.meta_title || "Survey",
       description: survey.description || "แบบสอบถามออนไลน์",
-      images: [survey.logo_image || "/images/contact-form.png"],
+      images: [survey.image_url || "/images/contact-form.png"],
       type: "website",
     },
-    themeColor: survey.primary_color || "#1976d2",
+    // themeColor: survey.primary_color || "#1976d2",
   };
 }
 
 export default async function SurveyPage({ params }) {
   const survey = await getSurvey(params.id);
-
+  console.log("Fetched survey data:", survey);
   // ถ้าไม่พบ survey ให้แสดงข้อความ
   if (!survey) {
     return (<div>ไม่พบแบบสอบถาม</div>);

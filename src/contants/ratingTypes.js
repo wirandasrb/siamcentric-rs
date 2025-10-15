@@ -1,4 +1,4 @@
-import { Favorite, Mood, Star, ThumbUp } from "@mui/icons-material";
+import { Favorite, FavoriteOutlined, Mood, MoodOutlined, Star, StarOutline, ThumbUp, ThumbUpOutlined } from "@mui/icons-material";
 
 export const ratingTypes = [
     {
@@ -6,6 +6,8 @@ export const ratingTypes = [
         value: "star",
         label: "ดาว",
         icon: <Star sx={{ color: "#fbc02d" }} />,
+        iconDefault: <StarOutline />,
+        color: '#fbc02d',
     },
     {
         id: 2,
@@ -18,6 +20,8 @@ export const ratingTypes = [
                 }}
             />
         ),
+        iconDefault: <MoodOutlined />,
+        color: '#558b2f',
     },
     {
         id: 3,
@@ -30,11 +34,15 @@ export const ratingTypes = [
                 }}
             />
         ),
+        iconDefault: <ThumbUpOutlined />,
+        color: '#1e88e5',
     },
     {
         id: 4,
         value: "heart",
         label: "หัวใจ",
         icon: <Favorite sx={{ color: "red" }} />,
+        iconDefault: <FavoriteOutlined />,
+        color: 'red',
     },
 ];

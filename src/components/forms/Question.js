@@ -48,10 +48,39 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
     }
 
     const handleDuplicateQuestion = () => {
-        // สร้างคำถามใหม่โดยคัดลอกข้อมูลจากคำถามปัจจุบัน
-        const duplicatedQuestion = { ...question, temp_id: `question-${getRandomId()}` };
-        onAdd(question.temp_id, duplicatedQuestion); // เรียกใช้ฟังก์ชัน onAdd เพื่อเพิ่มคำถามใหม่
-    }
+        const optionsCopy = question.options?.map(opt => {
+            const { id, ...optRest } = opt;
+            return {
+                ...optRest,
+                id: undefined,
+                temp_id: `option-${getRandomId()}`,
+            };
+        });
+
+        const matrixRowsCopy = question.matrix_rows?.map(row => {
+            const { id, ...rowRest } = row;
+            return { ...rowRest, id: undefined };
+        });
+
+        const matrixColumnsCopy = question.matrix_columns?.map(col => {
+            const { id, ...colRest } = col;
+            return { ...colRest, id: undefined };
+        });
+
+        const { id, ...rest } = question;
+
+        const duplicatedQuestion = {
+            ...rest,
+            id: undefined,
+            temp_id: `question-${getRandomId()}`,
+            options: optionsCopy || rest.options || [],
+            ...(matrixRowsCopy ? { matrix_rows: matrixRowsCopy } : {}),
+            ...(matrixColumnsCopy ? { matrix_columns: matrixColumnsCopy } : {}),
+        };
+
+        onAdd(question.temp_id, duplicatedQuestion);
+    };
+
 
     const handleMoveQuestionUp = () => {
         const index = questions.findIndex((q) => q.temp_id === question.temp_id);
@@ -380,6 +409,11 @@ const QuestionDragAndDrop = ({ questions, onChange, sections }) => {
 
     const handleQuestionDelete = (question_id) => {
         onChange(questions.filter((q) => q.temp_id !== question_id));
+        // ถ้ามีการลบคำถามแล้วให้รีเซ็ตค่า question_no ใหม่ทั้งหมดให้เรียงต่อกัน
+        const formatedQuestions = questions
+            .filter((q) => q.temp_id !== question_id)
+            .map((q, i) => ({ ...q, question_no: i + 1 }));
+        onChange(formatedQuestions);
     };
 
     const handleAddQuestion = (question_id, duplicatedQuestion) => {

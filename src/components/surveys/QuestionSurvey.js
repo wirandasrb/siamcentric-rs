@@ -1,5 +1,8 @@
-import { Autocomplete, Box, Checkbox, FormControlLabel, FormGroup, Radio, RadioGroup, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Checkbox, FormControlLabel, FormGroup, lighten, Radio, RadioGroup, TextField, Typography } from "@mui/material";
 import ExternalSelection from "./ExternalSelection";
+import RatingQuestionSurvey from "./RatingQuestionSurvey";
+import MatrixQuestionSurvey from "./MatrixQuestionSurvey";
+import DatePickerSurvey from "./DatepickerSurvey";
 
 const QuestionSurvey = ({
     question,
@@ -10,17 +13,40 @@ const QuestionSurvey = ({
 }) => {
     const answer = answers.find(ans => ans?.question_id === question.id);
     return (
-        <Box key={question.id}>
-            <Typography
-                sx={{
-                    fontSize: 16,
-                }}
-            >
-                {question.question_no}. {question.question}
-            </Typography>
+        <Box key={question.id} sx={{ px: 2, width: "100%" }}>
+            {question.question_type_id === 9 ?
+                <Box sx={{
+                    mb: 2,
+                    backgroundColor: secondColor,
+                    p: 2,
+                    borderRadius: 2,
+                    borderLeft: `4px solid ${primaryColor}`
+                }}>
+                    <Typography
+                        sx={{
+                            fontSize: 16,
+                            fontWeight: 700,
+                        }}
+                    >
+                        {question.question_no}. {question.question}
+                    </Typography>
+                </Box>
+                : <Typography
+                    sx={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        mb: 2
+                    }}
+                >
+                    {question.question_no}. {question.question}
+                </Typography>}
             <Box
                 sx={{
                     ml: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                    mb: 2,
                 }}
             >
                 {(question.question_type_id === 1 || question.question_type_id === 2) && (
@@ -72,17 +98,44 @@ const QuestionSurvey = ({
                                 onChange({ ...question, answer: updatedAnswer });
                             }}
                         >
-                            {question.options.map((option) => (
-                                <FormControlLabel
-                                    key={option.id}
-                                    control={<Radio />}
-                                    label={option.option}
-                                    value={option.id}
-                                    sx={{
-                                        fontSize: 14
-                                    }}
-                                />
-                            ))}
+                            {question.options.map((option) => {
+                                const isSelected = answer?.answer_option_id === option.id;
+
+                                return (
+                                    <Box
+                                        key={option.id}
+                                        sx={{
+                                            border: isSelected
+                                                ? `1px solid ${primaryColor}`
+                                                : "none",
+                                            borderRadius: 2,
+                                            p: 1,
+                                            transition: "all 0.2s ease",
+                                            backgroundColor: isSelected ? lighten(secondColor, 0.08) : "transparent",
+                                            "&:hover": {
+                                                borderColor: primaryColor,
+                                                backgroundColor: lighten(secondColor, 0.03),
+                                            },
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <FormControlLabel
+                                            control={<Radio />}
+                                            label={option.option}
+                                            value={option.id}
+                                            sx={{
+                                                width: "100%",
+                                                m: 0,
+                                                "& .MuiFormControlLabel-label": {
+                                                    fontSize: 16,
+                                                    color: isSelected ? primaryColor : "inherit",
+                                                    fontWeight: isSelected ? "bold" : "normal",
+                                                },
+                                            }}
+                                        />
+                                    </Box>
+                                );
+                            })}
                             {/* ถ้าคำตอบที่เลือกเป็นอื่นๆ option มีตัวแปร is_other */}
                             {question.options.find(option => option.is_other) && (
                                 <TextField
@@ -100,7 +153,7 @@ const QuestionSurvey = ({
                                     }}
                                     disabled={!(answer && question.options.find(option => option.is_other && option.id === answer.answer_option_id))}
                                     placeholder="โปรดระบุ"
-                                    sx={{ mt: 1 }}
+                                    sx={{ mt: 1, mb: 2, ml: 4 }}
                                 />
                             )}
                         </RadioGroup>
@@ -185,7 +238,7 @@ const QuestionSurvey = ({
                     </Box>)}
 
                 {question.question_type_id === 5 && (
-                    <Box sx={{ mt: 2 }}>
+                    <Box sx={{ mt: 1, ml: 1, width: 300 }}>
                         {/*แบบ autocomplete */}
                         {question.dropdown_source_type && question.dropdown_source_type === "external" ? (
                             <ExternalSelection
@@ -215,6 +268,40 @@ const QuestionSurvey = ({
                         )}
                     </Box>
                 )}
+
+                {question.question_type_id === 6 && (
+                    <RatingQuestionSurvey question={question} answers={answers} onChange={onChange} />
+                )}
+
+                {question.question_type_id === 9 && (
+                    <MatrixQuestionSurvey
+                        question={question}
+                        answers={answers}
+                        handleAnswerChange={(updatedAnswers) => {
+                            // คำถาม matrix จะมีหลายคำตอบใน answers
+                            let filteredAnswers = answers.filter(ans => ans.question_id !== question.id);
+                            let newAnswers = [...filteredAnswers, ...updatedAnswers];
+                            onChange({
+                                ...question,
+                                answers: newAnswers,
+                            });
+                        }}
+                    />
+                )}
+
+                {/* Date*/}
+                {question.question_type_id === 11 && (
+                    <DatePickerSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
+                )}
+
             </Box>
         </Box>
     );

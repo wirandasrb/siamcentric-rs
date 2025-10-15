@@ -69,6 +69,14 @@ const FormCreatePage = () => {
                             ...option,
                             temp_id: option.id,
                         })) : [],
+                        matrix_rows: question.matrix_rows ? question.matrix_rows.map((row, rIndex) => ({
+                            ...row,
+                            temp_id: row.id,
+                        })) : [],
+                        matrix_columns: question.matrix_columns ? question.matrix_columns.map((col, cIndex) => ({
+                            ...col,
+                            temp_id: col.id,
+                        })) : [],
                     })),
                 }));
                 setSections(formSections);

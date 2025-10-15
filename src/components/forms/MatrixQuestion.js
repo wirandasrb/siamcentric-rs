@@ -80,40 +80,6 @@ const MatrixQuestion = ({ question, onChange }) => {
 
     }, [rows, columns]);
 
-    // เมื่อ question.matrix_rows หรือ question.matrix_columns เปลี่ยน (เช่น โหลดคำถามเก่าเข้ามา)
-    // ให้ตั้งค่า rows/columns ใหม่
-    // useEffect(() => {
-    //     if (question?.matrix_rows && question.matrix_rows.length > 0) {
-    //         setRows(question.matrix_rows.map((row) => ({
-    //             id: row.id || "",
-    //             row_label: row.row_label || "",
-    //             order: row.order || 1
-    //         })));
-    //     } else {
-    //         setRows([{
-    //             id: "",
-    //             row_label: "แถวที่ 1",
-    //             order: 1
-    //         }]);
-    //     }
-    //     if (question?.matrix_columns && question.matrix_columns.length > 0) {
-    //         setColumns(question.matrix_columns.map((col) => ({
-    //             id: col.id || "",
-    //             column_label: col.column_label || "",
-    //             column_value: col.column_value || 1,
-    //             order: col.order || 1
-    //         })));
-    //     } else {
-    //         setColumns([{
-    //             id: "",
-    //             column_label: "คอลัมน์ที่ 1",
-    //             column_value: 1,
-    //             order: 1
-    //         }]);
-    //     }
-    // }, [question?.matrix_rows, question?.matrix_columns]);
-
-
     return (
         <Box sx={{ display: "flex", mb: 2, width: "100%", flexDirection: "column", gap: 2 }}>
             {/* ส่วนเลือกประเภทของ matrix */}

@@ -149,19 +149,8 @@ const SectionSurvey = ({
                     }}
                 >
                     {section.questions.map((question, index) => {
-                        // ถ้า options ใน question มีเงื่อนไขการแสดงผล (condition) ให้ตรวจสอบก่อน render
-                        console.log('conditions', conditions);
-                        console.log('answers', answers);
-
-                        // ถ้า option นี้ถูกเลือก และมีเงื่อนไข ให้ตรวจสอบเงื่อนไข มันคือการข้ามไปยังคำถามหรือ section ไหน
-                        // ถ้าข้อ 1 ตอบ ใช่ ให้ข้ามไปยังข้อ 3 (ไม่แสดงข้อ 2)
-                        // ถ้าข้อ 1 ตอบ ไม่ใช่ ให้แสดงข้อ 2
-                        // ดังนั้นถ้า option นี้ถูกเลือก เราต้องเช็คว่า เงื่อนไขที่กำหนดไว้ ข้ามไปยังคำถามหรือ section ที่มีคำตอบแล้วหรือไม่
-                        // ถ้ามีคำตอบแล้ว แสดงว่าไม่ควรแสดงคำถามนี้
-                        // ถ้ายังไม่มีคำตอบ แสดงว่าควรแสดงคำถามนี้
-
                         return (
-                            <Box key={question.id} sx={{ mt: index === 0 ? 2 : 0 }}>
+                            <Box key={question.id}>
                                 {/* Render คำถามที่นี่ */}
                                 <QuestionSurvey
                                     question={question}

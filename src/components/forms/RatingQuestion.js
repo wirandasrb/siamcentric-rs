@@ -16,8 +16,8 @@ const RatingQuestion = ({ question, onChange }) => {
                     <Select
                         labelId="rating-type-label"
                         id="rating-type-select"
-                        value={question.rating_type_id || ""}
-                        onChange={(e) => onChange({ ...question, rating_type_id: e.target.value })}
+                        value={question.vote_type_id || ""}
+                        onChange={(e) => onChange({ ...question, vote_type_id: e.target.value })}
                         label="รูปแบบ"
                     >
                         {ratingTypes.map((type) => (
@@ -67,7 +67,7 @@ const RatingQuestion = ({ question, onChange }) => {
             </Box>
             <Box sx={{ fontSize: 14, color: 'text.secondary' }}>
                 ตัวอย่าง: {question.max_scale || 5} ระดับ
-                {question.rating_type_id === 1 && " (ดาว)"}{question.rating_type_id === 2 && " (รูปยิ้ม)"}{question.rating_type_id === 3 && " (ปลายนิ้ว)"}{question.rating_type_id === 4 && " (หัวใจ)"}
+                {question.vote_type_id === 1 && " (ดาว)"}{question.vote_type_id === 2 && " (รูปยิ้ม)"}{question.vote_type_id === 3 && " (ปลายนิ้ว)"}{question.vote_type_id === 4 && " (หัวใจ)"}
             </Box>
             <Box
                 sx={{
@@ -106,12 +106,12 @@ const RatingQuestion = ({ question, onChange }) => {
 
                     {[...Array(parseInt(question.max_scale || 5)).keys()].map((i) => (
                         <Box key={i} sx={{ minWidth: 40, textAlign: "center" }}>
-                            <i style={{ fontSize: 20, color: "red" }}>{ratingTypes.find(r => r.id === question.rating_type_id)?.icon}</i>
+                            <i style={{ fontSize: 20, color: "red" }}>{ratingTypes.find(r => r.id === question.vote_type_id)?.icon}</i>
                         </Box>
                     ))}
                     {question.is_irrelevant && (
                         <Box sx={{ minWidth: 40, textAlign: "center" }}>
-                            <i style={{ fontSize: 20, color: "gray" }}>{ratingTypes.find(r => r.id === question.rating_type_id)?.icon}</i>
+                            <i style={{ fontSize: 20, color: "gray" }}>{ratingTypes.find(r => r.id === question.vote_type_id)?.icon}</i>
                         </Box>
                     )}
                 </Box>
