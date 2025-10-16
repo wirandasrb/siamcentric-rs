@@ -41,13 +41,37 @@ const MatrixQuestion = ({ question, onChange }) => {
     const removeRow = (index) => setRows(rows.filter((_, i) => i !== index));
 
     // เพิ่ม/ลบคอลัมน์
-    const addColumn = () =>
+
+    // เพิ่มคอลัมน์ปกติ แต่ถ้ามีคอลัมน์ N/A อยู่แล้ว จะเพิ่มแทรกหน้า N/A
+    const addColumn = () => {
+        const naIndex = columns.findIndex(col => col.column_value === "N/A");
+        if (naIndex !== -1) {
+            // ถ้ามีคอลัมน์ N/A อยู่แล้ว จะเพิ่มแทรกหน้า N/A
+            setColumns([...columns.slice(0, naIndex), {
+                id: "",
+                column_label: `คอลัมน์ที่ ${columns.length + 1}`,
+                column_value: columns.length + 1,
+                order: columns.length + 1
+            }, ...columns.slice(naIndex)]);
+        } else {
+            // ถ้าไม่มีคอลัมน์ N/A ให้เพิ่มคอลัมน์ปกติ
+            setColumns([...columns, {
+                id: "",
+                column_label: `คอลัมน์ที่ ${columns.length + 1}`,
+                column_value: columns.length + 1,
+                order: columns.length + 1
+            }]);
+        }
+    };
+
+    const addColumnNA = () =>
         setColumns([...columns, {
             id: "",
-            column_label: `คอลัมน์ที่ ${columns.length + 1}`,
-            column_value: columns.length + 1,
+            column_label: "N/A",
+            column_value: "N/A",
             order: columns.length + 1
         }]);
+
     const removeColumn = (index) =>
         setColumns(columns.filter((_, i) => i !== index));
 
@@ -74,7 +98,7 @@ const MatrixQuestion = ({ question, onChange }) => {
             // ถ้ามี id ให้เก็บ id ด้วย (กรณีแก้ไขคำถามที่มีอยู่แล้ว) 
             // ถ้าเป็นแถว/คอลัมน์ ใหม่ ให้ id เป็น "" (backend จะสร้าง id ใหม่ให้)
             const rowsData = rows.map((row) => ({ id: row.id, row_label: row.row_label, order: row.order }));
-            const columnsData = columns.map((col) => ({ id: col.id, column_label: col.column_label, column_value: col.column_value, order: col.order }));
+            const columnsData = columns.map((col, index) => ({ id: col.id, column_label: col.column_label, column_value: col.column_value, order: index + 1 }));
             onChange({ ...question, matrix_rows: rowsData, matrix_columns: columnsData });
         }
 
@@ -210,14 +234,31 @@ const MatrixQuestion = ({ question, onChange }) => {
                             </Box>
                         ))}
 
-                        <Button
-                            startIcon={<Add />}
-                            size="small"
-                            onClick={addColumn}
-                            sx={{ alignSelf: "flex-start", mt: 1 }}
-                        >
-                            เพิ่มคอลัมน์
-                        </Button>
+                        <Box sx={{ display: 'flex', direction: 'row', gap: 1, alignItems: 'center', mt: 1, alignSelf: "flex-start" }}>
+                            <Button
+                                startIcon={<Add />}
+                                size="small"
+                                onClick={addColumn}
+                            >
+                                เพิ่มคอลัมน์
+                            </Button>
+                            {question?.matrix_type === "single_choice" && (
+                                <>
+                                    <Typography variant="caption" color="textSecondary" sx={{ ml: 2 }}>
+                                        หรือ
+                                    </Typography>
+                                    <Button
+                                        startIcon={<Add />}
+                                        size="small"
+                                        onClick={addColumnNA}
+                                        disabled={columns.some(col => col.column_value === "N/A")}
+                                    >
+                                        เพิ่มคอลัมน์ N/A
+                                    </Button>
+                                </>
+                            )}
+
+                        </Box>
                     </Box>
                 </Grid>
             </Grid>

@@ -30,6 +30,15 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                             mb: 1,
                         }}
                     >
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                textAlign: "center",
+                                fontWeight: 500,
+                                color: "text.secondary",
+                            }}>
+                            คำถาม
+                        </Typography>
                         {question.matrix_columns.map((col, colIndex) => (
                             <Typography
                                 key={colIndex}
@@ -59,7 +68,7 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                         : "none",
                             }}
                         >
-                            <Typography sx={{ fontWeight: 500 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
                                 {row.row_label}
                             </Typography>
                             {question.matrix_columns.map((col, colIndex) => (
