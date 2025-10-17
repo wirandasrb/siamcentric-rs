@@ -16,14 +16,15 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                         flexDirection: "column",
                         border: "1px solid #ddd",
                         borderRadius: 2,
-                        overflowX: "auto",
+                        overflow: "hidden",
                         width: "100%",
                         p: 2,
                     }}
                 >
+                    {/* Header เฉพาะ Desktop */}
                     <Box
                         sx={{
-                            display: "grid",
+                            display: { xs: "none", sm: "grid" },
                             gridTemplateColumns: `150px repeat(${question.matrix_columns.length}, 1fr)`,
                             borderBottom: "1px solid #ddd",
                             pb: 1,
@@ -36,7 +37,8 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                 textAlign: "center",
                                 fontWeight: 500,
                                 color: "text.secondary",
-                            }}>
+                            }}
+                        >
                             คำถาม
                         </Typography>
                         {question.matrix_columns.map((col, colIndex) => (
@@ -54,13 +56,21 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                         ))}
                     </Box>
 
+                    {/* แถวคำถาม */}
                     {question.matrix_rows.map((row, rowIndex) => (
                         <Box
                             key={rowIndex}
                             sx={{
-                                display: "grid",
-                                gridTemplateColumns: `150px repeat(${question.matrix_columns.length}, 1fr)`,
-                                alignItems: "center",
+                                display: {
+                                    xs: "flex", // มือถือแนวตั้ง
+                                    sm: "grid", // เดสก์ท็อปเป็นตาราง
+                                },
+                                flexDirection: { xs: "column", sm: "row" },
+                                gridTemplateColumns: {
+                                    sm: `150px repeat(${question.matrix_columns.length}, 1fr)`,
+                                },
+                                alignItems: { sm: "center" },
+                                gap: { xs: 1, sm: 0 },
                                 py: 1,
                                 borderBottom:
                                     rowIndex < question.matrix_rows.length - 1
@@ -68,19 +78,40 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                         : "none",
                             }}
                         >
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {/* label ของ row */}
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    fontWeight: 500,
+                                    mb: { xs: 0.5, sm: 0 },
+                                }}
+                            >
                                 {row.row_label}
                             </Typography>
+
+                            {/* options */}
                             {question.matrix_columns.map((col, colIndex) => (
                                 <Box
                                     key={colIndex}
                                     sx={{
                                         display: "flex",
-                                        justifyContent: "center",
                                         alignItems: "center",
+                                        justifyContent: { xs: "flex-start", sm: "center" },
+                                        pl: { xs: 2, sm: 0 },
                                     }}
                                 >
-                                    <Radio disabled fontSize="small" color="disabled" />
+                                    {/* ✅ มือถือ: radio ก่อน, label หลัง */}
+                                    <Radio disabled size="small" color="disabled" />
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            display: { xs: "inline", sm: "none" },
+                                            ml: 1,
+                                            color: "text.secondary",
+                                        }}
+                                    >
+                                        {col.column_label}
+                                    </Typography>
                                 </Box>
                             ))}
                         </Box>

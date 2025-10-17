@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AppBar, Box, createTheme, CssBaseline, Divider, ThemeProvider, Toolbar, Typography, useTheme } from "@mui/material";
 import ProgressBarSection from "./ProgressBarSection";
 import SectionSurvey from "./SectionSurvey";
+import ThankMessage from "./ThankMessage";
+import ModalConfirm from "../modals/ModalComfirm";
 
 const SurveyComponent = ({ survey, responses }) => {
     const customTheme = useMemo(
@@ -21,6 +23,7 @@ const SurveyComponent = ({ survey, responses }) => {
     const [activeStep, setActiveStep] = useState(0);
     const [answers, setAnswers] = useState(responses || []);
     const [conditionMap, setConditionMap] = useState({}); // เก็บเงื่อนไขของคำถาม
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     useEffect(() => {
         if (survey && survey.sections) {
@@ -40,6 +43,20 @@ const SurveyComponent = ({ survey, responses }) => {
             setConditionMap(map);
         }
     }, [survey]);
+
+    const handleSubmit = async () => {
+        // Logic การส่งคำตอบเมื่อแบบสำรวจเสร็จสิ้น
+        console.log("Submitting answers:", answers);
+        setActiveStep(prev => prev + 1);
+        setIsConfirmOpen(false);
+
+        // คุณสามารถเพิ่มโค้ดเพื่อส่งคำตอบไปยังเซิร์ฟเวอร์ได้ที่นี่
+    }
+
+    const handleRetakeSurvey = () => {
+        setAnswers([]);
+        setActiveStep(0);
+    }
 
     return (
         <ThemeProvider theme={customTheme} >
@@ -151,7 +168,7 @@ const SurveyComponent = ({ survey, responses }) => {
                         primaryColor={survey?.primary_color || "#1976d2"}
                     />
                     {/* ส่วนของคำถาม จะมาแทนที่ตรงนี้ */}
-                    {survey?.sections?.length > 0 && (
+                    {survey?.sections?.length > 0 && activeStep < survey.sections.length && (
                         <SectionSurvey
                             section={survey.sections[activeStep]}
                             conditions={conditionMap}
@@ -167,6 +184,8 @@ const SurveyComponent = ({ survey, responses }) => {
                                     setActiveStep(activeStep - 1);
                                 }
                             }}
+                            onSubmit={() => setIsConfirmOpen(true)}
+                            is_last_section={activeStep === survey.sections.length - 1}
                             onChangeAnswer={(questionId, answer) => {
                                 setAnswers(prev => {
                                     const updatedAnswers = [...prev];
@@ -176,10 +195,21 @@ const SurveyComponent = ({ survey, responses }) => {
                             }}
                             answers={answers}
                         />
-                    )
-                    }
+                    )}
+
+                    {/* ส่วนท้ายแบบขอบคุณหลังส่งแบบสอบถามเสร็จสิ้น */}
+                    {activeStep >= survey?.sections?.length && (
+                        <ThankMessage form={survey} onRetakeSurvey={handleRetakeSurvey} />
+                    )}
                 </Box>
             </Box>
+            <ModalConfirm
+                open={isConfirmOpen}
+                onClose={() => setIsConfirmOpen(false)}
+                onConfirm={handleSubmit}
+                title="ยืนยันส่งคำตอบ"
+                description="คุณแน่ใจหรือว่าต้องการส่งคำตอบแบบสอบถามนี้?"
+            />
         </ThemeProvider>
     );
 }

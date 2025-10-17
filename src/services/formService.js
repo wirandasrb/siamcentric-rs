@@ -54,12 +54,26 @@ const updateForm = async (formId, formData) => {
     }
 };
 
+const getFormGoogleSheetLink = async (formId) => {
+    try {
+        const { data, status } = await apiWithAuth.get(`/forms/${formId}/google-sheet`);
+        if (status === 200 && data) {
+            return data; // ✅ ส่งข้อมูลจริงกลับไป
+        }
+        throw new Error("No Google Sheet link found");
+    } catch (error) {
+        return null; // ✅ คืนค่า null ดีกว่าโยน error กลับ เพื่อไม่ให้ UI พัง
+    }
+};
+
+
 const formService = {
     getFormsList,
     getFormById,
     updateFormStatus,
     createForm,
     updateForm,
+    getFormGoogleSheetLink,
 };
 
 export default formService;

@@ -1,6 +1,6 @@
 "use client";
-import { DatasetLinked, Download, ListAltOutlined, Person } from "@mui/icons-material";
-import { Box, Button, colors, Grid, Paper, Typography } from "@mui/material";
+import { DatasetLinked, Download, ListAltOutlined, NoteAdd, Person } from "@mui/icons-material";
+import { Box, Button, colors, Divider, Grid, Link, Paper, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import Cardboard from "../../../../../components/Cardboard";
 import React, { useEffect } from "react";
@@ -9,12 +9,14 @@ import useApi from "../../../../../services";
 const ReportPage = () => {
     const { id } = useParams();
     const [details, setDetails] = React.useState(null);
+    const [isOpenCreateGoogleSheet, setIsOpenCreateGoogleSheet] = React.useState(false);
 
     useEffect(() => {
         // ดึงข้อมูลรายงานจาก API โดยใช้ id
         console.log("Fetch report data for survey ID:", id);
         if (id) {
             fetchData();
+            fetchGoogleSheetLink();
         }
     }, [id]);
 
@@ -22,11 +24,32 @@ const ReportPage = () => {
         // ตัวอย่างการดึงข้อมูล
         try {
             const response = await useApi.reports.getAnswerFromResult(id);
-            console.log("Report data:", response);
             setDetails(response.data);
-            // จัดการข้อมูลที่ได้รับ
         } catch (error) {
             // จัดการข้อผิดพลาด
+            console.error("Error fetching report data:", error);
+        }
+    };
+
+    const fetchGoogleSheetLink = async () => {
+        try {
+            const response = await useApi.forms.getFormGoogleSheetLink(id);
+            if (response) {
+                const { data } = response;
+                setDetails(prevDetails => ({
+                    ...prevDetails,
+                    google_sheet_url: data.sheet_url || "",
+                    spreadsheet_id: data.spreadsheet_id || ""
+                }));
+            }
+        } catch (error) {
+            // จัดการข้อผิดพลาด
+            console.error("Error fetching Google Sheet link:", error);
+            setDetails(prevDetails => ({
+                ...prevDetails,
+                google_sheet_url: "",
+                spreadsheet_id: ""
+            }));
         }
     };
 
@@ -67,6 +90,7 @@ const ReportPage = () => {
             console.error("Error exporting Excel:", error);
         }
     }
+
 
     return (
         <Box sx={{ p: 2, width: "100%", flexGrow: 1 }}>
@@ -158,10 +182,64 @@ const ReportPage = () => {
                                 minHeight: 200,
                             }}
                         >
-                            <Typography variant="h5">{details ? details.form?.title : ""}</Typography>
-                            <Typography variant="body1" sx={{
-                                mt: 1, whiteSpace: 'pre-line', color: 'text.secondary',
-                            }}>
+                            <Box sx={{
+                                gap: 2,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 3,
+                                width: '100%',
+                                minHeight: 100,
+                                p: 2,
+
+                            }}
+                            >
+                                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 1 }}>
+                                    <Typography variant="body1" sx={{ my: 'auto', color: 'primary.main' }}>
+                                        Link Google Sheet :
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: details && details.google_sheet_url ? 'primary.main' : 'text.secondary',
+
+                                        }}>
+                                        {details && details.google_sheet_url ? (
+                                            <Link href={details.google_sheet_url} target="_blank" rel="noopener">
+                                                {details.google_sheet_url}
+                                            </Link>
+                                        ) : ("ยังไม่มีการสร้าง Google Sheet")}
+                                    </Typography>
+                                </Box>
+                                {details && !details.google_sheet_url && (
+                                    <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            startIcon={
+                                                <NoteAdd />
+                                            }
+                                            sx={{
+                                                borderRadius: 3,
+                                            }}
+                                        >
+                                            สร้าง Google Sheet
+                                        </Button>
+                                    </Box>)}
+                            </Box>
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    mt: 2,
+                                }}>
+                                {details ? details.form?.title : ""}
+                            </Typography>
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    color: 'text.secondary',
+                                    mt: 2,
+                                    marginLeft: 1,
+                                }}>
                                 {details ? details.form?.description : ""}
                             </Typography>
                         </Box>

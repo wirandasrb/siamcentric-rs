@@ -9,6 +9,8 @@ const SectionSurvey = ({
     secondColor,
     onNext,
     onBack,
+    onSubmit,
+    is_last_section = false,
     onChangeAnswer,
     answers
 }) => {
@@ -187,11 +189,11 @@ const SectionSurvey = ({
                 <Box
                     sx={{
                         display: "flex",
-                        justifyContent: "space-between", // ปุ่มย้อนกลับซ้าย ถัดไปขวา
+                        justifyContent: section.section_no > 1 ? "space-between" : "flex-end", // ปุ่มย้อนกลับซ้าย ถัดไปขวา
                         mb: 2,
                     }}
                 >
-                    {onBack && (
+                    {section.section_no > 1 && onBack && (
                         <Button
                             sx={{
                                 minWidth: 100,
@@ -201,14 +203,32 @@ const SectionSurvey = ({
                             ย้อนกลับ
                         </Button>
                     )}
-                    <Button
-                        sx={{
-                            minWidth: 100,
-                            borderRadius: 3
-                        }}
-                        variant="contained" color="primary" onClick={onNext}>
-                        ถัดไป
-                    </Button>
+                    {/* ปุ่มถัดไป หรือส่งแบบสอบถาม */}
+                    {!is_last_section && onNext && (
+                        <Button
+                            sx={{
+                                minWidth: 100,
+                                borderRadius: 3,
+                                color: "white",
+                                fontWeight: "bold",
+                            }}
+                            variant="contained" color="primary" onClick={onNext}>
+                            ถัดไป
+                        </Button>
+                    )}
+                    {/* ปุ่มส่งแบบสอบถาม */}
+                    {is_last_section && onSubmit && (
+                        <Button
+                            sx={{
+                                minWidth: 100,
+                                borderRadius: 3,
+                                color: "white",
+                                fontWeight: "bold",
+                            }}
+                            variant="contained" color="primary" onClick={onSubmit}>
+                            ส่งแบบสอบถาม
+                        </Button>
+                    )}
                 </Box>
             </Box>
 

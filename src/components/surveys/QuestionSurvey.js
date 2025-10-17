@@ -171,53 +171,89 @@ const QuestionSurvey = ({
                         }}
                     >
                         <FormGroup>
-                            {question.options.map((option) => (
-                                <FormControlLabel
-                                    key={option.id}
-                                    control={
-                                        <Checkbox
-                                            checked={answer ? answer.answer_option_id?.includes(option.id) : false}
-                                            onChange={(e) => {
-                                                // is_exclusive ถ้าเลือกแล้วจะไม่สามารถเลือกตัวอื่นได้
-                                                let updatedOptionIds = answer ? [...(answer.answer_option_id || [])] : [];
-                                                if (e.target.checked) {
-                                                    // ถ้าเลือก is_exclusive ให้ล้างตัวเลือกอื่นๆ ออก
-                                                    if (option.is_exclusive) {
-                                                        updatedOptionIds = [option.id];
+                            {question.options.map((option) => {
+                                const isChecked = answer?.answer_option_id?.includes(option.id) || false;
+
+                                return (
+                                    <Box
+                                        key={option.id}
+                                        sx={{
+                                            border: isChecked ? `1px solid ${primaryColor}` : "none",
+                                            borderRadius: 2,
+                                            p: 1,
+                                            transition: "all 0.2s ease",
+                                            backgroundColor: isChecked
+                                                ? lighten(secondColor, 0.08)
+                                                : "transparent",
+                                            "&:hover": {
+                                                borderColor: primaryColor,
+                                                backgroundColor: lighten(secondColor, 0.03),
+                                            },
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={isChecked}
+                                                    onChange={(e) => {
+                                                        let updatedOptionIds = answer
+                                                            ? [...(answer.answer_option_id || [])]
+                                                            : [];
+                                                        if (e.target.checked) {
+                                                            if (option.is_exclusive) {
+                                                                updatedOptionIds = [option.id];
+                                                            } else {
+                                                                updatedOptionIds = updatedOptionIds.filter((id) => {
+                                                                    const opt = question.options.find((o) => o.id === id);
+                                                                    return opt && !opt.is_exclusive;
+                                                                });
+                                                                updatedOptionIds.push(option.id);
+                                                            }
+                                                        } else {
+                                                            updatedOptionIds = updatedOptionIds.filter(
+                                                                (id) => id !== option.id
+                                                            );
+                                                        }
+
+                                                        const updatedAnswer = {
+                                                            section_id: question.section_id,
+                                                            question_id: question.id,
+                                                            answer_option_id: updatedOptionIds,
+                                                            answer_text: "",
+                                                            answer_value: null,
+                                                            attachment_url: null,
+                                                        };
+                                                        onChange({ ...question, answer: updatedAnswer });
+                                                    }}
+                                                    disabled={
+                                                        answer &&
+                                                        !answer.answer_option_id?.includes(option.id) &&
+                                                        answer.answer_option_id?.some((id) => {
+                                                            const opt = question.options.find((o) => o.id === id);
+                                                            return opt && opt.is_exclusive;
+                                                        })
                                                     }
-                                                    else {
-                                                        // ถ้าเลือกตัวอื่น ให้ลบ is_exclusive ออก
-                                                        updatedOptionIds = updatedOptionIds.filter(id => {
-                                                            let opt = question.options.find(o => o.id === id);
-                                                            return opt && !opt.is_exclusive;
-                                                        });
-                                                        updatedOptionIds.push(option.id);
-                                                    }
-                                                } else {
-                                                    updatedOptionIds = updatedOptionIds.filter(id => id !== option.id);
-                                                }
-                                                let updatedAnswer = {
-                                                    section_id: question.section_id,
-                                                    question_id: question.id,
-                                                    answer_option_id: updatedOptionIds,
-                                                    answer_text: "",
-                                                    answer_value: null,
-                                                    attachment_url: null,
-                                                };
-                                                onChange({ ...question, answer: updatedAnswer });
+                                                />
+                                            }
+                                            label={option.option}
+                                            sx={{
+                                                width: "100%",
+                                                m: 0,
+                                                "& .MuiFormControlLabel-label": {
+                                                    fontSize: 16,
+                                                    color: isChecked ? primaryColor : "inherit",
+                                                    fontWeight: isChecked ? "bold" : "normal",
+                                                },
                                             }}
-                                            disabled={answer && answer.answer_option_id?.includes(option.id) ? false : (answer && answer.answer_option_id?.some(id => {
-                                                let opt = question.options.find(o => o.id === id);
-                                                return opt && opt.is_exclusive;
-                                            }))}
                                         />
-                                    }
-                                    label={option.option}
-                                />
-                            ))}
+                                    </Box>
+                                );
+                            })}
                         </FormGroup>
-                        {/* ถ้าคำตอบที่เลือกเป็นอื่นๆ option มีตัวแปร is_other */}
-                        {question.options.find(option => option.is_other) && (
+
+                        {/* ช่องกรอก "อื่นๆ" */}
+                        {question.options.find((option) => option.is_other) && (
                             <TextField
                                 value={answer ? answer.answer_text : ""}
                                 variant="standard"
@@ -227,15 +263,24 @@ const QuestionSurvey = ({
                                         answer: {
                                             ...answer,
                                             answer_text: e.target.value,
-                                        }
+                                        },
                                     });
                                 }}
-                                disabled={!(answer && question.options.find(option => option.is_other && answer.answer_option_id?.includes(option.id)))}
+                                disabled={
+                                    !(
+                                        answer &&
+                                        question.options.find(
+                                            (option) =>
+                                                option.is_other && answer.answer_option_id?.includes(option.id)
+                                        )
+                                    )
+                                }
                                 placeholder="โปรดระบุ"
-                                sx={{ mt: 1 }}
+                                sx={{ mt: 1, ml: 4 }}
                             />
                         )}
-                    </Box>)}
+                    </Box>
+                )}
 
                 {question.question_type_id === 5 && (
                     <Box sx={{ mt: 1, ml: 1, width: 300 }}>
