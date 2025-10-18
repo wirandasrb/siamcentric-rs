@@ -1,3 +1,4 @@
+import { AttachEmailSharp } from '@mui/icons-material';
 import { apiWithAuth } from './apiConfig.js';
 
 const getFormsList = async () => {
@@ -66,6 +67,26 @@ const getFormGoogleSheetLink = async (formId) => {
     }
 };
 
+const addEmailSyncGoogleSheet = async (formId, emails) => {
+    try {
+        const response = await apiWithAuth.post(`/forms/${formId}/allowed-emails`, { emails });
+        return response.data;
+    } catch (error) {
+        console.error("Error adding email to Google Sheet:", error);
+        throw new Error("Failed to add email to Google Sheet");
+    }
+};
+
+const createGoogleSheetLink = async (formId) => {
+    try {
+        const response = await apiWithAuth.post(`/forms/${formId}/create-google-sheet`);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating Google Sheet link:", error);
+        throw new Error("Failed to create Google Sheet link");
+    }
+};
+
 
 const formService = {
     getFormsList,
@@ -74,6 +95,8 @@ const formService = {
     createForm,
     updateForm,
     getFormGoogleSheetLink,
+    createGoogleSheetLink,
+    addEmailSyncGoogleSheet,
 };
 
 export default formService;
