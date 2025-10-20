@@ -26,7 +26,7 @@ const DatePickerSurvey = ({
                     }
                 })}
                 sx={{
-                    width: 220,
+                    width: 300,
                     '& .MuiInputBase-root': {
                         height: 40,
                         backgroundColor: "white",

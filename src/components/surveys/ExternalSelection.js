@@ -27,7 +27,12 @@ const ExternalSelection = ({ source_id, value, onChange }) => {
             onChange={(event, newValue) => {
                 onChange(newValue ? newValue.option : null);
             }}
-            renderInput={(params) => <TextField {...params} label={source_id === 1 ? "จังหวัด" : source_id === 2 ? "อำเภอ" : "Select an option"} />}
+            renderInput={(params) => <TextField
+                {...params}
+                placeholder="กรุณาเลือกคำตอบ"
+                label={source_id === 1 ? "จังหวัด" : source_id === 2 ? "อำเภอ" : "Select an option"}
+                InputLabelProps={{ shrink: true }}
+            />}
         />
     );
 }

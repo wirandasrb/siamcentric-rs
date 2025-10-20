@@ -3,6 +3,9 @@ import ExternalSelection from "./ExternalSelection";
 import RatingQuestionSurvey from "./RatingQuestionSurvey";
 import MatrixQuestionSurvey from "./MatrixQuestionSurvey";
 import DatePickerSurvey from "./DatepickerSurvey";
+import TimePickerSurvey from "./TimePrickerSurvey";
+import FileUploadSurvey from "./FileUploadSurvey";
+import LinearScaleSurvey from "./LinearScaleSurver";
 
 const QuestionSurvey = ({
     question,
@@ -28,7 +31,7 @@ const QuestionSurvey = ({
                             fontWeight: 700,
                         }}
                     >
-                        {question.question_no}. {question.question}
+                        {question.question_no}. {question.question} {question.is_required && <span style={{ color: "red" }}>*</span>}
                     </Typography>
                 </Box>
                 : <Typography
@@ -38,7 +41,7 @@ const QuestionSurvey = ({
                         mb: 2
                     }}
                 >
-                    {question.question_no}. {question.question}
+                    {question.question_no}. {question.question} {question.is_required && <span style={{ color: "red" }}>*</span>}
                 </Typography>}
             <Box
                 sx={{
@@ -318,6 +321,22 @@ const QuestionSurvey = ({
                     <RatingQuestionSurvey question={question} answers={answers} onChange={onChange} />
                 )}
 
+                {question.question_type_id === 7 && (
+                    <LinearScaleSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
+                )}
+
+                {question.question_type_id === 8 && (
+                    <></>
+                )}
+
                 {question.question_type_id === 9 && (
                     <MatrixQuestionSurvey
                         question={question}
@@ -334,6 +353,19 @@ const QuestionSurvey = ({
                     />
                 )}
 
+                {/* file upload */}
+                {question.question_type_id === 10 && (
+                    <FileUploadSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
+                )}
+
                 {/* Date*/}
                 {question.question_type_id === 11 && (
                     <DatePickerSurvey
@@ -345,6 +377,21 @@ const QuestionSurvey = ({
                         primaryColor={primaryColor}
                         secondColor={secondColor}
                     />
+                )}
+
+                {/* Time */}
+                {question.question_type_id === 12 && (
+                    <Box sx={{ ml: 1 }}>
+                        <TimePickerSurvey
+                            question={question}
+                            answer={answer}
+                            onChange={(updatedQuestion) => {
+                                onChange(updatedQuestion);
+                            }}
+                            primaryColor={primaryColor}
+                            secondColor={secondColor}
+                        />
+                    </Box>
                 )}
 
             </Box>
