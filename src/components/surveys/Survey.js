@@ -58,6 +58,8 @@ const SurveyComponent = ({ survey, responses }) => {
         setActiveStep(0);
     }
 
+    console.log("Survey Component Rendered with answers:", answers);
+
     return (
         <ThemeProvider theme={customTheme} >
             <CssBaseline />

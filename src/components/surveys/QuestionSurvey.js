@@ -6,6 +6,7 @@ import DatePickerSurvey from "./DatepickerSurvey";
 import TimePickerSurvey from "./TimePrickerSurvey";
 import FileUploadSurvey from "./FileUploadSurvey";
 import LinearScaleSurvey from "./LinearScaleSurver";
+import BarScaleSurvey from "./BarScaleSurvey";
 
 const QuestionSurvey = ({
     question,
@@ -291,12 +292,12 @@ const QuestionSurvey = ({
                         {question.dropdown_source_type && question.dropdown_source_type === "external" ? (
                             <ExternalSelection
                                 source_id={question?.external_source_id}
-                                value={answer ? answer.answer_option_id : null}
+                                value={answer ? answer.answer_text : null}
                                 onChange={(newValue) => {
                                     let updatedAnswer = {
                                         section_id: question.section_id,
                                         question_id: question.id,
-                                        answer_text: newValue ? newValue.label : "",
+                                        answer_text: newValue ? newValue : "",
                                         answer_option_id: null,
                                         answer_value: null,
                                         attachment_url: null,
@@ -334,20 +335,29 @@ const QuestionSurvey = ({
                 )}
 
                 {question.question_type_id === 8 && (
-                    <></>
+                    <BarScaleSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
                 )}
 
                 {question.question_type_id === 9 && (
                     <MatrixQuestionSurvey
                         question={question}
                         answers={answers}
-                        handleAnswerChange={(updatedAnswers) => {
-                            // คำถาม matrix จะมีหลายคำตอบใน answers
-                            let filteredAnswers = answers.filter(ans => ans.question_id !== question.id);
-                            let newAnswers = [...filteredAnswers, ...updatedAnswers];
+                        handleAnswerChange={(updatedAnswersForThisQuestion) => {
+                            // รวมเข้ากับคำตอบทั้งหมดใน section
+                            const otherAnswers = answers.filter(ans => ans.question_id !== question.id);
+                            const newAnswers = [...otherAnswers, ...updatedAnswersForThisQuestion];
+
                             onChange({
                                 ...question,
-                                answers: newAnswers,
+                                answers: newAnswers, // ส่งกลับไปให้ SectionSurvey
                             });
                         }}
                     />

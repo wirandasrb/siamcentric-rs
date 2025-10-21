@@ -143,6 +143,10 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                 {question.matrix_columns.map((col, colIndex) => {
                                     const isFirst = colIndex === 0;
                                     const isLast = colIndex === question.matrix_columns.length - 1;
+                                    const answerForThisRow = answers.find(
+                                        (ans) => ans?.question_id === question.id && ans?.matrix_row_id === row.id
+                                    );
+                                    const isSelected = answerForThisRow?.answer_value === col.value;
 
                                     // ไล่เฉดสีจากแดง -> เหลือง -> เขียว
                                     const ratio = colIndex / (question.matrix_columns.length - 1);
@@ -165,6 +169,7 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                                 border: "1px solid",
                                                 borderColor: color,
                                                 color: color,
+                                                backgroundColor: isSelected ? color : "transparent",
                                                 borderRadius: isFirst
                                                     ? "20px 0 0 20px"
                                                     : isLast
@@ -175,6 +180,35 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                                     color: "#fff",
                                                 },
                                             }}
+                                            onClick={() => {
+                                                const existingAnswerIndex = answers.findIndex(
+                                                    (ans) => ans.question_id === question.id && ans.matrix_row_id === row.id
+                                                );
+
+                                                let updatedAnswers = [...answers];
+
+                                                if (existingAnswerIndex !== -1) {
+                                                    // มีอยู่แล้ว → อัปเดตค่า
+                                                    updatedAnswers[existingAnswerIndex] = {
+                                                        ...updatedAnswers[existingAnswerIndex],
+                                                        answer_value: col.value,
+                                                    };
+                                                } else {
+                                                    // ยังไม่มี → เพิ่มใหม่
+                                                    updatedAnswers.push({
+                                                        section_id: question.section_id,
+                                                        question_id: question.id,
+                                                        matrix_row_id: row.id,
+                                                        answer_option_id: null,
+                                                        answer_value: col.value,
+                                                        answer_text: null,
+                                                    });
+                                                }
+
+                                                handleAnswerChange(updatedAnswers);
+                                            }}
+
+
                                         >
                                             <Typography sx={{ fontSize: "12px" }}>
                                                 {col.column_label}

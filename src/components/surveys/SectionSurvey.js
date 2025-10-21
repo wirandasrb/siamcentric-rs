@@ -16,7 +16,18 @@ const SectionSurvey = ({
 }) => {
 
     const handleChangeAnswer = (questionId, answer) => {
-        onChangeAnswer(questionId, answer);
+        const findedQuestion = section.questions.find(q => q.id === questionId);
+        if (!findedQuestion) return;
+        if (findedQuestion.question_type_id === 9) {
+            // กรณี matrix question ที่มีหลายคำตอบ
+            const updatedAnswersForThisQuestion = answer;
+            const otherAnswers = answers.filter(ans => ans.question_id !== questionId);
+            const newAnswers = [...otherAnswers, ...updatedAnswersForThisQuestion];
+            onChangeAnswer(questionId, newAnswers);
+        } else {
+            // กรณีคำถามปกติที่มีคำตอบเดียว
+            onChangeAnswer(questionId, answer);
+        }
     };
 
     return (
@@ -212,6 +223,19 @@ const SectionSurvey = ({
                                 color: "white",
                                 fontWeight: "bold",
                             }}
+                            // ปุ่มถัดไป ปิดใช้งานถ้ายังมีคำถามที่โดน is_required ที่ยังไม่ได้ตอบ
+                            // disabled={section.questions.some((q) => {
+                            //     if (!q.is_required) return false; // ไม่บังคับ ไม่ต้องเช็ค
+
+                            //     const ans = answers[q.id];
+                            //     if (!ans) return true; // ยังไม่มีคำตอบ
+
+                            //     const hasValue = ans.answer_value !== null && ans.answer_value !== undefined;
+                            //     const hasText = ans.answer_text !== null && ans.answer_text !== undefined && ans.answer_text !== "";
+                            //     const hasOption = ans.answer_option_id !== null && ans.answer_option_id !== undefined;
+                            //     const hasAttachment = ans.attachment_url !== null && ans.attachment_url !== undefined && ans.attachment_url !== "";
+                            //     return !(hasValue || hasText || hasOption || hasAttachment); // ถ้าไม่มีค่าเลย = ยังตอบไม่ครบ
+                            // })}
                             variant="contained" color="primary" onClick={onNext}>
                             ถัดไป
                         </Button>

@@ -17,7 +17,9 @@ const LinearScaleSurvey = ({
         onChange({
             ...question,
             answer: {
-                ...answer,
+                section_id: question.section_id,
+                question_id: question.id,
+                answer_option_id: null,
                 answer_value: val,
                 answer_text: null,
             },
@@ -28,9 +30,11 @@ const LinearScaleSurvey = ({
         onChange({
             ...question,
             answer: {
-                ...answer,
-                answer_text: question.irrelevant_text || "N/A",
+                section_id: question.section_id,
+                question_id: question.id,
+                answer_option_id: null,
                 answer_value: null,
+                answer_text: question.irrelevant_text || "N/A",
             },
         });
     };

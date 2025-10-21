@@ -25,7 +25,7 @@ const ExternalSelection = ({ source_id, value, onChange }) => {
             getOptionLabel={(option) => option.option}
             value={options.find(opt => opt.option === value) || null}
             onChange={(event, newValue) => {
-                onChange(newValue ? newValue.option : null);
+                onChange(newValue ? newValue.option : "");
             }}
             renderInput={(params) => <TextField
                 {...params}
