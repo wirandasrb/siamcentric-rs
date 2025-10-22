@@ -1,6 +1,7 @@
 import { Box, Button, Radio, Typography } from "@mui/material";
 
 const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
+    console.log("Rendering MatrixQuestionSurvey with question:", question, "and answers:", answers);
     return (
         <Box
             sx={{
@@ -143,10 +144,13 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                 {question.matrix_columns.map((col, colIndex) => {
                                     const isFirst = colIndex === 0;
                                     const isLast = colIndex === question.matrix_columns.length - 1;
-                                    const answerForThisRow = answers.find(
-                                        (ans) => ans?.question_id === question.id && ans?.matrix_row_id === row.id
+                                    const existingAnswer = answers.find(
+                                        (ans) =>
+                                            ans?.question_id === question.id && ans.matrix_row_id === row.id
                                     );
-                                    const isSelected = answerForThisRow?.answer_value === col.value;
+                                    const isSelected =
+                                        existingAnswer &&
+                                        Number(existingAnswer.answer_value) === Number(col.column_value);
 
                                     // ไล่เฉดสีจากแดง -> เหลือง -> เขียว
                                     const ratio = colIndex / (question.matrix_columns.length - 1);
@@ -181,34 +185,23 @@ const MatrixQuestionSurvey = ({ question, answers, handleAnswerChange }) => {
                                                 },
                                             }}
                                             onClick={() => {
-                                                const existingAnswerIndex = answers.findIndex(
-                                                    (ans) => ans.question_id === question.id && ans.matrix_row_id === row.id
+                                                const otherAnswers = answers.filter(
+                                                    (ans) => !(ans?.question_id === question.id && ans?.matrix_row_id === row.id)
                                                 );
 
-                                                let updatedAnswers = [...answers];
+                                                // สร้างคำตอบใหม่สำหรับแถวนี้
+                                                const newAnswer = {
+                                                    section_id: question.section_id,
+                                                    question_id: question.id,
+                                                    matrix_row_id: row.id,
+                                                    answer_option_id: null,
+                                                    answer_value: Number(col.column_value),
+                                                    answer_text: null,
+                                                };
 
-                                                if (existingAnswerIndex !== -1) {
-                                                    // มีอยู่แล้ว → อัปเดตค่า
-                                                    updatedAnswers[existingAnswerIndex] = {
-                                                        ...updatedAnswers[existingAnswerIndex],
-                                                        answer_value: col.value,
-                                                    };
-                                                } else {
-                                                    // ยังไม่มี → เพิ่มใหม่
-                                                    updatedAnswers.push({
-                                                        section_id: question.section_id,
-                                                        question_id: question.id,
-                                                        matrix_row_id: row.id,
-                                                        answer_option_id: null,
-                                                        answer_value: col.value,
-                                                        answer_text: null,
-                                                    });
-                                                }
-
-                                                handleAnswerChange(updatedAnswers);
+                                                // รวมคำตอบเก่า + ใหม่
+                                                handleAnswerChange([...otherAnswers, newAnswer]);
                                             }}
-
-
                                         >
                                             <Typography sx={{ fontSize: "12px" }}>
                                                 {col.column_label}

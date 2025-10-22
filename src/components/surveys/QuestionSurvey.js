@@ -349,15 +349,19 @@ const QuestionSurvey = ({
                 {question.question_type_id === 9 && (
                     <MatrixQuestionSurvey
                         question={question}
-                        answers={answers}
+                        answers={answers || []}
                         handleAnswerChange={(updatedAnswersForThisQuestion) => {
-                            // รวมเข้ากับคำตอบทั้งหมดใน section
-                            const otherAnswers = answers.filter(ans => ans.question_id !== question.id);
-                            const newAnswers = [...otherAnswers, ...updatedAnswersForThisQuestion];
+                            const normalized = Array.isArray(updatedAnswersForThisQuestion)
+                                ? updatedAnswersForThisQuestion
+                                : [updatedAnswersForThisQuestion];
 
+                            const otherAnswers = answers.filter(ans => ans?.question_id !== question.id);
+                            const newAnswers = [...otherAnswers, ...normalized];
+
+                            // ส่งไป SectionSurvey
                             onChange({
                                 ...question,
-                                answers: newAnswers, // ส่งกลับไปให้ SectionSurvey
+                                answers: newAnswers,
                             });
                         }}
                     />

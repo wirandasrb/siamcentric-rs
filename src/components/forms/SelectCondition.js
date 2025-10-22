@@ -37,7 +37,7 @@
 //                     const targetQuestion = questions.find(q => q.temp_id === targetId);
 //                     const targetSection = sections.find(s => s.temp_id === targetId);
 
-//                     // ถ้าตอบอันนี้ ต้องตอบคำถามข้อที่ ... (required_question) 
+//                     // ถ้าตอบอันนี้ ต้องตอบคำถามข้อที่ ... (require_question) 
 //                     // ถ้าตอบอันนี้ ให้ข้ามไปยังคำถามข้อที่ ... (skip_question)
 //                     // ถ้าตอบอันนี้ ให้ข้ามไปยังส่วนที่ ... (skip_section)
 //                     if (targetQuestion) {
@@ -118,7 +118,7 @@ const SelectCondition = ({ questions, option, onChange, question, sections }) =>
     // หา value ที่ Select จะใช้
     const selectValue = (() => {
         if (!currentCondition) return "";
-        if (currentCondition.condition_type === "required_question") return `required_question-${currentCondition.target_question_temp_id || currentCondition.target_question_id}`;
+        if (currentCondition.condition_type === "require_question") return `require_question-${currentCondition.target_question_temp_id || currentCondition.target_question_id}`;
         if (currentCondition.condition_type === "skip_question") return `skip_question-${currentCondition.target_question_temp_id || currentCondition.target_question_id}`;
         if (currentCondition.condition_type === "skip_section") return `skip_section-${currentCondition.target_section_temp_id || currentCondition.target_section_id}`;
         return "";
@@ -170,7 +170,7 @@ const SelectCondition = ({ questions, option, onChange, question, sections }) =>
             >
                 <MenuItem value="">ไม่มีเงื่อนไข</MenuItem>
                 {nextQuestions.map((q) => (
-                    <MenuItem key={`req-${q.temp_id}`} value={`required_question-${q.temp_id}`}>
+                    <MenuItem key={`req-${q.temp_id}`} value={`require_question-${q.temp_id}`}>
                         ต้องตอบคำถามที่ {q.question_no}
                     </MenuItem>
                 ))}

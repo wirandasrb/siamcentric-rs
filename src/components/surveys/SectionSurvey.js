@@ -15,20 +15,58 @@ const SectionSurvey = ({
     answers
 }) => {
 
-    const handleChangeAnswer = (questionId, answer) => {
-        const findedQuestion = section.questions.find(q => q.id === questionId);
-        if (!findedQuestion) return;
-        if (findedQuestion.question_type_id === 9) {
-            // กรณี matrix question ที่มีหลายคำตอบ
-            const updatedAnswersForThisQuestion = answer;
-            const otherAnswers = answers.filter(ans => ans.question_id !== questionId);
-            const newAnswers = [...otherAnswers, ...updatedAnswersForThisQuestion];
-            onChangeAnswer(questionId, newAnswers);
+    // const handleChangeAnswer = (questionId, answer) => {
+    //     onChangeAnswer(questionId, answer);
+    // };
+    const handleChangeAnswer = (questionId, newAnswer) => {
+        const question = section.questions.find(q => q.id === questionId);
+
+        if (question?.question_type_id === 9) {
+            // คำตอบใหม่อาจเป็น array ของหลาย row
+            const newAnswers = Array.isArray(newAnswer) ? newAnswer : [newAnswer];
+
+            // คัดคำตอบเดิมที่ไม่ใช่ question นี้
+            const otherAnswers = answers.filter(ans => ans?.question_id !== questionId);
+
+            // รวมคำตอบเก่า + ใหม่
+            onChangeAnswer(questionId, [...otherAnswers, ...newAnswers]);
         } else {
-            // กรณีคำถามปกติที่มีคำตอบเดียว
-            onChangeAnswer(questionId, answer);
+            // คำถามปกติ
+            onChangeAnswer(questionId, newAnswer);
         }
     };
+
+
+    const shouldShowQuestion = (question) => {
+        // หาว่ามีใคร require คำถามนี้บ้าง
+        const requireConditions = section.questions.flatMap(q =>
+            q.options.flatMap(opt =>
+                opt.conditions.filter(
+                    cond =>
+                        cond.condition_type === "require_question" &&
+                        cond.target_question_id === question.id
+                ).map(cond => ({
+                    sourceQuestionId: q.id,
+                    sourceOptionId: opt.id
+                }))
+            )
+        );
+
+        if (requireConditions.length === 0) {
+            // ถ้าไม่มีใคร require -> แสดงได้เลย
+            return true;
+        }
+
+        // ถ้ามีคน require -> แสดงเมื่อ option ที่ require ถูกเลือก
+        return requireConditions.some(cond =>
+            answers.some(
+                ans =>
+                    ans?.question_id === cond.sourceQuestionId &&
+                    ans?.answer_option_id === cond.sourceOptionId
+            )
+        );
+    };
+
 
     return (
         <>
@@ -162,6 +200,9 @@ const SectionSurvey = ({
                     }}
                 >
                     {section.questions.map((question, index) => {
+                        const visible = shouldShowQuestion(question);
+                        if (!visible) return null;
+
                         return (
                             <Box key={question.id}>
                                 {/* Render คำถามที่นี่ */}

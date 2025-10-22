@@ -188,13 +188,17 @@ const SurveyComponent = ({ survey, responses }) => {
                             }}
                             onSubmit={() => setIsConfirmOpen(true)}
                             is_last_section={activeStep === survey.sections.length - 1}
-                            onChangeAnswer={(questionId, answer) => {
+                            onChangeAnswer={(questionId, newAnswer) => {
                                 setAnswers(prev => {
-                                    const updatedAnswers = [...prev];
-                                    updatedAnswers[questionId] = answer;
-                                    return updatedAnswers;
+                                    const otherAnswers = prev.filter(ans => ans?.question_id !== questionId);
+
+                                    // สำหรับ matrix question, newAnswer อาจเป็น array
+                                    const newAnswers = Array.isArray(newAnswer) ? newAnswer : [newAnswer];
+
+                                    return [...otherAnswers, ...newAnswers];
                                 });
                             }}
+
                             answers={answers}
                         />
                     )}

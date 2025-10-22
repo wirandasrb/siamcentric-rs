@@ -1,7 +1,7 @@
 "use client";
 
 import { Add, Apps, CheckBox, Circle, Close, ColorLens, DragHandle, DragIndicator, Event, ExpandCircleDown, FileUpload, LinearScale, Notes, Schedule, Settings, ShortText, StarHalf } from "@mui/icons-material";
-import { Autocomplete, Box, Button, Divider, IconButton, TextField, Typography, Popover, Grid, FormControl, FormControlLabel, Checkbox } from "@mui/material";
+import { Autocomplete, Box, Button, Divider, IconButton, TextField, Typography, Popover, Grid, FormControl, FormControlLabel, Checkbox, CircularProgress, LinearProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SketchPicker } from "react-color";
@@ -14,6 +14,9 @@ const colorPaletteDefault = ["#1976d2", "#43a047", "#e53935", "#f57c00", "#8e24a
 const FormCreatePage = () => {
     const { id } = useParams();
     const router = useRouter();
+
+    const [loading, setLoading] = useState(false);
+
 
     const [openThemeMenu, setOpenThemeMenu] = useState(false);
 
@@ -45,6 +48,7 @@ const FormCreatePage = () => {
     }, [id]);
 
     const fetchFormDetail = async (formId) => {
+        setLoading(true);
         try {
             const response = await useApi.forms.getFormById(formId);
             if (response.status === 'success') {
@@ -87,6 +91,8 @@ const FormCreatePage = () => {
             }
         } catch (error) {
             console.error("Failed to fetch form detail:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -147,324 +153,341 @@ const FormCreatePage = () => {
     }
 
     return (
-        <>
-            <Box sx={{ display: "flex", gap: 2, backgroundColor: secondColor }}>
-                {/* ฟอร์มหลัก */}
-                <Box
-                    sx={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        p: 2,
-                        gap: 2,
-                        transition: "all 0.3s ease",
-                        marginRight: openThemeMenu ? "300px" : 0,
-                        mb: 6,
-                    }}
-                >
-                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <Typography variant="h5">
-                            {id === "create" ? "สร้างแบบสอบถาม" : "แก้ไขแบบสอบถาม"}
-                        </Typography>
-                        <IconButton onClick={() => setOpenThemeMenu(!openThemeMenu)} sx={{ p: 0 }}>
-                            <ColorLens color={openThemeMenu ? "primary" : "action"} />
-                        </IconButton>
-                    </Box>
+        loading ? (
+            <Box sx={{
+                p: 2,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
+            }}>
 
+                <CircularProgress />
+                <Typography>  กำลังโหลดแบบสอบถาม...</Typography>
+
+            </Box>
+        ) : (
+            <>
+                <Box sx={{ display: "flex", gap: 2, backgroundColor: secondColor }}>
+                    {/* ฟอร์มหลัก */}
                     <Box
                         sx={{
-                            backgroundColor: "white",
-                            borderRadius: 2,
-                            boxShadow: 3,
-                            p: 2,
+                            flex: 1,
                             display: "flex",
                             flexDirection: "column",
+                            p: 2,
                             gap: 2,
+                            transition: "all 0.3s ease",
+                            marginRight: openThemeMenu ? "300px" : 0,
+                            mb: 6,
                         }}
                     >
-                        <TextField
-                            fullWidth
-                            label="หัวข้อแบบสอบถาม"
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                            placeholder="ตัวอย่าง: แบบสอบถามความพึงพอใจ"
-                            value={formDetail.title}
-                            onChange={(e) => setFormDetail({ ...formDetail, title: e.target.value })}
-                        />
-                        <TextField
-                            fullWidth
-                            label="คำอธิบายแบบสอบถาม"
-                            variant="outlined"
-                            multiline
-                            rows={4}
-                            InputLabelProps={{ shrink: true }}
-                            placeholder="ตัวอย่าง: แบบสอบถามนี้จัดทำขึ้นเพื่อสำรวจความพึงพอใจของลูกค้าเกี่ยวกับบริการของเรา"
-                            value={formDetail.description}
-                            onChange={(e) => setFormDetail({ ...formDetail, description: e.target.value })}
-                        />
-                        <TextField
-                            fullWidth
-                            label="หมายเหตุ"
-                            variant="outlined"
-                            multiline
-                            InputLabelProps={{ shrink: true }}
-                            placeholder="ตัวอย่าง: กรุณาตอบคำถามทุกข้ออย่างตรงไปตรงมา ข้อมูลของคุณจะถูกเก็บเป็นความลับ"
-                            value={formDetail.note}
-                            onChange={(e) => setFormDetail({ ...formDetail, note: e.target.value })}
-                        />
-
-                        <Divider />
-                        <Box sx={{ p: 1 }}>
-                            <Typography variant="h6">
-                                <Settings />
-                                การตั้งค่าแบบสอบถาม
+                        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <Typography variant="h5">
+                                {id === "create" ? "สร้างแบบสอบถาม" : "แก้ไขแบบสอบถาม"}
                             </Typography>
-                            <Box sx={{ mt: 1, pl: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-                                {/** สวิตซ์เปิด - ปิด */}
-
-                                {/* ชื่อผู้จัดแสดงในแบบสอบถาม */}
-                                <TextField
-                                    fullWidth
-                                    label="Organizer/Title (แสดงในหน้าตอบแบบสอบถามและลิ้งค์ที่ถูกแชร์)"
-                                    variant="outlined"
-                                    InputLabelProps={{ shrink: true }}
-                                    placeholder="ตัวอย่าง: Survey Forms 2025"
-                                    value={formDetail.meta_title || ""}
-                                    onChange={(e) => setFormDetail({ ...formDetail, meta_title: e.target.value })}
-                                />
-
-                                {/* เลือกว่า สามารถตอบซ้ำได้หรือไม่ */}
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={formDetail.allow_multiple_answers || false}
-                                            onChange={(e) => setFormDetail({ ...formDetail, allow_multiple_answers: e.target.checked })}
-                                        />
-                                    }
-                                    label="อนุญาตให้ตอบซ้ำ"
-                                />
-
-                                {/* ข้อความหลังส่งแบบฟอร์มเสร็จ */}
-                                <TextField
-                                    fullWidth
-                                    label="กำหนดข้อความหลังส่งแบบสอบถามเสร็จสิ้น"
-                                    variant="outlined"
-                                    multiline
-                                    rows={2}
-                                    InputLabelProps={{ shrink: true }}
-                                    placeholder="ตัวอย่าง: ขอบคุณที่สละเวลาในการตอบแบบสอบถามของเรา"
-                                    value={formDetail?.thank_you_message || ""}
-                                    onChange={(e) => setFormDetail({ ...formDetail, thank_you_message: e.target.value })}
-                                />
-
-                                {/* ตัวเลือกว่าจะแสดง icon แชร์แบบไหนได้บ้าง facebook line */}
-                                <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row', alignItems: 'center' }}>
-                                    <Typography>แสดงปุ่มแชร์แบบสอบถาม:</Typography>
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={formDetail?.show_facebook_share || true}
-                                                onChange={(e) => setFormDetail({ ...formDetail, show_facebook_share: e.target.checked })}
-                                            />
-                                        }
-                                        label="Facebook"
-                                    />
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={formDetail?.show_line_share || true}
-                                                onChange={(e) => setFormDetail({ ...formDetail, show_line_share: e.target.checked })}
-                                            />
-                                        }
-                                        label="Line"
-                                    />
-                                </Box>
-
-                            </Box>
+                            <IconButton onClick={() => setOpenThemeMenu(!openThemeMenu)} sx={{ p: 0 }}>
+                                <ColorLens color={openThemeMenu ? "primary" : "action"} />
+                            </IconButton>
                         </Box>
-                        {/* Form goes here */}
-                    </Box>
 
-                    {/* create section and question here */}
-
-                    <SectionList sections={sections} setSections={setSections} />
-
-                </Box>
-
-                {/* Theme Panel */}
-                {
-                    openThemeMenu && (
                         <Box
                             sx={{
-                                width: 300,
-                                flexShrink: 0,
+                                backgroundColor: "white",
+                                borderRadius: 2,
+                                boxShadow: 3,
+                                p: 2,
                                 display: "flex",
                                 flexDirection: "column",
-                                bgcolor: "#fff",
-                                borderLeft: "1px solid #e0e0e0",
-                                position: "fixed",
-                                right: 0,
-                                top: 64,
-                                height: "calc(100vh - 64px)",
-                                overflowY: "auto",
+                                gap: 2,
                             }}
                         >
-                            <Box sx={{ p: 2, display: "flex", justifyContent: "space-between" }}>
-                                <Typography variant="h6">ธีม</Typography>
-                                <IconButton onClick={() => setOpenThemeMenu(false)} sx={{ p: 0 }}>
-                                    <Close />
-                                </IconButton>
-                            </Box>
+                            <TextField
+                                fullWidth
+                                label="หัวข้อแบบสอบถาม"
+                                variant="outlined"
+                                InputLabelProps={{ shrink: true }}
+                                placeholder="ตัวอย่าง: แบบสอบถามความพึงพอใจ"
+                                value={formDetail.title}
+                                onChange={(e) => setFormDetail({ ...formDetail, title: e.target.value })}
+                            />
+                            <TextField
+                                fullWidth
+                                label="คำอธิบายแบบสอบถาม"
+                                variant="outlined"
+                                multiline
+                                rows={4}
+                                InputLabelProps={{ shrink: true }}
+                                placeholder="ตัวอย่าง: แบบสอบถามนี้จัดทำขึ้นเพื่อสำรวจความพึงพอใจของลูกค้าเกี่ยวกับบริการของเรา"
+                                value={formDetail.description}
+                                onChange={(e) => setFormDetail({ ...formDetail, description: e.target.value })}
+                            />
+                            <TextField
+                                fullWidth
+                                label="หมายเหตุ"
+                                variant="outlined"
+                                multiline
+                                InputLabelProps={{ shrink: true }}
+                                placeholder="ตัวอย่าง: กรุณาตอบคำถามทุกข้ออย่างตรงไปตรงมา ข้อมูลของคุณจะถูกเก็บเป็นความลับ"
+                                value={formDetail.note}
+                                onChange={(e) => setFormDetail({ ...formDetail, note: e.target.value })}
+                            />
+
                             <Divider />
-
-                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, mt: 2 }}>
-                                <TextField type="file" label="โลโก้" fullWidth InputLabelProps={{ shrink: true }} onChange={handleLogoChange} />
-
-                                <Autocomplete
-                                    options={fontTypeOptions}
-                                    getOptionLabel={(option) => option.label}
-                                    value={fontTypeOptions.find((f) => f.value === fontFamily) || null}
-                                    onChange={(event, newValue) => setFontFamily(newValue ? newValue.value : "")}
-                                    renderInput={(params) => <TextField {...params} label="ฟอนต์" />}
-                                    fullWidth
-                                />
-
-                                <Typography variant="caption" color="textSecondary">
-                                    เลือกสีหลัก/หัวข้อ
+                            <Box sx={{ p: 1 }}>
+                                <Typography variant="h6">
+                                    <Settings />
+                                    การตั้งค่าแบบสอบถาม
                                 </Typography>
-                                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                                    {colorPaletteDefault.map((color) => (
-                                        <Box
-                                            key={color}
-                                            onClick={(e) => setPrimaryColor(color)}
-                                            sx={{
-                                                width: 32,
-                                                height: 32,
-                                                borderRadius: "50%",
-                                                bgcolor: color,
-                                                cursor: "pointer",
-                                                border: primaryColor === color ? "2px solid black" : "2px solid transparent",
-                                            }}
-                                        />
-                                    ))}
-                                    {/* ปุ่ม + */}
-                                    <Box
-                                        onClick={(e) => handleOpenColorPicker(e, "primary")}
-                                        sx={{
-                                            width: 32,
-                                            height: 32,
-                                            borderRadius: "50%",
-                                            bgcolor: primaryColor,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            cursor: "pointer",
-                                            border: "2px solid transparent",
-                                        }}
-                                    >
-                                        <Add />
-                                    </Box>
-                                </Box>
+                                <Box sx={{ mt: 1, pl: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+                                    {/** สวิตซ์เปิด - ปิด */}
 
-                                <Typography variant="caption" color="textSecondary">
-                                    เลือกสีพื้นหลัง
-                                </Typography>
-                                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                                    {colorPaletteDefault.map((color) => (
-                                        <Box
-                                            key={color}
-                                            onClick={(e) => setSecondColor(color)}
-                                            sx={{
-                                                width: 32,
-                                                height: 32,
-                                                borderRadius: "50%",
-                                                bgcolor: color,
-                                                cursor: "pointer",
-                                                border: secondColor === color ? "2px solid black" : "2px solid transparent",
-                                            }}
+                                    {/* ชื่อผู้จัดแสดงในแบบสอบถาม */}
+                                    <TextField
+                                        fullWidth
+                                        label="Organizer/Title (แสดงในหน้าตอบแบบสอบถามและลิ้งค์ที่ถูกแชร์)"
+                                        variant="outlined"
+                                        InputLabelProps={{ shrink: true }}
+                                        placeholder="ตัวอย่าง: Survey Forms 2025"
+                                        value={formDetail.meta_title || ""}
+                                        onChange={(e) => setFormDetail({ ...formDetail, meta_title: e.target.value })}
+                                    />
+
+                                    {/* เลือกว่า สามารถตอบซ้ำได้หรือไม่ */}
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={formDetail.allow_multiple_answers || false}
+                                                onChange={(e) => setFormDetail({ ...formDetail, allow_multiple_answers: e.target.checked })}
+                                            />
+                                        }
+                                        label="อนุญาตให้ตอบซ้ำ"
+                                    />
+
+                                    {/* ข้อความหลังส่งแบบฟอร์มเสร็จ */}
+                                    <TextField
+                                        fullWidth
+                                        label="กำหนดข้อความหลังส่งแบบสอบถามเสร็จสิ้น"
+                                        variant="outlined"
+                                        multiline
+                                        rows={2}
+                                        InputLabelProps={{ shrink: true }}
+                                        placeholder="ตัวอย่าง: ขอบคุณที่สละเวลาในการตอบแบบสอบถามของเรา"
+                                        value={formDetail?.thank_you_message || ""}
+                                        onChange={(e) => setFormDetail({ ...formDetail, thank_you_message: e.target.value })}
+                                    />
+
+                                    {/* ตัวเลือกว่าจะแสดง icon แชร์แบบไหนได้บ้าง facebook line */}
+                                    <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row', alignItems: 'center' }}>
+                                        <Typography>แสดงปุ่มแชร์แบบสอบถาม:</Typography>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={formDetail?.show_facebook_share || true}
+                                                    onChange={(e) => setFormDetail({ ...formDetail, show_facebook_share: e.target.checked })}
+                                                />
+                                            }
+                                            label="Facebook"
                                         />
-                                    ))}
-                                    {/* ปุ่ม + */}
-                                    <Box
-                                        onClick={(e) => handleOpenColorPicker(e, "second")}
-                                        sx={{
-                                            width: 32,
-                                            height: 32,
-                                            borderRadius: "50%",
-                                            bgcolor: secondColor,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            cursor: "pointer",
-                                            border: "2px solid transparent",
-                                        }}
-                                    >
-                                        <Add />
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={formDetail?.show_line_share || true}
+                                                    onChange={(e) => setFormDetail({ ...formDetail, show_line_share: e.target.checked })}
+                                                />
+                                            }
+                                            label="Line"
+                                        />
                                     </Box>
+
                                 </Box>
                             </Box>
-
-                            {/* Popover สำหรับเลือกสี */}
-                            <Popover
-                                open={colorPickerOpen}
-                                anchorEl={colorAnchorEl}
-                                onClose={handleCloseColorPicker}
-                                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                                transformOrigin={{ vertical: "top", horizontal: "center" }}
-                            >
-                                <SketchPicker color={colorPickerTarget === "primary" ? primaryColor : secondColor} onChange={handleChangeColor} />
-                            </Popover>
+                            {/* Form goes here */}
                         </Box>
-                    )
-                }
 
-            </Box>
+                        {/* create section and question here */}
 
+                        <SectionList sections={sections} setSections={setSections} />
 
-            {/* save button form */}
-            <Box sx={{
-                position: "fixed",
-                bottom: 16,
-                right: openThemeMenu ? 316 : 16,
-                transition: "right 0.3s ease",
-            }}>
-                <Box sx={{ display: "flex", gap: 2 }}>
-                    <Button variant="contained"
-                        sx={{
-                            backgroundColor: 'white',
-                            color: 'grey.700',
-                            boxShadow: 'none',
-                            '&:hover': { backgroundColor: 'grey.100', boxShadow: 'none' },
-                            borderRadius: 3,
-                            fontSize: 14,
-                            textTransform: 'none',
-                            border: '1px solid',
-                            width: 100,
-                        }}
-                        onClick={() => router.push("/admin/forms")}>
-                        ยกเลิก
-                    </Button>
-                    <Button
-                        variant="contained"
-                        onClick={handleSave}
-                        color="success"
-                        sx={{
-                            textTransform: "none",
-                            borderRadius: 3,
-                            boxShadow: "none",
-                            color: "#fff",
-                            fontSize: 14,
-                            '&:hover': {
-                                boxShadow: "none",
-                            },
-                            width: 100,
-                        }}>
-                        บันทึก
-                    </Button>
+                    </Box>
+
+                    {/* Theme Panel */}
+                    {
+                        openThemeMenu && (
+                            <Box
+                                sx={{
+                                    width: 300,
+                                    flexShrink: 0,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    bgcolor: "#fff",
+                                    borderLeft: "1px solid #e0e0e0",
+                                    position: "fixed",
+                                    right: 0,
+                                    top: 64,
+                                    height: "calc(100vh - 64px)",
+                                    overflowY: "auto",
+                                }}
+                            >
+                                <Box sx={{ p: 2, display: "flex", justifyContent: "space-between" }}>
+                                    <Typography variant="h6">ธีม</Typography>
+                                    <IconButton onClick={() => setOpenThemeMenu(false)} sx={{ p: 0 }}>
+                                        <Close />
+                                    </IconButton>
+                                </Box>
+                                <Divider />
+
+                                <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, mt: 2 }}>
+                                    <TextField type="file" label="โลโก้" fullWidth InputLabelProps={{ shrink: true }} onChange={handleLogoChange} />
+
+                                    <Autocomplete
+                                        options={fontTypeOptions}
+                                        getOptionLabel={(option) => option.label}
+                                        value={fontTypeOptions.find((f) => f.value === fontFamily) || null}
+                                        onChange={(event, newValue) => setFontFamily(newValue ? newValue.value : "")}
+                                        renderInput={(params) => <TextField {...params} label="ฟอนต์" />}
+                                        fullWidth
+                                    />
+
+                                    <Typography variant="caption" color="textSecondary">
+                                        เลือกสีหลัก/หัวข้อ
+                                    </Typography>
+                                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                                        {colorPaletteDefault.map((color) => (
+                                            <Box
+                                                key={color}
+                                                onClick={(e) => setPrimaryColor(color)}
+                                                sx={{
+                                                    width: 32,
+                                                    height: 32,
+                                                    borderRadius: "50%",
+                                                    bgcolor: color,
+                                                    cursor: "pointer",
+                                                    border: primaryColor === color ? "2px solid black" : "2px solid transparent",
+                                                }}
+                                            />
+                                        ))}
+                                        {/* ปุ่ม + */}
+                                        <Box
+                                            onClick={(e) => handleOpenColorPicker(e, "primary")}
+                                            sx={{
+                                                width: 32,
+                                                height: 32,
+                                                borderRadius: "50%",
+                                                bgcolor: primaryColor,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                cursor: "pointer",
+                                                border: "2px solid transparent",
+                                            }}
+                                        >
+                                            <Add />
+                                        </Box>
+                                    </Box>
+
+                                    <Typography variant="caption" color="textSecondary">
+                                        เลือกสีพื้นหลัง
+                                    </Typography>
+                                    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                                        {colorPaletteDefault.map((color) => (
+                                            <Box
+                                                key={color}
+                                                onClick={(e) => setSecondColor(color)}
+                                                sx={{
+                                                    width: 32,
+                                                    height: 32,
+                                                    borderRadius: "50%",
+                                                    bgcolor: color,
+                                                    cursor: "pointer",
+                                                    border: secondColor === color ? "2px solid black" : "2px solid transparent",
+                                                }}
+                                            />
+                                        ))}
+                                        {/* ปุ่ม + */}
+                                        <Box
+                                            onClick={(e) => handleOpenColorPicker(e, "second")}
+                                            sx={{
+                                                width: 32,
+                                                height: 32,
+                                                borderRadius: "50%",
+                                                bgcolor: secondColor,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                cursor: "pointer",
+                                                border: "2px solid transparent",
+                                            }}
+                                        >
+                                            <Add />
+                                        </Box>
+                                    </Box>
+                                </Box>
+
+                                {/* Popover สำหรับเลือกสี */}
+                                <Popover
+                                    open={colorPickerOpen}
+                                    anchorEl={colorAnchorEl}
+                                    onClose={handleCloseColorPicker}
+                                    anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                                    transformOrigin={{ vertical: "top", horizontal: "center" }}
+                                >
+                                    <SketchPicker color={colorPickerTarget === "primary" ? primaryColor : secondColor} onChange={handleChangeColor} />
+                                </Popover>
+                            </Box>
+                        )
+                    }
+
                 </Box>
-            </Box>
-        </>
-    );
+
+
+                {/* save button form */}
+                <Box sx={{
+                    position: "fixed",
+                    bottom: 16,
+                    right: openThemeMenu ? 316 : 16,
+                    transition: "right 0.3s ease",
+                }}>
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                        <Button variant="contained"
+                            sx={{
+                                backgroundColor: 'white',
+                                color: 'grey.700',
+                                boxShadow: 'none',
+                                '&:hover': { backgroundColor: 'grey.100', boxShadow: 'none' },
+                                borderRadius: 3,
+                                fontSize: 14,
+                                textTransform: 'none',
+                                border: '1px solid',
+                                width: 100,
+                            }}
+                            onClick={() => router.push("/admin/forms")}>
+                            ยกเลิก
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={handleSave}
+                            color="success"
+                            sx={{
+                                textTransform: "none",
+                                borderRadius: 3,
+                                boxShadow: "none",
+                                color: "#fff",
+                                fontSize: 14,
+                                '&:hover': {
+                                    boxShadow: "none",
+                                },
+                                width: 100,
+                            }}>
+                            บันทึก
+                        </Button>
+                    </Box>
+                </Box>
+
+            </>
+
+        ));
 };
 
 export default FormCreatePage;
