@@ -1,7 +1,7 @@
 "use client";
 
 import { Add, Apps, CheckBox, Circle, Close, ColorLens, DragHandle, DragIndicator, Event, ExpandCircleDown, FileUpload, LinearScale, Notes, Schedule, Settings, ShortText, StarHalf } from "@mui/icons-material";
-import { Autocomplete, Box, Button, Divider, IconButton, TextField, Typography, Popover, Grid, FormControl, FormControlLabel, Checkbox, CircularProgress, LinearProgress } from "@mui/material";
+import { Autocomplete, Box, Button, Divider, IconButton, TextField, Typography, Popover, Grid, FormControl, FormControlLabel, Checkbox, CircularProgress, LinearProgress, FormLabel, RadioGroup, Radio } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SketchPicker } from "react-color";
@@ -241,12 +241,33 @@ const FormCreatePage = () => {
                                     การตั้งค่าแบบสอบถาม
                                 </Typography>
                                 <Box sx={{ mt: 1, pl: 4, display: "flex", flexDirection: "column", gap: 2 }}>
-                                    {/** สวิตซ์เปิด - ปิด */}
+                                    {/* ส่วนเลือกว่าจะแสดงหัวข้อแบบสอบถามในหน้าตอบแบบสอบถาม */}
+                                    <FormControl>
+                                        <FormLabel
+                                            id="group-title-display"
+                                            sx={{
+                                                fontSize: 14,
+                                                color: 'text.secondary', // สีปกติ
+                                                '&.Mui-focused': { color: 'text.secondary' },
+                                            }}
+                                        >การแสดงชื่อแบบสอบถาม:</FormLabel>
+                                        <RadioGroup
+                                            row
+                                            sx={{ ml: 2 }}
+                                            aria-labelledby="group-title-display"
+                                            name="title-display-group"
+                                            value={formDetail?.display_title ? "all_pages" : "first_page"}
+                                            onChange={(e) => setFormDetail({ ...formDetail, display_title: e.target.value ?? "all_pages" })}
+                                        >
+                                            <FormControlLabel value="all_pages" control={<Radio size="small" />} label="ทุกหน้า" />
+                                            <FormControlLabel value="first_page" control={<Radio size="small" />} label="เฉพาะหน้าแรก" />
+                                        </RadioGroup>
+                                    </FormControl>
 
-                                    {/* ชื่อผู้จัดแสดงในแบบสอบถาม */}
+                                    {/* ตั้งค่า SEO (สำหรับการแชร์ลิ้งค์แบบสอบถาม) */}
                                     <TextField
                                         fullWidth
-                                        label="Organizer/Title (แสดงในหน้าตอบแบบสอบถามและลิ้งค์ที่ถูกแชร์)"
+                                        label="ตั้งค่า SEO (สำหรับการแชร์ลิ้งค์แบบสอบถาม)"
                                         variant="outlined"
                                         InputLabelProps={{ shrink: true }}
                                         placeholder="ตัวอย่าง: Survey Forms 2025"

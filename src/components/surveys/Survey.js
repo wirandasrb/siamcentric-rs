@@ -68,7 +68,48 @@ const SurveyComponent = ({ survey, responses }) => {
     setActiveStep(0);
   };
 
-  console.log("Survey Component Rendered with answers:", answers);
+  const handleChangeAnswer = (questionId, newAnswer) => {
+    setAnswers((prev) => {
+      // กรณีลบคำตอบของคำถามตาม condition
+      if (questionId === "__REMOVE__" && Array.isArray(newAnswer)) {
+        return prev.filter((ans) => !newAnswer.includes(ans.question_id));
+      }
+
+      // // ปกติ (รวมถึง matrix logic)
+      // let otherAnswers = [];
+
+      // if (Array.isArray(newAnswer)) {
+      //   const rowIds = newAnswer.map((a) => a.matrix_row_id);
+      //   otherAnswers = prev.filter(
+      //     (ans) =>
+      //       ans.question_id !== questionId ||
+      //       (ans.question_id === questionId && !rowIds.includes(ans.matrix_row_id))
+      //   );
+      // } else {
+      //   otherAnswers = prev.filter(
+      //     (ans) =>
+      //       ans.question_id !== questionId ||
+      //       (ans.matrix_row_id &&
+      //         newAnswer.matrix_row_id &&
+      //         ans.matrix_row_id !== newAnswer.matrix_row_id)
+      //   );
+      // }
+
+      const otherAnswers = prev.filter(
+        (ans) => ans?.question_id !== questionId
+      );
+
+      // สำหรับ matrix question, newAnswer อาจเป็น array
+      const newAnswers = Array.isArray(newAnswer)
+        ? newAnswer
+        : [newAnswer];
+
+      return [...otherAnswers, ...newAnswers];
+    });
+  };
+
+  console.log("SurveyComponent render with answers:", answers);
+
 
   return (
     <ThemeProvider theme={customTheme}>
@@ -199,20 +240,22 @@ const SurveyComponent = ({ survey, responses }) => {
                 }}
                 onSubmit={() => setIsConfirmOpen(true)}
                 is_last_section={activeStep === survey.sections.length - 1}
-                onChangeAnswer={(questionId, newAnswer) => {
-                  setAnswers((prev) => {
-                    const otherAnswers = prev.filter(
-                      (ans) => ans?.question_id !== questionId
-                    );
+                // onChangeAnswer={(questionId, newAnswer) => {
+                //   setAnswers((prev) => {
+                //     const otherAnswers = prev.filter(
+                //       (ans) => ans?.question_id !== questionId
+                //     );
 
-                    // สำหรับ matrix question, newAnswer อาจเป็น array
-                    const newAnswers = Array.isArray(newAnswer)
-                      ? newAnswer
-                      : [newAnswer];
+                //     // สำหรับ matrix question, newAnswer อาจเป็น array
+                //     const newAnswers = Array.isArray(newAnswer)
+                //       ? newAnswer
+                //       : [newAnswer];
 
-                    return [...otherAnswers, ...newAnswers];
-                  });
-                }}
+                //     return [...otherAnswers, ...newAnswers];
+                //   });
+                // }}
+                onChangeAnswer={handleChangeAnswer}
+
                 answers={answers}
               />
             )}

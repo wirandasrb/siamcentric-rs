@@ -59,6 +59,7 @@ const RatingQuestionSurvey = ({ question, answers, onChange }) => {
                                 textAlign: "center",
                                 cursor: "pointer",
                                 transition: "transform 0.15s ease",
+                                color: isFilled ? ratingType?.color || "black" : "gray",
                                 "&:hover": {
                                     transform: "scale(1.15)",
                                     color: ratingType?.color || "black",
