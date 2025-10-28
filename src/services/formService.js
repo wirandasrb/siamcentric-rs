@@ -57,6 +57,16 @@ const updateForm = async (formId, formData) => {
   }
 };
 
+const deleteForm = async (formId) => {
+  try {
+    const response = await apiWithAuth.delete(`/forms/${formId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting form:", error);
+    throw new Error("Failed to delete form");
+  }
+};
+
 const getFormGoogleSheetLink = async (formId) => {
   try {
     const { data, status } = await apiWithAuth.get(
@@ -95,6 +105,30 @@ const createGoogleSheetLink = async (formId) => {
   }
 };
 
+// const updateGoogleSheet = async (formId: string) => {
+//   const response = await apiWithAuth.post(
+//     `/forms/${formId}/update-google-sheet`
+//   );
+//   if (response.status === 200) {
+//     return response.data;
+//   }
+//   throw new Error("Failed to update Google Sheet");
+// };
+
+const updateGoogleSheet = async (form_id) => {
+  try {
+    const response = await apiWithAuth.post(
+      `/forms/${form_id}/update-google-sheet`
+    );
+    if (response.status === 200) {
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error updating Google Sheet:", error);
+    throw new Error("Failed to update Google Sheet");
+  }
+};
+
 const getEmailSyncGoogleSheet = async (form_id) => {
   try {
     const response = await apiWithAuth.get(`/forms/${form_id}/allowed-emails`);
@@ -113,8 +147,10 @@ const formService = {
   updateFormStatus,
   createForm,
   updateForm,
+  deleteForm,
   getFormGoogleSheetLink,
   createGoogleSheetLink,
+  updateGoogleSheet,
   addEmailSyncGoogleSheet,
   getEmailSyncGoogleSheet,
 };

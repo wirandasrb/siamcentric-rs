@@ -2,9 +2,12 @@ import SurveyComponent from "../../../components/surveys/Survey";
 
 async function getSurvey(id) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_API}/surveys/${id}`, {
-      next: { revalidate: 0 },
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL_API}/surveys/${id}`,
+      {
+        next: { revalidate: 0 },
+      }
+    );
 
     if (!res.ok) throw new Error("Failed to fetch survey");
 
@@ -41,7 +44,7 @@ export default async function SurveyPage({ params }) {
   console.log("Fetched survey data:", survey);
   // ถ้าไม่พบ survey ให้แสดงข้อความ
   if (!survey) {
-    return (<div>ไม่พบแบบสอบถาม</div>);
+    return <div>ไม่พบแบบสอบถาม</div>;
   }
 
   return <SurveyComponent survey={survey} />;

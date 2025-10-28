@@ -1,6 +1,7 @@
 "use client";
 import {
   Add,
+  ContentCopy,
   DatasetLinked,
   Download,
   Edit,
@@ -14,8 +15,10 @@ import {
   colors,
   Divider,
   Grid,
+  IconButton,
   Link,
   Paper,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useParams } from "next/navigation";
@@ -23,6 +26,7 @@ import Cardboard from "../../../../../components/Cardboard";
 import React, { useEffect } from "react";
 import useApi from "../../../../../services";
 import ModalCreateGoogleSheet from "../../../../../components/modals/form/ModalCreateGoogleSheet";
+import SnackbarCustomized from "../../../../../components/Snackbar";
 
 const ReportPage = () => {
   const { id } = useParams();
@@ -30,6 +34,11 @@ const ReportPage = () => {
   const [googleSheet, setGoogleSheet] = React.useState(null);
   const [isOpenCreateGoogleSheet, setIsOpenCreateGoogleSheet] =
     React.useState(false);
+  const [toast, setToast] = React.useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
 
   useEffect(() => {
     // ดึงข้อมูลรายงานจาก API โดยใช้ id
@@ -81,6 +90,27 @@ const ReportPage = () => {
       }
     } catch (error) {
       console.error("Error creating Google Sheet:", error);
+    }
+  };
+
+  const handleUpdateGoogleSheet = async () => {
+    // Logic สำหรับการอัปเดตข้อมูลภายใน Google Sheet
+    try {
+      const response = await useApi.forms.updateGoogleSheet(id);
+      if (response) {
+        setToast({
+          open: true,
+          message: "อัปเดตข้อมูล Google Sheet สำเร็จ",
+          severity: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating Google Sheet:", error);
+      setToast({
+        open: true,
+        message: "อัปเดตข้อมูล Google Sheet ไม่สำเร็จ",
+        severity: "error",
+      });
     }
   };
 
@@ -313,6 +343,23 @@ const ReportPage = () => {
                         justifyContent: "flex-end",
                       }}
                     >
+                      <Tooltip title="คัดลอกลิงก์">
+                        <IconButton
+                          color="primary"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              googleSheet?.sheet_url
+                            );
+                            setToast({
+                              open: true,
+                              message: "คัดลอกลิงก์สำเร็จ",
+                              severity: "success",
+                            });
+                          }}
+                        >
+                          <ContentCopy />
+                        </IconButton>
+                      </Tooltip>
                       <Button
                         variant="outlined"
                         color="primary"
@@ -320,7 +367,7 @@ const ReportPage = () => {
                         sx={{
                           borderRadius: 3,
                         }}
-                        // onClick={() => setIsOpenCreateGoogleSheet(true)}
+                        onClick={handleUpdateGoogleSheet}
                       >
                         อัปเดตข้อมูลชีท
                       </Button>
@@ -370,6 +417,13 @@ const ReportPage = () => {
         onCreate={googleSheet ? handleAddEmail : handleCreateGoogleSheet}
         formId={id}
         isEdit={Boolean(googleSheet)}
+      />
+      <SnackbarCustomized
+        open={toast.open}
+        message={toast.message}
+        severity={toast.severity}
+        autoHideDuration={3000}
+        onClose={() => setToast({ ...toast, open: false })}
       />
     </>
   );

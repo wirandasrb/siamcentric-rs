@@ -15,6 +15,7 @@ import ProgressBarSection from "./ProgressBarSection";
 import SectionSurvey from "./SectionSurvey";
 import ThankMessage from "./ThankMessage";
 import ModalConfirm from "../modals/ModalComfirm";
+import useApi from "../../services";
 
 const SurveyComponent = ({ survey, responses }) => {
   const customTheme = useMemo(
@@ -30,10 +31,21 @@ const SurveyComponent = ({ survey, responses }) => {
       }),
     [survey]
   );
+  const [respondentToken, setRespondentToken] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
   const [answers, setAnswers] = useState(responses || []);
   const [conditionMap, setConditionMap] = useState({}); // เก็บเงื่อนไขของคำถาม
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    // ตรวจสอบถ้ามี responses และมี respondent_token
+    const token = localStorage.getItem("respondent_token");
+    if (token) {
+      setRespondentToken(token);
+      // และไปหน้าท้ายเลย
+      setActiveStep(survey.sections.length);
+    }
+  }, []);
 
   useEffect(() => {
     if (survey && survey.sections) {
@@ -57,8 +69,29 @@ const SurveyComponent = ({ survey, responses }) => {
   const handleSubmit = async () => {
     // Logic การส่งคำตอบเมื่อแบบสำรวจเสร็จสิ้น
     console.log("Submitting answers:", answers);
-    setActiveStep((prev) => prev + 1);
     setIsConfirmOpen(false);
+    try {
+      const response = await useApi.surveys.submitSurveyAnswers({
+        answers: answers,
+        form_id: survey.id,
+        respondent_token: "",
+      });
+
+      console.log("Survey submission response:", response);
+      if (response.success) {
+        const token = response.respondent_token;
+        if (typeof window !== "undefined" && token) {
+          const existingToken = localStorage.getItem("respondent_token");
+          if (!existingToken) {
+            localStorage.setItem("respondent_token", token);
+            setRespondentToken(token);
+          }
+        }
+        setActiveStep((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error submitting survey answers:", error);
+    }
 
     // คุณสามารถเพิ่มโค้ดเพื่อส่งคำตอบไปยังเซิร์ฟเวอร์ได้ที่นี่
   };
@@ -66,6 +99,10 @@ const SurveyComponent = ({ survey, responses }) => {
   const handleRetakeSurvey = () => {
     setAnswers([]);
     setActiveStep(0);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("respondent_token");
+      setRespondentToken(null);
+    }
   };
 
   const handleChangeAnswer = (questionId, newAnswer) => {
@@ -100,16 +137,13 @@ const SurveyComponent = ({ survey, responses }) => {
       );
 
       // สำหรับ matrix question, newAnswer อาจเป็น array
-      const newAnswers = Array.isArray(newAnswer)
-        ? newAnswer
-        : [newAnswer];
+      const newAnswers = Array.isArray(newAnswer) ? newAnswer : [newAnswer];
 
       return [...otherAnswers, ...newAnswers];
     });
   };
 
   console.log("SurveyComponent render with answers:", answers);
-
 
   return (
     <ThemeProvider theme={customTheme}>
@@ -255,7 +289,6 @@ const SurveyComponent = ({ survey, responses }) => {
                 //   });
                 // }}
                 onChangeAnswer={handleChangeAnswer}
-
                 answers={answers}
               />
             )}
