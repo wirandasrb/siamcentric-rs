@@ -83,6 +83,28 @@ const SectionSurvey = ({
         );
     };
 
+    const checkNextDisabled = () => {
+        return section.questions.some((q) => {
+            // ตรวจเฉพาะคำถามที่บังคับและ "แสดงจริง ๆ"
+            if (!q.is_required) return false;
+
+            const visible = shouldShowQuestion(q);
+            if (!visible) return false; // ❗ ถ้าไม่แสดง ไม่ต้องบังคับตอบ
+
+            // หาคำตอบของคำถามนี้
+            const ans = answers.find((a) => a.question_id === q.id);
+            if (!ans) return true; // ยังไม่มีคำตอบเลย
+
+            // ตรวจสอบว่ามีข้อมูลไหม
+            const hasValue = ans.answer_value !== null && ans.answer_value !== undefined;
+            const hasText = ans.answer_text && ans.answer_text.trim() !== "";
+            const hasOption = ans.answer_option_id !== null && ans.answer_option_id !== undefined;
+            const hasAttachment = ans.attachment_url && ans.attachment_url !== "";
+
+            return !(hasValue || hasText || hasOption || hasAttachment);
+        });
+    };
+
     return (
         <>
             <Box
@@ -289,18 +311,7 @@ const SectionSurvey = ({
                                 fontWeight: "bold",
                             }}
                             // ปุ่มถัดไป ปิดใช้งานถ้ายังมีคำถามที่โดน is_required ที่ยังไม่ได้ตอบ
-                            // disabled={section.questions.some((q) => {
-                            //     if (!q.is_required) return false; // ไม่บังคับ ไม่ต้องเช็ค
-
-                            //     const ans = answers[q.id];
-                            //     if (!ans) return true; // ยังไม่มีคำตอบ
-
-                            //     const hasValue = ans.answer_value !== null && ans.answer_value !== undefined;
-                            //     const hasText = ans.answer_text !== null && ans.answer_text !== undefined && ans.answer_text !== "";
-                            //     const hasOption = ans.answer_option_id !== null && ans.answer_option_id !== undefined;
-                            //     const hasAttachment = ans.attachment_url !== null && ans.attachment_url !== undefined && ans.attachment_url !== "";
-                            //     return !(hasValue || hasText || hasOption || hasAttachment); // ถ้าไม่มีค่าเลย = ยังตอบไม่ครบ
-                            // })}
+                            disabled={checkNextDisabled()}
                             variant="contained"
                             color="primary"
                             onClick={onNext}
@@ -320,6 +331,7 @@ const SectionSurvey = ({
                             variant="contained"
                             color="primary"
                             onClick={onSubmit}
+                            disabled={checkNextDisabled()}
                         >
                             ส่งแบบสอบถาม
                         </Button>

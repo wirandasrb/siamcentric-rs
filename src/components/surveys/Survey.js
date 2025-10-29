@@ -249,11 +249,13 @@ const SurveyComponent = ({ survey, responses }) => {
           </Box>
 
           {/* Progress bar อยู่ใต้หัวข้อ */}
-          <ProgressBarSection
-            activeStep={activeStep}
-            totalSteps={survey?.sections?.length}
-            primaryColor={survey?.primary_color || "#1976d2"}
-          />
+          {survey?.sections?.length > 1 && (
+            <ProgressBarSection
+              activeStep={activeStep}
+              totalSteps={survey?.sections?.length}
+              primaryColor={survey?.primary_color || "#1976d2"}
+            />
+          )}
           {/* ส่วนของคำถาม จะมาแทนที่ตรงนี้ */}
           {survey?.sections?.length > 0 &&
             activeStep < survey.sections.length && (
