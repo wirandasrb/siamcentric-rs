@@ -249,7 +249,7 @@ const SurveyComponent = ({ survey, responses }) => {
           </Box>
 
           {/* Progress bar อยู่ใต้หัวข้อ */}
-          {survey?.sections?.length > 1 && (
+          {survey?.sections?.length > 1 && activeStep < survey.sections?.length && (
             <ProgressBarSection
               activeStep={activeStep}
               totalSteps={survey?.sections?.length}
