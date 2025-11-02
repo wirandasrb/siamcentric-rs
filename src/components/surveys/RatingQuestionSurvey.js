@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { ratingTypes } from "../../contants/ratingTypes";
 
 const RatingQuestionSurvey = ({ question, answers, onChange }) => {
-    const selectedValue = answers?.[question.id]?.answer_value || 0;
+    const selectedValue = answers?.find(ans => ans.question_id === question.id)?.answer_value || 0;
     const ratingType = ratingTypes.find(r => r.id === question.vote_type_id);
 
     return (
@@ -48,9 +48,8 @@ const RatingQuestionSurvey = ({ question, answers, onChange }) => {
                                         section_id: question.section_id,
                                         question_id: question.id,
                                         answer_option_id: null,
-                                        answer_text: "",
+                                        answer_text: null,
                                         answer_value: newValue,
-                                        attachment_url: null,
                                     },
                                 });
                             }}
