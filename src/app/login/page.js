@@ -7,7 +7,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useEffect } from "react";
 import { object, string } from "yup";
 import authService from "../../services/authService";
 import { useRouter } from "next/navigation";
@@ -19,8 +19,15 @@ const LoginPage = () => {
   const [error, setError] = React.useState("");
   const router = useRouter();
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.replace("/admin/dashboard");
+    }
+  }, []);
+
   const handleSignin = async (values) => {
-    console.log(values);
+    // console.log(values);
     try {
       const response = await authService.login(
         values.username,
