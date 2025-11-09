@@ -37,6 +37,7 @@ import {
   FormLabel,
   RadioGroup,
   Radio,
+  colors,
 } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -44,6 +45,7 @@ import { SketchPicker } from "react-color";
 import SectionList from "../../../../components/forms/SectionList";
 import useApi from "../../../../services";
 import { fontTypeOptions } from "../../../../contants/fontTypes";
+import ModalConfirm from "../../../../components/modals/ModalComfirm";
 
 const colorPaletteDefault = [
   "#1976d2",
@@ -59,6 +61,9 @@ const FormCreatePage = () => {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [alertConfirm, setAlertConfirm] = useState({
+    open: false, title: '', description: '', sub_description: null, onConfirm: null
+  });
 
   const [openThemeMenu, setOpenThemeMenu] = useState(false);
 
@@ -116,6 +121,7 @@ const FormCreatePage = () => {
           show_facebook_share: formData.show_facebook_share,
           show_line_share: formData.show_line_share,
           meta_title: formData.meta_title,
+          meta_description: formData.meta_description,
           display_title: formData.display_title || "all_pages",
         });
         let formSections = formData.sections.map((section, sIndex) => ({
@@ -126,21 +132,21 @@ const FormCreatePage = () => {
             temp_id: question.id,
             options: question.options
               ? question.options.map((option, oIndex) => ({
-                  ...option,
-                  temp_id: option.id,
-                }))
+                ...option,
+                temp_id: option.id,
+              }))
               : [],
             matrix_rows: question.matrix_rows
               ? question.matrix_rows.map((row, rIndex) => ({
-                  ...row,
-                  temp_id: row.id,
-                }))
+                ...row,
+                temp_id: row.id,
+              }))
               : [],
             matrix_columns: question.matrix_columns
               ? question.matrix_columns.map((col, cIndex) => ({
-                  ...col,
-                  temp_id: col.id,
-                }))
+                ...col,
+                temp_id: col.id,
+              }))
               : [],
           })),
         }));
@@ -175,7 +181,7 @@ const FormCreatePage = () => {
     else setSecondColor(color.hex);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (isSavePreview = false) => {
     // Logic to save the form
     console.log("Form saved", {
       ...formDetail,
@@ -205,14 +211,14 @@ const FormCreatePage = () => {
     );
     formData.append("show_line_share", formDetail.show_line_share || true);
     formData.append("meta_title", formDetail.meta_title || "");
-    formData.append("meta_description", formDetail.meta_description || "");
+    formData.append("meta_description", formDetail?.meta_description || "");
     formData.append("display_title", formDetail.display_title || "all_pages");
 
     if (id === "create") {
       // call create form API
       const response = await useApi.forms.createForm(formData);
       console.log("Create form response:", response);
-      if (response.success) {
+      if (response.success && !isSavePreview) {
         // redirect to form list page
         router.push("/admin/forms");
       }
@@ -220,10 +226,13 @@ const FormCreatePage = () => {
       // call update form API
       const response = await useApi.forms.updateForm(id, formData);
       console.log("Update form response:", response);
-      if (response.success) {
+      if (response.success && !isSavePreview) {
         // redirect to form list page
         router.push("/admin/forms");
       }
+    }
+    if (isSavePreview) {
+      window.open(`/admin/forms/${id}/preview`, '_blank');
     }
   };
 
@@ -646,22 +655,58 @@ const FormCreatePage = () => {
             variant="contained"
             sx={{
               backgroundColor: "white",
-              color: "grey.700",
+              color: colors.red[800],
               boxShadow: "none",
-              "&:hover": { backgroundColor: "grey.100", boxShadow: "none" },
+              "&:hover": { backgroundColor: colors.red[100], boxShadow: "none" },
               borderRadius: 3,
               fontSize: 14,
               textTransform: "none",
               border: "1px solid",
               width: 100,
             }}
-            onClick={() => router.push("/admin/forms")}
+            onClick={() => {
+              setAlertConfirm({
+                open: true,
+                title: id === "create" ? 'ยกเลิกการสร้างแบบสอบถาม' : 'ยกเลิกการแก้ไขแบบสอบถาม',
+                description: id === "create" ? 'คุณแน่ใจหรือว่าต้องการยกเลิกการสร้างแบบสอบถาม?' : 'คุณแน่ใจหรือว่าต้องการยกเลิกการแก้ไขแบบสอบถาม?',
+                sub_description: 'ข้อมูลที่กรอกจะไม่ถูกบันทึก',
+                onConfirm: () => router.push('/admin/forms'),
+              });
+            }}
           >
             ยกเลิก
           </Button>
           <Button
+            variant="outlined"
+            onClick={() => {
+              // บังคับ save ให้ก่อน แล้วค่อย preview
+              setAlertConfirm({
+                open: true,
+                title: 'ไปที่โหมดแสดงตัวอย่างแบบฟอร์ม',
+                description: 'คุณต้องการบันทึกการเปลี่ยนแปลงก่อนดูตัวอย่างแบบฟอร์มหรือไม่?',
+                sub_description: null,
+                onConfirm: () => {
+                  handleSave(true);
+                },
+              });
+            }}
+            sx={{
+              textTransform: "none",
+              borderRadius: 3,
+              boxShadow: "none",
+              backgroundColor: "white",
+              fontSize: 14,
+              "&:hover": {
+                boxShadow: "none",
+              },
+              width: 100,
+            }}
+          >
+            ดูตัวอย่าง
+          </Button>
+          <Button
             variant="contained"
-            onClick={handleSave}
+            onClick={() => handleSave(false)}
             color="success"
             sx={{
               textTransform: "none",
@@ -679,6 +724,17 @@ const FormCreatePage = () => {
           </Button>
         </Box>
       </Box>
+      <ModalConfirm
+        open={alertConfirm.open}
+        title={alertConfirm.title}
+        description={alertConfirm.description}
+        sub_description={alertConfirm.sub_description}
+        onClose={() => setAlertConfirm({ ...alertConfirm, open: false })}
+        onConfirm={() => {
+          if (alertConfirm.onConfirm) alertConfirm.onConfirm();
+          setAlertConfirm({ ...alertConfirm, open: false });
+        }}
+      />
     </>
   );
 };

@@ -1,23 +1,93 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from "@mui/material";
 
-const ModalConfirm = ({ open, onClose, onConfirm, title = "ยืนยันการดำเนินการ", description = "คุณแน่ใจหรือว่าต้องการดำเนินการนี้?" }) => {
+const ModalConfirm = ({
+    open,
+    onClose,
+    onConfirm,
+    title = "ยืนยันการดำเนินการ",
+    description = "คุณแน่ใจหรือว่าต้องการดำเนินการนี้?",
+    sub_description = null,
+}) => {
     return (
         <Dialog
             open={open}
             onClose={onClose}
-            sx={{ '& .MuiDialog-paper': { borderRadius: 3 } }}
-            size="sm"
+            maxWidth="xs"
+            fullWidth
+            sx={{
+                "& .MuiDialog-paper": {
+                    borderRadius: 3,
+                    paddingTop: 1,
+                },
+            }}
         >
-            <DialogTitle>{title}</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    {description}
+            <DialogTitle
+                sx={{
+                    textAlign: "center",
+                    fontWeight: 600,
+                    fontSize: 20,
+                    pb: 1,
+                }}
+            >
+                {title}
+            </DialogTitle>
+
+            <DialogContent
+                sx={{
+                    textAlign: "center",
+                    px: 4,
+                    pt: 1,
+                    pb: 2,
+                }}
+            >
+                <DialogContentText
+                    sx={{
+                        fontSize: 16.5,
+                        fontWeight: 500,
+                        color: "text.primary",
+                        mb: description?.sub ? 1 : 0,
+                    }}
+                >
+                    {description?.main || description}
                 </DialogContentText>
+
+                {sub_description && (
+                    <DialogContentText
+                        sx={{
+                            fontSize: 15,
+                            color: "error.main",
+                            fontWeight: 400,
+                        }}
+                    >
+                        {sub_description}
+                    </DialogContentText>
+                )}
             </DialogContent>
-            <DialogActions sx={{
-                padding: 2
-            }}>
-                <Button onClick={onClose} color="error" >
+
+            <DialogActions
+                sx={{
+                    justifyContent: "center",
+                    gap: 1.5,
+                    pb: 2,
+                }}
+            >
+                <Button
+                    onClick={onClose}
+                    color="error"
+                    variant="outlined"
+                    sx={{
+                        borderRadius: 3,
+                        px: 3,
+                        fontWeight: 500,
+                    }}
+                >
                     ยกเลิก
                 </Button>
                 <Button
@@ -26,11 +96,12 @@ const ModalConfirm = ({ open, onClose, onConfirm, title = "ยืนยันก
                     variant="contained"
                     sx={{
                         borderRadius: 3,
-                        boxShadow: 'none',
-                        color: 'white',
-                        '&:hover': {
-                            backgroundColor: 'primary.dark',
-                            boxShadow: 'none',
+                        px: 3,
+                        boxShadow: "none",
+                        fontWeight: 500,
+                        "&:hover": {
+                            backgroundColor: "primary.dark",
+                            boxShadow: "none",
                         },
                     }}
                 >

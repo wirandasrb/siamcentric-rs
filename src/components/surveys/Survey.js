@@ -188,65 +188,67 @@ const SurveyComponent = ({ survey, responses }) => {
           }}
         >
           {/* กล่องหัวข้อ */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              backgroundColor: "white",
-              width: {
-                xs: "90%",
-                sm: "80%",
-                md: "80%",
-                lg: "60%",
-              },
-              height: "fit-content",
-              borderRadius: 2,
-              boxShadow: 3,
-              p: 2,
-            }}
-          >
-            <Box
+          {(survey?.display_title === "all_pages" ||
+            (survey?.display_title === "first_page" && activeStep === 0)) &&
+            (<Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
-                gap: 1,
                 justifyContent: "center",
+                backgroundColor: "white",
+                width: {
+                  xs: "90%",
+                  sm: "80%",
+                  md: "80%",
+                  lg: "60%",
+                },
+                height: "fit-content",
+                borderRadius: 2,
+                boxShadow: 3,
+                p: 2,
               }}
             >
-              <Typography
+              <Box
                 sx={{
-                  fontSize: 24,
-                  fontWeight: "bold",
-                  color: survey?.primary_color,
-                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                  justifyContent: "center",
                 }}
               >
-                {survey.title}
-              </Typography>
-              <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
-                {survey.description}
-              </Typography>
-              {survey.note && (
                 <Typography
                   sx={{
-                    fontSize: 14,
-                    color: "red",
-                    fontStyle: "italic",
-                    ml: 2,
+                    fontSize: 24,
+                    fontWeight: "bold",
+                    color: survey?.primary_color,
+                    textAlign: "center",
                   }}
                 >
-                  ** หมายเหตุ: {survey.note}
+                  {survey.title}
                 </Typography>
-              )}
-              <Divider
-                sx={{
-                  width: "100%",
-                  borderBottomWidth: 2,
-                  borderColor: survey.primary_color,
-                }}
-              />
-            </Box>
-          </Box>
+                <Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
+                  {survey.description}
+                </Typography>
+                {survey.note && (
+                  <Typography
+                    sx={{
+                      fontSize: 14,
+                      color: "red",
+                      fontStyle: "italic",
+                      ml: 2,
+                    }}
+                  >
+                    ** หมายเหตุ: {survey.note}
+                  </Typography>
+                )}
+                <Divider
+                  sx={{
+                    width: "100%",
+                    borderBottomWidth: 2,
+                    borderColor: survey.primary_color,
+                  }}
+                />
+              </Box>
+            </Box>)}
 
           {/* Progress bar อยู่ใต้หัวข้อ */}
           {survey?.sections?.length > 1 && activeStep < survey.sections?.length && (

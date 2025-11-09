@@ -14,6 +14,7 @@ const SectionSurvey = ({
     is_last_section = false,
     onChangeAnswer,
     answers,
+    isPreview = false,
 }) => {
     // const handleChangeAnswer = (questionId, newAnswer) => {
     //     onChangeAnswer(questionId, newAnswer);
@@ -84,6 +85,7 @@ const SectionSurvey = ({
     };
 
     const checkNextDisabled = () => {
+        if (isPreview) return false;
         return section.questions.some((q) => {
             // ตรวจเฉพาะคำถามที่บังคับและ "แสดงจริง ๆ"
             if (!q.is_required) return false;
