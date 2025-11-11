@@ -143,7 +143,41 @@ const SurveyComponent = ({ survey, responses }) => {
     });
   };
 
-  console.log("SurveyComponent render with answers:", answers);
+  const skipSectionByConditions = () => {
+    let skipToSectionIndex = null;
+
+    answers.forEach((answer) => {
+      const question = survey.sections
+        .flatMap((s) => s.questions)
+        .find((q) => q.id === answer.question_id);
+
+      if (question && question.options) {
+        const option = question.options.find(
+          (o) => o.id === answer.answer_option_id
+        );
+
+        if (option && option.is_have_condition && option.conditions) {
+          option.conditions.forEach((condition) => {
+            if (condition.condition_type === "skip_section") {
+              const targetIndex = survey.sections.findIndex(
+                (s) => s.id === condition.target_section_id
+              );
+
+              if (targetIndex !== -1) {
+                if (skipToSectionIndex === null || targetIndex > skipToSectionIndex) {
+                  skipToSectionIndex = targetIndex;
+                }
+              }
+            }
+          });
+        }
+      }
+    });
+
+    return skipToSectionIndex;
+  };
+
+  // console.log("SurveyComponent render with answers:", answers);
 
   return (
     <ThemeProvider theme={customTheme}>
@@ -262,15 +296,21 @@ const SurveyComponent = ({ survey, responses }) => {
           {survey?.sections?.length > 0 &&
             activeStep < survey.sections.length && (
               <SectionSurvey
+                sections={survey.sections}
                 section={survey.sections[activeStep]}
                 conditions={conditionMap}
                 primaryColor={survey.primary_color || "#1976d2"}
                 secondColor={survey.second_color || "#f5f5f5"}
                 onNext={() => {
-                  if (activeStep < survey.sections.length - 1) {
+                  const skipToIndex = skipSectionByConditions();
+                  console.log("Determined skip to section index:", skipToIndex);
+                  if (skipToIndex !== null) {
+                    setActiveStep(skipToIndex);
+                  } else {
                     setActiveStep(activeStep + 1);
                   }
                 }}
+
                 onBack={() => {
                   if (activeStep > 0) {
                     setActiveStep(activeStep - 1);
@@ -278,20 +318,6 @@ const SurveyComponent = ({ survey, responses }) => {
                 }}
                 onSubmit={() => setIsConfirmOpen(true)}
                 is_last_section={activeStep === survey.sections.length - 1}
-                // onChangeAnswer={(questionId, newAnswer) => {
-                //   setAnswers((prev) => {
-                //     const otherAnswers = prev.filter(
-                //       (ans) => ans?.question_id !== questionId
-                //     );
-
-                //     // สำหรับ matrix question, newAnswer อาจเป็น array
-                //     const newAnswers = Array.isArray(newAnswer)
-                //       ? newAnswer
-                //       : [newAnswer];
-
-                //     return [...otherAnswers, ...newAnswers];
-                //   });
-                // }}
                 onChangeAnswer={handleChangeAnswer}
                 answers={answers}
               />

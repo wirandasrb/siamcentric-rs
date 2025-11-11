@@ -4,6 +4,7 @@ import QuestionSurvey from "./QuestionSurvey";
 import { useEffect } from "react";
 
 const SectionSurvey = ({
+    sections,
     section,
     conditions,
     primaryColor,
@@ -52,34 +53,63 @@ const SectionSurvey = ({
         onChangeAnswer(questionId, newAnswer);
     };
 
+    // const shouldShowQuestion = (question) => {
+    //     // หาว่ามีใคร require คำถามนี้บ้าง
+    //     const requireConditions = section.questions.flatMap((q) =>
+    //         q.options.flatMap((opt) =>
+    //             opt.conditions
+    //                 .filter(
+    //                     (cond) =>
+    //                         cond.condition_type === "require_question" &&
+    //                         cond.target_question_id === question.id
+    //                 )
+    //                 .map((cond) => ({
+    //                     sourceQuestionId: q.id,
+    //                     sourceOptionId: opt.id,
+    //                 }))
+    //         )
+    //     );
+
+    //     if (requireConditions.length === 0) {
+    //         // ถ้าไม่มีใคร require -> แสดงได้เลย
+    //         return true;
+    //     }
+
+    //     // ถ้ามีคน require -> แสดงเมื่อ option ที่ require ถูกเลือก
+    //     return requireConditions.some((cond) =>
+    //         answers.some(
+    //             (ans) =>
+    //                 ans?.question_id === cond.sourceQuestionId &&
+    //                 ans?.answer_option_id === cond.sourceOptionId
+    //         )
+    //     );
+    // };
+
     const shouldShowQuestion = (question) => {
-        // หาว่ามีใคร require คำถามนี้บ้าง
-        const requireConditions = section.questions.flatMap((q) =>
-            q.options.flatMap((opt) =>
-                opt.conditions
-                    .filter(
-                        (cond) =>
-                            cond.condition_type === "require_question" &&
-                            cond.target_question_id === question.id
-                    )
-                    .map((cond) => ({
-                        sourceQuestionId: q.id,
-                        sourceOptionId: opt.id,
-                    }))
+        const requireConditions = sections.flatMap((s) =>
+            s.questions.flatMap((q) =>
+                q.options.flatMap((opt) =>
+                    (opt.conditions || [])
+                        .filter(
+                            (cond) =>
+                                cond.condition_type === "require_question" &&
+                                cond.target_question_id === question.id
+                        )
+                        .map((cond) => ({
+                            sourceQuestionId: q.id,
+                            requiredOptionId: cond.required_option_id || opt.id,
+                        }))
+                )
             )
         );
 
-        if (requireConditions.length === 0) {
-            // ถ้าไม่มีใคร require -> แสดงได้เลย
-            return true;
-        }
+        if (!requireConditions.length) return true;
 
-        // ถ้ามีคน require -> แสดงเมื่อ option ที่ require ถูกเลือก
         return requireConditions.some((cond) =>
             answers.some(
                 (ans) =>
-                    ans?.question_id === cond.sourceQuestionId &&
-                    ans?.answer_option_id === cond.sourceOptionId
+                    ans.question_id === cond.sourceQuestionId &&
+                    ans.answer_option_id === cond.requiredOptionId
             )
         );
     };

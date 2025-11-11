@@ -179,6 +179,17 @@ const SelectCondition = ({ questions, option, onChange, question, sections }) =>
                         ต้องตอบคำถามที่ {q.question_no}
                     </MenuItem>
                 ))}
+                {/* require question in other section */}
+                {nextSections.map((s) => (
+                    s.questions.map((q) => (
+                        <MenuItem
+                            key={`req-${getId(q)}`}
+                            value={`require_question-${getId(q)}`}
+                        >
+                            ต้องตอบคำถามที่ {q.question_no} ในส่วนที่ {s.section_no}
+                        </MenuItem>
+                    ))
+                ))}
 
                 {nextQuestions.length > 0 && <Divider />}
 
@@ -188,7 +199,7 @@ const SelectCondition = ({ questions, option, onChange, question, sections }) =>
                         key={`skip-${getId(q)}`}
                         value={`skip_question-${getId(q)}`}
                     >
-                        ข้ามไปยังคำถามที่ {q.question_no}
+                        ข้ามคำถามที่ {q.question_no}
                     </MenuItem>
                 ))}
 
