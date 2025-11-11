@@ -303,7 +303,7 @@ const SurveyComponent = ({ survey, responses }) => {
                 secondColor={survey.second_color || "#f5f5f5"}
                 onNext={() => {
                   const skipToIndex = skipSectionByConditions();
-                  console.log("Determined skip to section index:", skipToIndex);
+                  // console.log("Determined skip to section index:", skipToIndex);
                   if (skipToIndex !== null) {
                     setActiveStep(skipToIndex);
                   } else {
