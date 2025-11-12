@@ -221,6 +221,9 @@ const FormCreatePage = () => {
       if (response.success && !isSavePreview) {
         // redirect to form list page
         router.push("/admin/forms");
+      } else if (response.success && isSavePreview) {
+        router.replace(`/admin/forms/${response.data.id}`);
+        window.open(`/admin/forms/${response.data.id}/preview`, '_blank');
       }
     } else {
       // call update form API
@@ -231,7 +234,7 @@ const FormCreatePage = () => {
         router.push("/admin/forms");
       }
     }
-    if (isSavePreview) {
+    if (isSavePreview && id !== "create") {
       window.open(`/admin/forms/${id}/preview`, '_blank');
     }
   };

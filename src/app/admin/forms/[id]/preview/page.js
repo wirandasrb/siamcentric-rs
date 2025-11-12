@@ -240,6 +240,7 @@ const FormPreviewPage = () => {
                     {/* ส่วนของแบบฟอร์ม */}
                     {form && form?.sections && form?.sections?.length > 0 && activeStep < form?.sections?.length && (
                         <SectionSurvey
+                            sections={form.sections}
                             section={form.sections[activeStep]}
                             answers={answers || []}
                             primaryColor={form?.primary_color}
@@ -262,6 +263,7 @@ const FormPreviewPage = () => {
                             is_last_section={activeStep === form?.sections?.length - 1}
                             onChangeAnswer={handleChangeAnswer}
                             isPreview={true}
+
                         />
                     )}
 
