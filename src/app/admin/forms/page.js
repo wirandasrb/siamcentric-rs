@@ -5,6 +5,7 @@ import {
   Edit,
   OfflineShare,
   OpenInNew,
+  Share,
   Visibility,
 } from "@mui/icons-material";
 import {
@@ -195,9 +196,9 @@ const FormsPage = () => {
                           },
                         },
                         "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                          {
-                            backgroundColor: "#4caf50", // สีแถบพื้นหลังตอนเปิด
-                          },
+                        {
+                          backgroundColor: "#4caf50", // สีแถบพื้นหลังตอนเปิด
+                        },
                       }}
                     />
                   </Tooltip>
@@ -238,6 +239,13 @@ const FormsPage = () => {
                         label: "คัดลอกลิงก์",
                         icon: <OfflineShare />,
                         onClick: () => handleCopyLink(row),
+                      },
+                      {
+                        label: "สร้างลิงก์เชิญ",
+                        icon: <Share />,
+                        onClick: () => {
+                          router.push(`/admin/forms/invites/${row.id}`);
+                        }
                       },
                       {
                         label: "ลบ",
