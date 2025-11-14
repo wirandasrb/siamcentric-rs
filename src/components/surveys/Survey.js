@@ -42,8 +42,6 @@ const SurveyComponent = ({ survey, responses }) => {
     const token = localStorage.getItem("respondent_token");
     if (token) {
       setRespondentToken(token);
-      // และไปหน้าท้ายเลย
-      setActiveStep(survey.sections.length);
     }
   }, []);
 
@@ -66,9 +64,35 @@ const SurveyComponent = ({ survey, responses }) => {
     }
   }, [survey]);
 
+  // check token and this token has submitted this survey before
+  useEffect(() => {
+    const checkPreviousSubmission = async () => {
+      try {
+        const response = await useApi.surveys.checkResponseToken(
+          survey.id,
+          respondentToken
+        );
+        console.log("Check previous submission response:", response);
+        if (response.status === "success" && response.alreadyAnswered) {
+          // ไปหน้าท้ายเลย
+          setActiveStep(survey?.sections.length);
+        } else {
+          // ยังไม่เคยส่ง ให้เริ่มต้นที่หน้าแรก
+          setActiveStep(0);
+        }
+      } catch (error) {
+        console.error("Error checking previous submission:", error);
+        setActiveStep(0);
+      }
+    }
+    if (survey && survey?.id && respondentToken) {
+      checkPreviousSubmission();
+    } else if (survey && survey?.id && !respondentToken) {
+      setActiveStep(0);
+    }
+  }, [respondentToken, survey]);
+
   const handleSubmit = async () => {
-    // Logic การส่งคำตอบเมื่อแบบสำรวจเสร็จสิ้น
-    console.log("Submitting answers:", answers);
     setIsConfirmOpen(false);
     try {
       const response = await useApi.surveys.submitSurveyAnswers({
