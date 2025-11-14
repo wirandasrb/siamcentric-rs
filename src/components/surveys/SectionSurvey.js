@@ -1,5 +1,5 @@
 import { EditNote, Info } from "@mui/icons-material";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, lighten, Typography } from "@mui/material";
 import QuestionSurvey from "./QuestionSurvey";
 import { useEffect } from "react";
 
@@ -53,39 +53,35 @@ const SectionSurvey = ({
         onChangeAnswer(questionId, newAnswer);
     };
 
-    // const shouldShowQuestion = (question) => {
-    //     // หาว่ามีใคร require คำถามนี้บ้าง
-    //     const requireConditions = section.questions.flatMap((q) =>
-    //         q.options.flatMap((opt) =>
-    //             opt.conditions
-    //                 .filter(
-    //                     (cond) =>
-    //                         cond.condition_type === "require_question" &&
-    //                         cond.target_question_id === question.id
-    //                 )
-    //                 .map((cond) => ({
-    //                     sourceQuestionId: q.id,
-    //                     sourceOptionId: opt.id,
-    //                 }))
-    //         )
-    //     );
-
-    //     if (requireConditions.length === 0) {
-    //         // ถ้าไม่มีใคร require -> แสดงได้เลย
-    //         return true;
-    //     }
-
-    //     // ถ้ามีคน require -> แสดงเมื่อ option ที่ require ถูกเลือก
-    //     return requireConditions.some((cond) =>
-    //         answers.some(
-    //             (ans) =>
-    //                 ans?.question_id === cond.sourceQuestionId &&
-    //                 ans?.answer_option_id === cond.sourceOptionId
-    //         )
-    //     );
-    // };
-
     const shouldShowQuestion = (question) => {
+        // 1) เช็ค skip ก่อนเสมอ
+        const skipConditions = sections.flatMap((s) =>
+            s.questions.flatMap((q) =>
+                q.options.flatMap((opt) =>
+                    (opt.conditions || [])
+                        .filter(
+                            (cond) =>
+                                cond.condition_type === "skip_question" &&
+                                cond.target_question_id === question.id
+                        )
+                        .map((cond) => ({
+                            sourceQuestionId: q.id,
+                            skipOptionId: cond.required_option_id || opt.id,
+                        }))
+                )
+            )
+        );
+
+        for (let skipCond of skipConditions) {
+            const isSkipped = answers.some(
+                (ans) =>
+                    ans.question_id === skipCond.sourceQuestionId &&
+                    ans.answer_option_id === skipCond.skipOptionId
+            );
+            if (isSkipped) return false;  // ❗ skip ต้อง win
+        }
+
+        // 2) หา require conditions
         const requireConditions = sections.flatMap((s) =>
             s.questions.flatMap((q) =>
                 q.options.flatMap((opt) =>
@@ -103,8 +99,10 @@ const SectionSurvey = ({
             )
         );
 
+        // ไม่มี require → แสดงได้เลย
         if (!requireConditions.length) return true;
 
+        // 3) เช็ค require แบบ OR
         return requireConditions.some((cond) =>
             answers.some(
                 (ans) =>
@@ -113,6 +111,7 @@ const SectionSurvey = ({
             )
         );
     };
+
 
     const checkNextDisabled = () => {
         if (isPreview) return false;
@@ -132,6 +131,25 @@ const SectionSurvey = ({
             const hasText = ans.answer_text && ans.answer_text.trim() !== "";
             const hasOption = ans.answer_option_id !== null && ans.answer_option_id !== undefined;
             const hasAttachment = ans.attachment_url && ans.attachment_url !== "";
+
+
+            // ถ้าตอบตัวเลือกที่เป็น is_other ต้องมีข้อความ
+            const optionSelected = q.options.find((o => o.id === ans.answer_option_id));
+            if (optionSelected?.is_other) {
+                if (!hasText) return true;
+            }
+
+            // ถ้า matrix question ตอนนี้จะต้องตรวจสอบทุก row
+            if (q.question_type_id === 9) {
+                const matrixRows = q.matrix_rows || [];
+                for (let row of matrixRows) {
+                    const rowAns = answers.find(
+                        (a) =>
+                            a.question_id === q.id && a.matrix_row_id === row.id
+                    );
+                    if (!rowAns) return true; // row นี้ยังไม่มีคำตอบ
+                }
+            }
 
             return !(hasValue || hasText || hasOption || hasAttachment);
         });
@@ -176,7 +194,7 @@ const SectionSurvey = ({
                     </Typography>
                 </Box>
 
-                {section.is_dynamic && (
+                {section?.is_dynamic && (
                     <Box
                         sx={{
                             display: "flex",

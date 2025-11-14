@@ -281,6 +281,11 @@ const QuestionSurvey = ({
                                                             );
                                                         }
 
+                                                        // ถ้านำออกหมด ให้เป็น null
+                                                        if (updatedOptionIds.length === 0) {
+                                                            updatedOptionIds = null;
+                                                        }
+
                                                         const updatedAnswer = {
                                                             section_id: question.section_id,
                                                             question_id: question.id,
