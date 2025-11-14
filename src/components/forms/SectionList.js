@@ -59,7 +59,12 @@ function SortableItem({ section, setSections, onAdd, sections }) {
         setSections((prev) => prev.map((s) => (s.temp_id === section.temp_id ? { ...s, questions: [...s.questions, newQuestion] } : s)));
     };
     const handleDeleteSection = () => {
-        setSections((prev) => prev.filter((s) => s.temp_id !== section.temp_id));
+        // setSections((prev) => prev.filter((s) => s.temp_id !== section.temp_id));
+        // ปรับปรุงให้ลบแล้วปรับ section_no ใหม่ทั้งหมดให้เรียงต่อกัน
+        setSections((prev) => {
+            const newSections = prev.filter((s) => s.temp_id !== section.temp_id);
+            return newSections.map((s, i) => ({ ...s, section_no: i + 1 }));
+        });
     };
 
     return (
