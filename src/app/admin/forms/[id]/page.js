@@ -94,6 +94,7 @@ const FormCreatePage = () => {
           question_no: 1,
           question: "",
           question_type_id: 1,
+          is_required: true,
         },
       ],
     },
@@ -232,11 +233,14 @@ const FormCreatePage = () => {
       if (response.success && !isSavePreview) {
         // redirect to form list page
         router.push("/admin/forms");
+      } else if (response.success && isSavePreview) {
+        fetchFormDetail(id); // reload form detail
+        window.open(`/admin/forms/${id}/preview`, '_blank');
       }
     }
-    if (isSavePreview && id !== "create") {
-      window.open(`/admin/forms/${id}/preview`, '_blank');
-    }
+    // if (isSavePreview && id !== "create") {
+    //   window.open(`/admin/forms/${id}/preview`, '_blank');
+    // }
   };
 
   return loading ? (

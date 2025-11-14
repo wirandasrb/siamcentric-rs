@@ -67,6 +67,14 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
             return { ...colRest, id: undefined };
         });
 
+        // scape_labels ก็ต้องทำเหมือนกันถ้ามี
+        if (question?.scale_labels && question.scale_labels.length > 0) {
+            question.scale_labels = question.scale_labels.map(label => {
+                const { id, ...labelRest } = label;
+                return { ...labelRest, id: undefined };
+            });
+        }
+
         const { id, ...rest } = question;
 
         const duplicatedQuestion = {
@@ -76,6 +84,7 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
             options: optionsCopy || rest.options || [],
             ...(matrixRowsCopy ? { matrix_rows: matrixRowsCopy } : {}),
             ...(matrixColumnsCopy ? { matrix_columns: matrixColumnsCopy } : {}),
+            ...(question.scale_labels ? { scale_labels: question.scale_labels } : {}),
         };
 
         onAdd(question.temp_id, duplicatedQuestion);
@@ -425,6 +434,7 @@ const QuestionDragAndDrop = ({ questions, onChange, sections }) => {
             question_no: index + 2,
             question: '',
             question_type_id: 1,
+            is_required: true,
             options: []
         };
         const newQuestions = [...questions];
