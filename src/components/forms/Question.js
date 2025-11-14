@@ -84,7 +84,7 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
             options: optionsCopy || rest.options || [],
             ...(matrixRowsCopy ? { matrix_rows: matrixRowsCopy } : {}),
             ...(matrixColumnsCopy ? { matrix_columns: matrixColumnsCopy } : {}),
-            ...(question.scale_labels ? { scale_labels: question.scale_labels } : {}),
+            ...(question?.scale_labels ? { scale_labels: question.scale_labels } : {}),
         };
 
         onAdd(question.temp_id, duplicatedQuestion);
