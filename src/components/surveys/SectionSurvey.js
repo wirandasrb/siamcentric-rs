@@ -1,7 +1,17 @@
-import { EditNote, Info } from "@mui/icons-material";
-import { Box, Button, lighten, Typography } from "@mui/material";
+import { ChatBubbleOutline, CheckCircle, CheckCircleOutline, CheckCircleOutlined, DescriptionOutlined, EditNote, EditNoteOutlined, GppGoodOutlined, HomeRepairService, HomeRepairServiceOutlined, Info, KeyboardArrowLeft, KeyboardArrowRight, Person, PersonOutline, SendOutlined } from "@mui/icons-material";
+import { Box, Button, Divider, lighten, Paper, Typography } from "@mui/material";
 import QuestionSurvey from "./QuestionSurvey";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+
+const iconTitle = [
+    <PersonOutline key="icon-person" />,
+    <HomeRepairServiceOutlined key="icon-home-repair" />,
+    <DescriptionOutlined key="icon-description" />,
+    <CheckCircleOutlined key="icon-check-circle" />,
+    <GppGoodOutlined key="icon-gpp-good" />,
+    <ChatBubbleOutline key="icon-chat-bubble" />,
+    <EditNoteOutlined key="icon-edit-note" />,
+]
 
 const SectionSurvey = ({
     sections,
@@ -155,240 +165,418 @@ const SectionSurvey = ({
         });
     };
 
-    return (
-        <>
-            <Box
-                sx={{
-                    justifyContent: "center",
-                    backgroundColor: "white",
-                    width: {
-                        xs: "90%", // หน้าจอเล็ก
-                        sm: "80%", // หน้าจอกลาง
-                        md: "80%", // หน้าจอใหญ่
-                        lg: "60%", // หน้าจอใหญ่มาก
-                    },
-                    height: "auto",
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    boxShadow: 3,
-                    gap: 2,
-                    mt: 4, // เพิ่ม margin-top เพื่อให้ไม่ติดขอบจอ
-                }}
-                key={section.id}
-            >
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        p: 2,
-                        backgroundImage: `linear-gradient(to left, ${primaryColor ?? "#2196f3"
-                            }, ${secondColor ?? "#f5f5f5"})`,
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontSize: 20,
-                        }}
-                    >
-                        {section.section_title}
-                    </Typography>
-                </Box>
+    // return (
+    //     <>
+    //         <Box
+    //             sx={{
+    //                 justifyContent: "center",
+    //                 backgroundColor: "white",
+    //                 width: {
+    //                     xs: "90%", // หน้าจอเล็ก
+    //                     sm: "80%", // หน้าจอกลาง
+    //                     md: "80%", // หน้าจอใหญ่
+    //                     lg: "60%", // หน้าจอใหญ่มาก
+    //                 },
+    //                 height: "auto",
+    //                 borderRadius: 3,
+    //                 overflow: "hidden",
+    //                 boxShadow: 3,
+    //                 gap: 2,
+    //                 mt: 4, // เพิ่ม margin-top เพื่อให้ไม่ติดขอบจอ
+    //             }}
+    //             key={section.id}
+    //         >
+    //             <Box
+    //                 sx={{
+    //                     display: "flex",
+    //                     flexDirection: "column",
+    //                     p: 2,
+    //                     backgroundImage: `linear-gradient(to left, ${primaryColor ?? "#2196f3"
+    //                         }, ${secondColor ?? "#f5f5f5"})`,
+    //                 }}
+    //             >
+    //                 <Typography
+    //                     sx={{
+    //                         fontSize: 20,
+    //                     }}
+    //                 >
+    //                     {section.section_title}
+    //                 </Typography>
+    //             </Box>
 
-                {section?.is_dynamic && (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            position: "relative",
-                            gap: 2,
-                            p: 2,
-                            px: 4,
-                            borderRadius: 3,
-                            background: `linear-gradient(135deg, ${lighten(
-                                primaryColor,
-                                0.85
-                            )}, ${lighten(primaryColor, 0.95)})`,
-                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
-                            my: 2,
-                            mx: {
-                                xs: 2, // หน้าจอเล็ก
-                                sm: 2, // หน้าจอกลาง
-                                md: 4, // หน้าจอใหญ่
-                                lg: 4, // หน้าจอใหญ่มาก
-                            },
-                        }}
-                    >
+    //             {section?.is_dynamic && (
+    //                 <Box
+    //                     sx={{
+    //                         display: "flex",
+    //                         alignItems: "center",
+    //                         position: "relative",
+    //                         gap: 2,
+    //                         p: 2,
+    //                         px: 4,
+    //                         borderRadius: 3,
+    //                         background: `linear-gradient(135deg, ${lighten(
+    //                             primaryColor,
+    //                             0.85
+    //                         )}, ${lighten(primaryColor, 0.95)})`,
+    //                         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.06)",
+    //                         my: 2,
+    //                         mx: {
+    //                             xs: 2, // หน้าจอเล็ก
+    //                             sm: 2, // หน้าจอกลาง
+    //                             md: 4, // หน้าจอใหญ่
+    //                             lg: 4, // หน้าจอใหญ่มาก
+    //                         },
+    //                     }}
+    //                 >
+    //                     <Box
+    //                         sx={{
+    //                             backgroundColor: primaryColor,
+    //                             color: "#fff",
+    //                             borderRadius: "50%",
+    //                             p: 1,
+    //                             display: "flex",
+    //                             alignItems: "center",
+    //                             justifyContent: "center",
+    //                             height: 40,
+    //                             width: 40,
+    //                         }}
+    //                     >
+    //                         <EditNote sx={{ fontSize: 30 }} />
+    //                     </Box>
+    //                     <Typography
+    //                         sx={{
+    //                             fontSize: 16,
+    //                             color: primaryColor,
+    //                             fontWeight: "bold",
+    //                         }}
+    //                     >
+    //                         {/* แสดงข้อความ dynamic_text ถ้ามี + คำตอบจาก dynamic_source_question_id */}
+    //                     </Typography>
+    //                 </Box>
+    //             )}
+
+    //             {section.section_note && (
+    //                 <Box
+    //                     sx={{
+    //                         mx: { xs: 2, sm: 2, md: 4, lg: 4 },
+    //                         mt: 2,
+    //                         px: 2,
+    //                         display: "flex",
+    //                         alignItems: "flex-start",
+    //                         gap: 1.5,
+    //                     }}
+    //                 >
+    //                     <Info
+    //                         sx={{
+    //                             color: lighten(primaryColor, 0.4),
+    //                             fontSize: 20,
+    //                             mt: "2px",
+    //                         }}
+    //                     />
+    //                     <Typography
+    //                         sx={{
+    //                             fontSize: 16,
+    //                             fontStyle: "italic",
+    //                             color: "#555",
+    //                         }}
+    //                     >
+    //                         {section.section_note}
+    //                     </Typography>
+    //                 </Box>
+    //             )}
+    //             <Box
+    //                 sx={{
+    //                     display: "flex",
+    //                     flexDirection: "column",
+    //                     gap: 2,
+    //                     m: {
+    //                         xs: 2, // หน้าจอเล็ก
+    //                         sm: 2, // หน้าจอกลาง
+    //                         md: 4, // หน้าจอใหญ่
+    //                         lg: 6, // หน้าจอใหญ่มาก
+    //                     },
+    //                 }}
+    //             >
+    //                 {section.questions.map((question, index) => {
+    //                     const visible = shouldShowQuestion(question);
+    //                     if (!visible) return null;
+
+    //                     return (
+    //                         <Box key={question.id}>
+    //                             {/* Render คำถามที่นี่ */}
+    //                             <QuestionSurvey
+    //                                 question={question}
+    //                                 answers={answers}
+    //                                 primaryColor={primaryColor}
+    //                                 secondColor={secondColor}
+    //                                 onChange={(updatedQuestion) => {
+    //                                     // Handle when answer question changes
+    //                                     handleChangeAnswer(
+    //                                         updatedQuestion.id,
+    //                                         updatedQuestion.answer
+    //                                     );
+    //                                 }}
+    //                             />
+    //                         </Box>
+    //                     );
+    //                 })}
+    //             </Box>
+    //         </Box>
+    //         {/* Render ปุ่มถัดไป */}
+
+    //         <Box
+    //             sx={{
+    //                 justifyContent: "center",
+    //                 width: {
+    //                     xs: "90%", // หน้าจอเล็ก
+    //                     sm: "80%", // หน้าจอกลาง
+    //                     md: "80%", // หน้าจอใหญ่
+    //                     lg: "60%", // หน้าจอใหญ่มาก
+    //                 },
+    //                 height: "auto",
+    //                 overflow: "hidden",
+    //                 gap: 2,
+    //                 mt: 1,
+    //             }}
+    //             key={`footer-${section.id}`}
+    //         >
+    //             <Box
+    //                 sx={{
+    //                     display: "flex",
+    //                     justifyContent:
+    //                         section.section_no > 1 ? "space-between" : "flex-end", // ปุ่มย้อนกลับซ้าย ถัดไปขวา
+    //                     mb: 2,
+    //                 }}
+    //             >
+    //                 {section.section_no > 1 && onBack && (
+    //                     <Button
+    //                         sx={{
+    //                             minWidth: 100,
+    //                             borderRadius: 3,
+    //                         }}
+    //                         variant="outlined"
+    //                         color="primary"
+    //                         onClick={onBack}
+    //                     >
+    //                         ย้อนกลับ
+    //                     </Button>
+    //                 )}
+    //                 {/* ปุ่มถัดไป หรือส่งแบบสอบถาม */}
+    //                 {!is_last_section && onNext && (
+    //                     <Button
+    //                         sx={{
+    //                             minWidth: 100,
+    //                             borderRadius: 3,
+    //                             color: "white",
+    //                             fontWeight: "bold",
+    //                         }}
+    //                         // ปุ่มถัดไป ปิดใช้งานถ้ายังมีคำถามที่โดน is_required ที่ยังไม่ได้ตอบ
+    //                         disabled={checkNextDisabled()}
+    //                         variant="contained"
+    //                         color="primary"
+    //                         onClick={onNext}
+    //                     >
+    //                         ถัดไป
+    //                     </Button>
+    //                 )}
+    //                 {/* ปุ่มส่งแบบสอบถาม */}
+    //                 {is_last_section && onSubmit && (
+    //                     <Button
+    //                         sx={{
+    //                             minWidth: 100,
+    //                             borderRadius: 3,
+    //                             color: "white",
+    //                             fontWeight: "bold",
+    //                         }}
+    //                         variant="contained"
+    //                         color="primary"
+    //                         onClick={onSubmit}
+    //                         disabled={checkNextDisabled()}
+    //                     >
+    //                         ส่งแบบสอบถาม
+    //                     </Button>
+    //                 )}
+    //             </Box>
+    //         </Box>
+    //     </>
+    // );
+
+    return (
+        <Box
+            sx={{
+                width: { xs: "90%", sm: "85%", md: "75%", lg: "60%" },
+                mx: "auto",
+                mb: 8,
+            }}
+        >
+            {/* Container หลักที่เป็นกระดาษสีขาว */}
+            <Paper
+                elevation={0}
+                sx={{
+                    borderRadius: 4,
+                    overflow: "hidden",
+                    boxShadow: "0px 10px 30px rgba(0,0,0,0.08)", // เงาฟุ้งๆ ตามรูป
+                    backgroundColor: "#fff",
+                    position: "relative",
+                }}
+            >
+                {/* ส่วนหัว Section */}
+                <Box sx={{ p: { xs: 3, md: 4 }, pb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                        {/* Icon Wrapper: กรอบสีเหลี่ยมสีฟ้าอ่อน */}
                         <Box
                             sx={{
-                                backgroundColor: primaryColor,
-                                color: "#fff",
-                                borderRadius: "50%",
-                                p: 1,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                height: 40,
-                                width: 40,
+                                width: 42,
+                                height: 42,
+                                borderRadius: '12px', // ความโค้งมนตามรูป
+                                backgroundColor: lighten(primaryColor, 0.9), // สีฟ้าอ่อนพาสเทล
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
                             }}
                         >
-                            <EditNote sx={{ fontSize: 30 }} />
+                            {/* เลือก Icon ตามประเภท Section (ตัวอย่าง) */}
+                            {/* {section.section_no === 6 ? (
+                                <ChatBubbleOutline sx={{ color: primaryColor, fontSize: 22 }} />
+                            ) : (
+                                <PersonOutline sx={{ color: primaryColor, fontSize: 24 }} />
+                            )} */}
+                            {iconTitle[(section.section_no - 1) % iconTitle.length] &&
+                                React.cloneElement(iconTitle[(section.section_no - 1) % iconTitle.length], {
+                                    sx: { color: primaryColor, fontSize: 24 }
+                                })
+                            }
                         </Box>
-                        <Typography
-                            sx={{
-                                fontSize: 16,
-                                color: primaryColor,
-                                fontWeight: "bold",
-                            }}
-                        >
-                            {/* แสดงข้อความ dynamic_text ถ้ามี + คำตอบจาก dynamic_source_question_id */}
-                        </Typography>
-                    </Box>
-                )}
 
-                {section.section_note && (
-                    <Box
-                        sx={{
-                            mx: { xs: 2, sm: 2, md: 4, lg: 4 },
-                            mt: 2,
-                            px: 2,
-                            display: "flex",
-                            alignItems: "flex-start",
-                            gap: 1.5,
-                        }}
-                    >
-                        <Info
-                            sx={{
-                                color: lighten(primaryColor, 0.4),
-                                fontSize: 20,
-                                mt: "2px",
-                            }}
-                        />
+                        {/* ข้อความ Title */}
                         <Typography
+                            variant="h5"
                             sx={{
-                                fontSize: 16,
-                                fontStyle: "italic",
-                                color: "#555",
+                                fontWeight: 700,
+                                color: "#2C3E50", // สีเข้มโทนน้ำเงิน-เทา เพื่อความหรูหรา
+                                fontSize: { xs: "1.1rem", md: "1.35rem" },
+                                letterSpacing: "0.5px",
                             }}
                         >
-                            {section.section_note}
+                            {section.section_title}
                         </Typography>
                     </Box>
-                )}
+
+                    {section.section_note && (
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                gap: 1,
+                                mt: 1,
+                                p: 2,
+                                borderRadius: 2,
+                                backgroundColor: lighten(primaryColor, 0.95), // พื้นหลังสีอ่อนๆ
+                                borderLeft: `4px solid ${primaryColor}`,
+                            }}
+                        >
+                            <Info sx={{ color: primaryColor, fontSize: 20, mt: 0.3 }} />
+                            <Typography sx={{ fontSize: 15, color: "#555", fontStyle: "italic" }}>
+                                {section.section_note}
+                            </Typography>
+                        </Box>
+                    )}
+                </Box>
+
+                <Divider sx={{ mx: 4, opacity: 0.6 }} />
+
+                {/* รายการคำถาม */}
                 <Box
                     sx={{
+                        p: { xs: 2, md: 4 },
                         display: "flex",
                         flexDirection: "column",
-                        gap: 2,
-                        m: {
-                            xs: 2, // หน้าจอเล็ก
-                            sm: 2, // หน้าจอกลาง
-                            md: 4, // หน้าจอใหญ่
-                            lg: 6, // หน้าจอใหญ่มาก
-                        },
+                        gap: 4, // ระยะห่างระหว่างข้อ
                     }}
                 >
-                    {section.questions.map((question, index) => {
+                    {section.questions.map((question) => {
                         const visible = shouldShowQuestion(question);
                         if (!visible) return null;
 
                         return (
-                            <Box key={question.id}>
-                                {/* Render คำถามที่นี่ */}
+                            <Box
+                                key={question.id}
+                                sx={{
+                                    transition: "all 0.3s ease",
+                                    "&:hover": { transform: "translateX(4px)" } // Effect เล็กน้อยตอน hover
+                                }}
+                            >
                                 <QuestionSurvey
                                     question={question}
                                     answers={answers}
                                     primaryColor={primaryColor}
                                     secondColor={secondColor}
                                     onChange={(updatedQuestion) => {
-                                        // Handle when answer question changes
-                                        handleChangeAnswer(
-                                            updatedQuestion.id,
-                                            updatedQuestion.answer
-                                        );
+                                        handleChangeAnswer(updatedQuestion.id, updatedQuestion.answer);
                                     }}
                                 />
                             </Box>
                         );
                     })}
                 </Box>
-            </Box>
-            {/* Render ปุ่มถัดไป */}
 
-            <Box
-                sx={{
-                    justifyContent: "center",
-                    width: {
-                        xs: "90%", // หน้าจอเล็ก
-                        sm: "80%", // หน้าจอกลาง
-                        md: "80%", // หน้าจอใหญ่
-                        lg: "60%", // หน้าจอใหญ่มาก
-                    },
-                    height: "auto",
-                    overflow: "hidden",
-                    gap: 2,
-                    mt: 1,
-                }}
-                key={`footer-${section.id}`}
-            >
+                {/* ส่วน Footer ปุ่มกด */}
                 <Box
                     sx={{
+                        p: 3,
+                        backgroundColor: "#fcfcfc",
+                        borderTop: "1px solid #eee",
                         display: "flex",
-                        justifyContent:
-                            section.section_no > 1 ? "space-between" : "flex-end", // ปุ่มย้อนกลับซ้าย ถัดไปขวา
-                        mb: 2,
+                        justifyContent: "space-between",
+                        alignItems: "center",
                     }}
                 >
-                    {section.section_no > 1 && onBack && (
-                        <Button
-                            sx={{
-                                minWidth: 100,
-                                borderRadius: 3,
-                            }}
-                            variant="outlined"
-                            color="primary"
-                            onClick={onBack}
-                        >
-                            ย้อนกลับ
-                        </Button>
-                    )}
-                    {/* ปุ่มถัดไป หรือส่งแบบสอบถาม */}
-                    {!is_last_section && onNext && (
-                        <Button
-                            sx={{
-                                minWidth: 100,
-                                borderRadius: 3,
-                                color: "white",
-                                fontWeight: "bold",
-                            }}
-                            // ปุ่มถัดไป ปิดใช้งานถ้ายังมีคำถามที่โดน is_required ที่ยังไม่ได้ตอบ
-                            disabled={checkNextDisabled()}
-                            variant="contained"
-                            color="primary"
-                            onClick={onNext}
-                        >
-                            ถัดไป
-                        </Button>
-                    )}
-                    {/* ปุ่มส่งแบบสอบถาม */}
-                    {is_last_section && onSubmit && (
-                        <Button
-                            sx={{
-                                minWidth: 100,
-                                borderRadius: 3,
-                                color: "white",
-                                fontWeight: "bold",
-                            }}
-                            variant="contained"
-                            color="primary"
-                            onClick={onSubmit}
-                            disabled={checkNextDisabled()}
-                        >
-                            ส่งแบบสอบถาม
-                        </Button>
-                    )}
+                    <Box>
+                        {section.section_no > 0 && (
+                            <Button
+                                variant="text"
+                                startIcon={<KeyboardArrowLeft />}
+                                onClick={onBack}
+                                sx={{ color: "#777", fontWeight: 600 }}
+                            >
+                                ย้อนกลับ
+                            </Button>
+                        )}
+                    </Box>
+
+                    <Button
+                        variant="contained"
+                        disabled={checkNextDisabled()}
+                        onClick={is_last_section ? onSubmit : onNext}
+                        endIcon={is_last_section ? <SendOutlined sx={{
+                            // กำหนดทิศทางของไอคอนให้ชี้เฉียงขึ้นไปทางขวา
+                            transform: 'rotate(-45deg)',
+                            fontSize: 20,
+                            mb: "2px",
+                        }} /> : <KeyboardArrowRight />}
+                        sx={{
+                            px: 4,
+                            py: 1,
+                            borderRadius: 3,
+                            fontSize: "1rem",
+                            fontWeight: "bold",
+                            boxShadow: `0 2px 4px 0 ${lighten(primaryColor, 0.4)}`,
+                            backgroundColor: primaryColor,
+                            "&:hover": {
+                                backgroundColor: primaryColor,
+                                filter: "brightness(0.9)",
+                            },
+                            "&.Mui-disabled": {
+                                backgroundColor: "#e0e0e0",
+                            }
+                        }}
+                    >
+                        {is_last_section ? "ส่งแบบสอบถาม" : "ถัดไป"}
+                    </Button>
                 </Box>
-            </Box>
-        </>
+            </Paper>
+        </Box>
     );
 };
 

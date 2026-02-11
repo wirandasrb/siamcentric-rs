@@ -1,3 +1,4 @@
+import { CheckCircle } from "@mui/icons-material";
 import {
     Button,
     Dialog,
@@ -94,11 +95,15 @@ const ModalConfirm = ({
                     onClick={onConfirm}
                     color="primary"
                     variant="contained"
+                    endIcon={
+                        <CheckCircle sx={{ fontSize: 20, color: "white" }} />
+                    }
                     sx={{
                         borderRadius: 3,
                         px: 3,
                         boxShadow: "none",
                         fontWeight: 500,
+                        minWidth: 100,
                         "&:hover": {
                             backgroundColor: "primary.dark",
                             boxShadow: "none",

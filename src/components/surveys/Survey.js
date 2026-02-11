@@ -3,6 +3,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   AppBar,
   Box,
+  Button,
+  colors,
   createTheme,
   CssBaseline,
   Divider,
@@ -16,6 +18,7 @@ import SectionSurvey from "./SectionSurvey";
 import ThankMessage from "./ThankMessage";
 import ModalConfirm from "../modals/ModalComfirm";
 import useApi from "../../services";
+import { DescriptionOutlined, GppGoodOutlined, KeyboardArrowRight, SecurityOutlined } from "@mui/icons-material";
 
 const SurveyComponent = ({ survey, responses }) => {
   const customTheme = useMemo(
@@ -36,6 +39,7 @@ const SurveyComponent = ({ survey, responses }) => {
   const [answers, setAnswers] = useState(responses || []);
   const [conditionMap, setConditionMap] = useState({}); // เก็บเงื่อนไขของคำถาม
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
 
   useEffect(() => {
     // ตรวจสอบถ้ามี responses และมี respondent_token
@@ -94,6 +98,9 @@ const SurveyComponent = ({ survey, responses }) => {
 
   const handleSubmit = async () => {
     setIsConfirmOpen(false);
+    // ชั่วคราว ข้ามการส่งข้อมูล
+    // setActiveStep((prev) => prev + 1);
+
     try {
       const response = await useApi.surveys.submitSurveyAnswers({
         answers: answers,
@@ -117,12 +124,12 @@ const SurveyComponent = ({ survey, responses }) => {
       console.error("Error submitting survey answers:", error);
     }
 
-    // คุณสามารถเพิ่มโค้ดเพื่อส่งคำตอบไปยังเซิร์ฟเวอร์ได้ที่นี่
   };
 
   const handleRetakeSurvey = () => {
     setAnswers([]);
     setActiveStep(0);
+    setIsStarted(false);
     if (typeof window !== "undefined") {
       localStorage.removeItem("respondent_token");
       setRespondentToken(null);
@@ -222,6 +229,30 @@ const SurveyComponent = ({ survey, responses }) => {
       >
         <AppBar
           position="static"
+          elevation={0}
+          sx={{
+            background: `linear-gradient(90deg, ${survey?.primary_color || "#1976d2"} 0%,  rgba(255, 255, 255, 0.4) 100%)`,
+            // ผสมสีหลักเข้าไปในพื้นหลังด้วย เพื่อให้ gradient ไม่ออกสีขาวเกินไป
+            backgroundColor: survey?.primary_color || "#1976d2",
+            p: 2,
+          }}>
+          <Toolbar
+            sx={{
+              display: "flex",
+              justifyContent: "center", // จัดการเรียงในแนวแกนหลัก (แนวนอน) ให้อยู่กลาง
+              alignItems: "center"      // จัดการเรียงในแนวตั้งให้อยู่กลาง
+            }}
+          >
+            <Box component="img" src={survey.image_url ?? "/images/online-survey.png"} sx={{ width: 50, height: 50, mr: 2 }} />
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+                {survey.title}
+              </Typography>
+            </Box>
+          </Toolbar>
+        </AppBar>
+        {/* <AppBar
+          position="static"
           sx={{ backgroundColor: survey.primary_color || "#1976d2" }}
         >
           <Toolbar>
@@ -231,7 +262,7 @@ const SurveyComponent = ({ survey, responses }) => {
               sx={{ width: 60, height: 60, padding: 1 }}
             />
           </Toolbar>
-        </AppBar>
+        </AppBar> */}
 
         {/* เนื้อหาตรงกลาง */}
         <Box
@@ -245,8 +276,9 @@ const SurveyComponent = ({ survey, responses }) => {
             py: 4, // padding ด้านบน/ล่าง
           }}
         >
+
           {/* กล่องหัวข้อ */}
-          {(survey?.display_title === "all_pages" ||
+          {/* {(survey?.display_title === "all_pages" ||
             (survey?.display_title === "first_page" && activeStep === 0)) &&
             (<Box
               sx={{
@@ -306,50 +338,116 @@ const SurveyComponent = ({ survey, responses }) => {
                   }}
                 />
               </Box>
-            </Box>)}
+            </Box>)} */}
 
-          {/* Progress bar อยู่ใต้หัวข้อ */}
-          {survey?.sections?.length > 1 && activeStep < survey.sections?.length && (
-            <ProgressBarSection
-              activeStep={activeStep}
-              totalSteps={survey?.sections?.length}
-              primaryColor={survey?.primary_color || "#1976d2"}
-            />
-          )}
-          {/* ส่วนของคำถาม จะมาแทนที่ตรงนี้ */}
-          {survey?.sections?.length > 0 &&
-            activeStep < survey.sections.length && (
-              <SectionSurvey
-                sections={survey.sections}
-                section={survey.sections[activeStep]}
-                conditions={conditionMap}
-                primaryColor={survey.primary_color || "#1976d2"}
-                secondColor={survey.second_color || "#f5f5f5"}
-                onNext={() => {
-                  const skipToIndex = skipSectionByConditions();
-                  // console.log("Determined skip to section index:", skipToIndex);
-                  if (skipToIndex !== null) {
-                    setActiveStep(skipToIndex);
-                  } else {
-                    setActiveStep(activeStep + 1);
+          {/* 2. หน้าคำชี้แจง (ก่อนเริ่ม) */}
+          {!isStarted && activeStep < survey?.sections?.length ? (
+            <Box sx={{
+              width: { xs: "90%", md: "600px" },
+              backgroundColor: "white",
+              borderRadius: 3,
+              boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center"
+            }}>
+              {/* แถบสีด้านบนกล่องเล็กน้อย */}
+              <Box sx={{
+                height: 6, width: '100%',
+                background: `linear-gradient(90deg, ${survey?.primary_color || "#1976d2"} 0%,  rgba(255, 255, 255, 0.4) 100%)`,
+                backgroundColor: survey?.primary_color || "#1976d2",
+              }} />
+
+              <Box sx={{ p: 4, textAlign: "center", width: '100%' }}>
+                <Box sx={{ backgroundColor: '#e3f2fd', p: 2, borderRadius: '50%', width: 'fit-content', m: '0 auto 16px' }}>
+                  <DescriptionOutlined sx={{
+                    fontSize: 48,
+                    color: survey.primary_color
+                  }} /> {/* ไอคอนรูปกระดาษ */}
+                </Box>
+
+                <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>คำชี้แจง</Typography>
+
+                <Box sx={{ backgroundColor: "#f8f9fa", p: 3, borderRadius: 2, textAlign: "left", mb: 4 }}>
+                  <Typography variant="body1" sx={{ color: "#555", lineHeight: 1.8 }}>
+                    {survey.description || "แบบสำรวจนี้เป็นส่วนหนึ่งของโครงการพัฒนา..."}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 2, color: survey.primary_color, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ marginRight: 8 }}><GppGoodOutlined /></span> ข้อมูลของท่านจะถูกเก็บเป็นความลับ
+                  </Typography>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  onClick={() => setIsStarted(true)}
+                  sx={{
+                    borderRadius: 3,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                    background: `linear-gradient(90deg, ${survey?.primary_color || "#1976d2"} 0%,  rgba(255, 255, 255, 0.4) 100%)`,
+                    backgroundColor: survey?.primary_color || "#1976d2",
+                    '&:hover': { backgroundColor: survey?.primary_color, filter: 'brightness(0.9)' }
+                  }}
+                  endIcon={
+                    <KeyboardArrowRight />
                   }
-                }}
+                >
+                  เริ่มทำแบบสำรวจ
+                </Button>
+              </Box>
+            </Box>
+          ) : (
+            <>
 
-                onBack={() => {
-                  if (activeStep > 0) {
-                    setActiveStep(activeStep - 1);
-                  }
-                }}
-                onSubmit={() => setIsConfirmOpen(true)}
-                is_last_section={activeStep === survey.sections.length - 1}
-                onChangeAnswer={handleChangeAnswer}
-                answers={answers}
-              />
-            )}
+              {/* Progress bar อยู่ใต้หัวข้อ */}
+              {survey?.sections?.length > 1 && activeStep < survey.sections?.length && (
+                <ProgressBarSection
+                  activeStep={activeStep}
+                  totalSteps={survey?.sections?.length}
+                  primaryColor={survey?.primary_color || "#1976d2"}
+                />
+              )}
+              {/* ส่วนของคำถาม จะมาแทนที่ตรงนี้ */}
+              {survey?.sections?.length > 0 &&
+                activeStep < survey.sections.length && (
+                  <SectionSurvey
+                    sections={survey.sections}
+                    section={survey.sections[activeStep]}
+                    conditions={conditionMap}
+                    primaryColor={survey.primary_color || "#1976d2"}
+                    secondColor={survey.second_color || "#f5f5f5"}
+                    onNext={() => {
+                      const skipToIndex = skipSectionByConditions();
+                      // console.log("Determined skip to section index:", skipToIndex);
+                      if (skipToIndex !== null) {
+                        setActiveStep(skipToIndex);
+                      } else {
+                        setActiveStep(activeStep + 1);
+                      }
+                    }}
 
-          {/* ส่วนท้ายแบบขอบคุณหลังส่งแบบสอบถามเสร็จสิ้น */}
-          {activeStep >= survey?.sections?.length && (
-            <ThankMessage form={survey} onRetakeSurvey={handleRetakeSurvey} />
+                    onBack={() => {
+                      if (activeStep > 0) {
+                        setActiveStep(activeStep - 1);
+                      } else if (activeStep === 0) {
+                        setIsStarted(false);
+                      }
+                    }}
+                    onSubmit={() => setIsConfirmOpen(true)}
+                    is_last_section={activeStep === survey.sections.length - 1}
+                    onChangeAnswer={handleChangeAnswer}
+                    answers={answers}
+                  />
+                )}
+
+              {/* ส่วนท้ายแบบขอบคุณหลังส่งแบบสอบถามเสร็จสิ้น */}
+              {activeStep >= survey?.sections?.length && (
+                <ThankMessage form={survey} onRetakeSurvey={handleRetakeSurvey} />
+              )}
+            </>
           )}
         </Box>
       </Box>
