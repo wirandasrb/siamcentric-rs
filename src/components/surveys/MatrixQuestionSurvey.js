@@ -1,7 +1,7 @@
 import React from "react";
-import { Box, Button, Radio, Typography } from "@mui/material";
+import { Box, Button, lighten, Radio, Typography } from "@mui/material";
 
-const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange }) => {
+const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange, primaryColor }) => {
   // MatrixQuestionSurvey.js
   const handleSelect = (row, col) => {
     const updatedAnswer = {
@@ -21,7 +21,7 @@ const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange }) =>
 
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2, px: { xs: 1, sm: 2, md: 3 } }}>
       {question?.matrix_type === "single_choice" && (
         <Box sx={{ border: "1px solid #ddd", borderRadius: 2, overflow: "hidden", p: 2 }}>
           {/* Header */}
@@ -86,7 +86,7 @@ const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange }) =>
         </Box>
       )}
 
-      {question?.matrix_type === "rating_bar" && (
+      {/* {question?.matrix_type === "rating_bar" && (
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {question.matrix_rows.map((row) => {
             const existingAnswer = answers.find(
@@ -94,7 +94,7 @@ const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange }) =>
             );
             return (
               <Box key={row.id} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <Typography sx={{ fontWeight: 500 }}>{row.row_label}</Typography>
+                <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{row.row_label}</Typography>
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                   {question.matrix_columns.map((col, colIndex) => {
                     const isSelected = existingAnswer && Number(existingAnswer.answer_value) >= Number(col.column_value);
@@ -120,6 +120,96 @@ const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange }) =>
                       >
                         {col.column_label}
                       </Button>
+                    );
+                  })}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )} */}
+
+      {question?.matrix_type === "rating_bar" && (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {question.matrix_rows.map((row) => {
+            const existingAnswer = answers.find(
+              (ans) => ans.question_id === question.id && ans.matrix_row_id === row.id
+            );
+
+            return (
+              <Box key={row.id} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {/* หัวข้อคำถามย่อย (เช่น (1) ความรู้ ความสามารถ...) */}
+                <Typography sx={{ fontWeight: 600, fontSize: 16, color: "#333" }}>
+                  {row.order + ") " + row.row_label}
+                </Typography>
+
+                {/* Container ของปุ่มคะแนน */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between", // กระจายตัวให้เต็มความกว้าง
+                    gap: { xs: 1, sm: 2 }
+                  }}
+                >
+                  {question.matrix_columns.map((col) => {
+                    const isSelected = existingAnswer && Number(existingAnswer.answer_value) === Number(col.column_value);
+
+                    return (
+                      <Box
+                        key={col.id}
+                        onClick={() => handleSelect(row, col)}
+                        sx={{
+                          flex: 1,
+                          aspectRatio: "1/1", // ทำให้เป็นสี่เหลี่ยมจตุรัส
+                          maxWidth: 100, // จำกัดขนาดไม่ให้ใหญ่เกินไปบนจอคอม
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          borderRadius: 3, // ความโค้งมนตามรูป
+                          border: isSelected ? "none" : "1px solid #eee",
+                          backgroundColor: isSelected ? "transparent" : "#fff",
+                          // ใส่ Gradient เมื่อถูกเลือก
+                          backgroundImage: isSelected
+                            ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(primaryColor, 0.3)} 100%)`
+                            : "none",
+                          boxShadow: isSelected
+                            ? `0 10px 20px ${lighten(primaryColor, 0.6)}`
+                            : "none",
+                          transition: "all 0.3s ease",
+                          "&:hover": {
+                            transform: "translateY(-4px)",
+                            borderColor: primaryColor,
+                          }
+                        }}
+                      >
+                        {/* ตัวเลขคะแนน */}
+                        <Typography
+                          sx={{
+                            fontSize: 24,
+                            fontWeight: 800,
+                            color: isSelected ? "#fff" : "#ccc",
+                          }}
+                        >
+                          {col.column_value}
+                        </Typography>
+
+                        {/* คำอธิบาย (เช่น น้อยที่สุด, ปานกลาง) */}
+                        {col.column_label && (
+                          <Typography
+                            sx={{
+                              fontSize: 10,
+                              fontWeight: 500,
+                              color: isSelected ? "rgba(255,255,255,0.8)" : "#999",
+                              mt: 0.5,
+                              textAlign: "center"
+                            }}
+                          >
+                            {col.column_label}
+                          </Typography>
+                        )}
+                      </Box>
                     );
                   })}
                 </Box>

@@ -463,7 +463,7 @@ const SectionSurvey = ({
                         </Typography>
                     </Box>
 
-                    {section.section_note && (
+                    {/* {section.section_note && (
                         <Box
                             sx={{
                                 display: "flex",
@@ -481,10 +481,29 @@ const SectionSurvey = ({
                                 {section.section_note}
                             </Typography>
                         </Box>
-                    )}
+                    )} */}
                 </Box>
 
                 <Divider sx={{ mx: 4, opacity: 0.6 }} />
+
+                {section.section_note && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            gap: 1,
+                            mt: 2,
+                            px: { xs: 3, md: 4 },
+                            // borderRadius: 2,
+                            // backgroundColor: lighten(primaryColor, 0.95), // พื้นหลังสีอ่อนๆ
+                            // borderLeft: `4px solid ${primaryColor}`,
+                        }}
+                    >
+                        <Info sx={{ color: primaryColor, fontSize: 20, mt: 0.3 }} />
+                        <Typography sx={{ fontSize: 15, color: "#555", fontStyle: "italic" }}>
+                            {section.section_note}
+                        </Typography>
+                    </Box>
+                )}
 
                 {/* รายการคำถาม */}
                 <Box

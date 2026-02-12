@@ -19,6 +19,7 @@ import ThankMessage from "./ThankMessage";
 import ModalConfirm from "../modals/ModalComfirm";
 import useApi from "../../services";
 import { DescriptionOutlined, GppGoodOutlined, KeyboardArrowRight, SecurityOutlined } from "@mui/icons-material";
+import SurveyClosed from "./SurveyClosed";
 
 const SurveyComponent = ({ survey, responses }) => {
   const customTheme = useMemo(
@@ -276,7 +277,6 @@ const SurveyComponent = ({ survey, responses }) => {
             py: 4, // padding ด้านบน/ล่าง
           }}
         >
-
           {/* กล่องหัวข้อ */}
           {/* {(survey?.display_title === "all_pages" ||
             (survey?.display_title === "first_page" && activeStep === 0)) &&
@@ -340,8 +340,11 @@ const SurveyComponent = ({ survey, responses }) => {
               </Box>
             </Box>)} */}
 
+          {/* ปิดแบบสำรวจ */}
           {/* 2. หน้าคำชี้แจง (ก่อนเริ่ม) */}
-          {!isStarted && activeStep < survey?.sections?.length ? (
+          {!survey.is_open ? (
+            <SurveyClosed survey={survey} />
+          ) : !isStarted && activeStep < survey?.sections?.length ? (
             <Box sx={{
               width: { xs: "90%", md: "600px" },
               backgroundColor: "white",
