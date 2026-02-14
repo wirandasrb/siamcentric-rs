@@ -138,7 +138,7 @@ const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange, prim
 
             return (
               <Box key={row.id} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {/* หัวข้อคำถามย่อย (เช่น (1) ความรู้ ความสามารถ...) */}
+
                 <Typography sx={{ fontWeight: 600, fontSize: 16, color: "#333" }}>
                   {row.order + ") " + row.row_label}
                 </Typography>
@@ -187,7 +187,7 @@ const MatrixQuestionSurvey = ({ question, answers = [], handleAnswerChange, prim
                         {/* ตัวเลขคะแนน */}
                         <Typography
                           sx={{
-                            fontSize: 24,
+                            fontSize: { xs: 18, sm: 24 },
                             fontWeight: 800,
                             color: isSelected ? "#fff" : "#ccc",
                           }}

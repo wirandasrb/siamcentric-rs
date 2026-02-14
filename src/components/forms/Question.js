@@ -187,7 +187,7 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
                                     ...question,
                                     question_type_id: newValue.id,
                                     options: [{ temp_id: `option-${getRandomId()}`, option: '', option_no: 1, is_other: false }],
-                                    dropdown_source_type: null,
+                                    dropdown_source_type: newValue.id === 5 ? 'internal' : null,
                                     external_source_id: null,
                                     rating_type_id: null,
                                     max_scale: null,
@@ -320,7 +320,7 @@ function QuestionItem({ sections, questions, question, onChange, onDelete, onAdd
                                     onClick={
                                         handleOptionOther
                                     }
-                                    disabled={question.options?.some(option => option.option === 'อื่นๆ (โปรดระบุ)')}
+                                    disabled={question.options?.some(option => (option.option === 'อื่นๆ (โปรดระบุ)' || option.is_other))}
                                 >
                                     เพิ่มตัวเลือกอื่นๆ
                                 </Button>

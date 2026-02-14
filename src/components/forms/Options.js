@@ -52,6 +52,19 @@ function SortableItem({ option, question, questions, onChange, onDelete, onAdd, 
                 }}
                 onChange={(e) => onChange({ ...option, option: e.target.value })}
             />
+
+            {/*input description option*/}
+            <TextField
+                value={option?.description || ""}
+                variant="standard"
+                size="small"
+                placeholder="หมายเหตุ: "
+                sx={{
+                    flex: 0.5,
+                    "& .MuiInputBase-root": { height: "40px" },
+                }}
+                onChange={(e) => onChange({ ...option, description: e.target.value })}
+            />
             <IconButton aria-label="add-option" onClick={() => onAdd(option.temp_id)}>
                 <Add fontSize="small" />
             </IconButton>

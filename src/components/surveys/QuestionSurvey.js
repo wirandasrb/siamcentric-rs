@@ -184,7 +184,7 @@ const QuestionSurvey = ({
             )}
 
             {question.question_type_id === 3 && (
-                <Box sx={{ mt: 1, width: "100%", fontSize: 16, ml: 2 }}>
+                <Box sx={{ mt: 1, fontSize: 16 }}>
                     <RadioGroup
                         value={answer ? answer.answer_option_id : ""}
                         onChange={(e) => {
@@ -199,73 +199,64 @@ const QuestionSurvey = ({
                             };
                             onChange({ ...question, answer: updatedAnswer });
                         }}
-                        sx={{ width: "100%" }}
                     >
-                        {/* ต้องใช้ Grid Container หุ้ม Map โดยตรง และต้องไม่อยู่ภายใต้ Flex Column ที่บีบพื้นที่ */}
-                        <Grid
-                            container
-                            spacing={2}
+                        {/* ใช้ CSS Grid แทน */}
+                        <Box
                             sx={{
-                                width: "100%", // ชดเชย margin ลบที่เกิดจาก spacing ของ MUI
-                                ml: -1.5, // เลื่อนกลับมาให้ตรงกับแนวข้อความด้านบน
-                                mt: 0.5,
+                                display: "grid",
+                                gridTemplateColumns: {
+                                    xs: "1fr",        // มือถือ = 1 คอลัมน์
+                                    md: "1fr 1fr",    // จอใหญ่ = 2 คอลัมน์
+                                },
+                                gap: 2,
+                                width: "100%",
                             }}
                         >
                             {question.options.map((option) => {
                                 const isSelected = answer?.answer_option_id === option.id;
+
                                 return (
-                                    <Grid
-                                        item
-                                        xs={12}
-                                        sm={6}
+                                    <Box
                                         key={option.id}
-                                        sx={{ display: "flex" }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                border: isSelected
-                                                    ? `1px solid ${primaryColor}`
-                                                    : "1px solid #e0e0e0",
-                                                borderRadius: 2,
-                                                transition: "all 0.2s ease",
+                                        sx={{
+                                            border: isSelected
+                                                ? `1px solid ${primaryColor}`
+                                                : "1px solid #e0e0e0",
+                                            borderRadius: 2,
+                                            transition: "all 0.2s ease",
+                                            backgroundColor: isSelected
+                                                ? lighten(primaryColor, 0.85)
+                                                : "transparent",
+                                            "&:hover": {
+                                                borderColor: primaryColor,
                                                 backgroundColor: isSelected
-                                                    ? lighten(primaryColor, 0.8)
-                                                    : "transparent",
-                                                height: "100%",
+                                                    ? lighten(primaryColor, 0.85)
+                                                    : "#f9f9f9",
+                                            },
+                                        }}
+                                    >
+                                        <FormControlLabel
+                                            value={option.id}
+                                            control={<Radio />}
+                                            label={option.option}
+                                            sx={{
                                                 width: "100%",
-                                                display: "flex", // ให้ Box ภายในยืดเต็มความสูง Grid
-                                                alignItems: "stretch",
-                                                "&:hover": {
-                                                    borderColor: primaryColor,
-                                                    backgroundColor: isSelected
-                                                        ? lighten(primaryColor, 0.8)
-                                                        : "#f9f9f9",
+                                                m: 0,
+                                                p: { xs: 1, md: 1.5 },
+                                                alignItems: "center",
+                                                "& .MuiFormControlLabel-label": {
+                                                    fontSize: 16,
+                                                    fontWeight: isSelected ? "bold" : "normal",
+                                                    color: isSelected ? primaryColor : "inherit",
                                                 },
                                             }}
-                                        >
-                                            <FormControlLabel
-                                                control={<Radio />}
-                                                label={option.option}
-                                                value={option.id}
-                                                sx={{
-                                                    width: "100%",
-                                                    m: 0,
-                                                    p: { xs: 1, md: 1.5 },
-                                                    "& .MuiFormControlLabel-label": {
-                                                        fontSize: 16,
-                                                        fontWeight: isSelected ? "bold" : "normal",
-                                                        color: isSelected ? primaryColor : "inherit",
-                                                    },
-                                                }}
-                                            />
-                                        </Box>
-                                    </Grid>
+                                        />
+                                    </Box>
                                 );
                             })}
-                        </Grid>
+                        </Box>
                     </RadioGroup>
 
-                    {/* ถ้าคำตอบที่เลือกเป็นอื่นๆ option มีตัวแปร is_other */}
                     {question.options.find((option) => option.is_other) && (
                         <TextField
                             fullWidth
@@ -290,11 +281,12 @@ const QuestionSurvey = ({
                                 )
                             }
                             placeholder="โปรดระบุ"
-                            sx={{ mt: 1, mb: 2, width: "calc(100% - 32px)" }}
+                            sx={{ mt: 2, mb: 2 }}
                         />
                     )}
                 </Box>
             )}
+
 
             {/* {question.question_type_id === 3 && (
                     <Box
@@ -411,7 +403,7 @@ const QuestionSurvey = ({
                                 <Box
                                     key={option.id}
                                     sx={{
-                                        border: isChecked ? `1px solid ${primaryColor}` : "none",
+                                        border: isChecked ? `1px solid ${primaryColor}` : "1px solid #e0e0e0",
                                         borderRadius: 2,
                                         p: 1,
                                         transition: "all 0.2s ease",
@@ -521,14 +513,14 @@ const QuestionSurvey = ({
                                 )
                             }
                             placeholder="โปรดระบุ"
-                            sx={{ mt: 1, ml: 4 }}
+                        // sx={{  ml: 4 }}
                         />
                     )}
                 </Box>
             )}
 
             {question.question_type_id === 5 && (
-                <Box sx={{ mt: 1, ml: 1, width: 300 }}>
+                <Box sx={{ mt: 1 }}>
                     {/*แบบ autocomplete */}
                     {question.dropdown_source_type &&
                         question.dropdown_source_type === "external" ? (
@@ -553,57 +545,91 @@ const QuestionSurvey = ({
                             disableClearable={question.is_required}
                         />
                     ) : (
-                        <Autocomplete
-                            options={question.options || []}
-                            getOptionLabel={(option) => option.option}
-                            disableClearable={question.is_required}
-                            value={
-                                question?.options?.find(
-                                    (opt) => opt.id === (answer ? answer?.answer_option_id : null)
-                                ) || null
-                            }
-                            onChange={(event, newValue) => {
-                                let updatedAnswer = {
-                                    section_id: question.section_id,
-                                    question_id: question.id,
-                                    answer_option_id: newValue ? newValue.id : null,
-                                    answer_text: "",
-                                    answer_value: null,
-                                    attachment_url: null,
-                                };
-                                onChange({
-                                    ...question,
-                                    answer: updatedAnswer,
-                                });
-                            }}
-                            sx={{
-                                mt: 1.5,
-                                "& .MuiOutlinedInput-root": {
-                                    borderRadius: 2.5, // ความโค้งมนเท่ากับ TextField และปุ่ม
-                                    backgroundColor: "#fcfcfc",
-                                    "& fieldset": {
-                                        borderColor: "#e0e0e0",
+                        <Box sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                        }}>
+                            <Autocomplete
+                                options={question.options || []}
+                                getOptionLabel={(option) => option.option}
+                                disableClearable={question.is_required}
+                                value={
+                                    question?.options?.find(
+                                        (opt) => opt.id === (answer ? answer?.answer_option_id : null)
+                                    ) || null
+                                }
+                                onChange={(event, newValue) => {
+                                    let updatedAnswer = {
+                                        section_id: question.section_id,
+                                        question_id: question.id,
+                                        answer_option_id: newValue ? newValue.id : null,
+                                        answer_text: "",
+                                        answer_value: null,
+                                        attachment_url: null,
+                                    };
+                                    onChange({
+                                        ...question,
+                                        answer: updatedAnswer,
+                                    });
+                                }}
+                                sx={{
+                                    mt: 1.5,
+                                    "& .MuiOutlinedInput-root": {
+                                        borderRadius: 2.5, // ความโค้งมนเท่ากับ TextField และปุ่ม
+                                        backgroundColor: "#fcfcfc",
+                                        "& fieldset": {
+                                            borderColor: "#e0e0e0",
+                                        },
+                                        "&:hover fieldset": {
+                                            borderColor: primaryColor,
+                                        },
+                                        "&.Mui-focused fieldset": {
+                                            borderColor: primaryColor,
+                                        },
                                     },
-                                    "&:hover fieldset": {
-                                        borderColor: primaryColor,
-                                    },
-                                    "&.Mui-focused fieldset": {
-                                        borderColor: primaryColor,
-                                    },
-                                },
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    placeholder="กรุณาเลือกคำตอบ..."
-                                    // label="โปรดเลือกคำตอบ"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        placeholder="กรุณาเลือกคำตอบ..."
+                                        // label="โปรดเลือกคำตอบ"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
 
+                                    />
+                                )}
+                            />
+
+                            {question.options.find((option) => option.is_other) && (
+                                <TextField
+                                    fullWidth
+                                    variant="standard"
+                                    value={answer?.answer_text || ""}
+                                    onChange={(e) => {
+                                        onChange({
+                                            ...question,
+                                            answer: {
+                                                ...answer,
+                                                answer_text: e.target.value,
+                                            },
+                                        });
+                                    }}
+                                    disabled={
+                                        !(
+                                            answer &&
+                                            question.options.find(
+                                                (option) =>
+                                                    option.is_other && option.id === answer.answer_option_id
+                                            )
+                                        )
+                                    }
+                                    placeholder="โปรดระบุ"
+                                    sx={{ mt: 1, mb: 2 }}
                                 />
                             )}
-                        />
+                        </Box>
                     )}
                 </Box>
             )}
