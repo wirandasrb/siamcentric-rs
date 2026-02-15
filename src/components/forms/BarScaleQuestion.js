@@ -1,5 +1,5 @@
 "use client";
-import { Box, Button, Checkbox, FormControlLabel, TextField, Typography } from "@mui/material";
+import { Box, Button, Checkbox, FormControlLabel, TextField, Typography, lighten } from "@mui/material";
 import React from "react";
 import { defaultScaleLabels } from "../../contants/scaleBarLabel";
 
@@ -78,7 +78,110 @@ const BarScaleQuestion = ({ question, onChange }) => {
                     />
                 </Box>
             ))}
-            <Box sx={{ fontSize: 14, mt: 2, color: 'text.secondary' }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
+                <Box sx={{ fontSize: 14, color: 'text.secondary', ml: 1 }}>
+                    ตัวอย่าง: {question.max_scale || 5} ระดับ
+                </Box>
+
+                <Typography variant="body2" sx={{ fontWeight: 500, fontSize: 16, color: "text.secondary", ml: 2 }}>
+                    {question.question_no}. {question.question}
+                </Typography>
+
+                {/* ส่วนแสดงกล่องคะแนนตัวอย่าง */}
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        gap: { xs: 1, sm: 2 },
+                        px: 2,
+                        flexWrap: "wrap"
+                    }}
+                >
+                    {[...Array(parseInt(question.max_scale || 5)).keys()].map((i) => {
+                        const currentVal = i + 1;
+                        const currentLabel = defaultScaleLabels[i] ? defaultScaleLabels[i].label : '';
+
+                        // จำลองการ Highlight บางช่องเพื่อให้เห็น UI (เช่น ช่องที่ 4)
+                        const isMockSelected = i === 3;
+
+                        return (
+                            <Box
+                                key={i}
+                                sx={{
+                                    flex: { xs: "none", sm: 1 },
+                                    aspectRatio: "1/1",
+                                    width: { xs: "60px", sm: "auto" },
+                                    maxWidth: 100,
+                                    minWidth: { sm: "70px" },
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    borderRadius: 3,
+                                    border: isMockSelected ? "none" : "1px solid #eee",
+                                    backgroundColor: isMockSelected ? "transparent" : "#fff",
+                                    backgroundImage: isMockSelected
+                                        ? `linear-gradient(135deg, ${'#1976d2'} 0%, ${lighten('#1976d2', 0.3)} 100%)`
+                                        : "none",
+                                    boxShadow: isMockSelected
+                                        ? `0 8px 16px ${lighten('#1976d2', 0.6)}`
+                                        : "none",
+                                    // ปิดการคลิกและ cursor
+                                    pointerEvents: "none",
+                                    userSelect: "none"
+                                }}
+                            >
+                                <Typography
+                                    sx={{
+                                        fontSize: { xs: 18, sm: 22 },
+                                        fontWeight: 800,
+                                        color: isMockSelected ? "#fff" : "#ccc",
+                                    }}
+                                >
+                                    {currentVal}
+                                </Typography>
+
+                                {currentLabel && (
+                                    <Typography
+                                        sx={{
+                                            fontSize: 9,
+                                            fontWeight: 500,
+                                            color: isMockSelected ? "rgba(255,255,255,0.8)" : "#999",
+                                            mt: 0.5,
+                                            textAlign: "center",
+                                            px: 0.5,
+                                            lineHeight: 1.1
+                                        }}
+                                    >
+                                        {currentLabel}
+                                    </Typography>
+                                )}
+                            </Box>
+                        );
+                    })}
+                </Box>
+
+                {/* ส่วน "ไม่ประสงค์ตอบ" ตัวอย่าง */}
+                {question.is_irrelevant && (
+                    <Box sx={{ display: "flex", justifyContent: "flex-start", ml: 1, opacity: 0.6, pointerEvents: "none" }}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    size="small"
+                                    sx={{ color: "#ccc" }}
+                                />
+                            }
+                            label={
+                                <Typography sx={{ fontSize: 13, color: "#666" }}>
+                                    {question.irrelevant_text || "ไม่ประสงค์ตอบ"} (ตัวอย่าง)
+                                </Typography>
+                            }
+                        />
+                    </Box>
+                )}
+            </Box>
+            {/* <Box sx={{ fontSize: 14, mt: 2, color: 'text.secondary' }}>
                 ตัวอย่าง: {question.max_scale || 5} ระดับ
             </Box>
             <Box
@@ -131,7 +234,7 @@ const BarScaleQuestion = ({ question, onChange }) => {
                     }
                     label={question.irrelevant_text || "ไม่ประสงค์ตอบ"}
                 />
-            </Box>}
+            </Box>} */}
 
         </Box>
     );

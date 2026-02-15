@@ -346,53 +346,145 @@ const MatrixQuestion = ({ question, onChange }) => {
                         sx={{
                             display: "flex",
                             flexDirection: "column",
-                            gap: 2,
+                            gap: 4, // ระยะห่างระหว่างข้อคำถาม (Row)
                             width: "100%",
+                            p: 1,
                         }}
                     >
                         {rows.map((row, rowIndex) => (
-                            <Box key={rowIndex} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                                <Typography variant="body2" color="text.secondary">
+                            <Box key={rowIndex}
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 2,
+                                    width: "100%"
+                                }}>
+                                {/* ชื่อแถวคำถาม */}
+                                <Typography sx={{ fontWeight: 500, fontSize: 16, color: "text.secondary" }}>
                                     {rowIndex + 1}. {row.row_label}
                                 </Typography>
+
+                                {/* Container ของปุ่มคะแนน */}
                                 <Box
                                     sx={{
                                         display: "flex",
-                                        alignItems: "center",
-                                        flexDirection: "row",
-                                        justifyContent: "center",
-                                        px: 2,
+                                        justifyContent: "flex-start",
+                                        gap: { xs: 1, sm: 2 },
+                                        flexWrap: "wrap" // เผื่อกรณีจอเล็กมาก
                                     }}
                                 >
                                     {columns.map((col, colIndex) => {
-                                        const isFirst = colIndex === 0;
-                                        const isLast = colIndex === columns.length - 1;
+                                        // จำลองให้ข้อที่ 2 ของแถวที่ 1 และข้อที่ 4 ของแถวที่ 2 ถูกเลือก (เพื่อโชว์ UI)
+                                        const isMockSelected = (rowIndex === 0 && colIndex === 1) || (rowIndex === 1 && colIndex === 3);
+
                                         return (
-                                            <Button
+                                            <Box
                                                 key={colIndex}
-                                                variant="outlined"
                                                 sx={{
-                                                    minWidth: "50px",
-                                                    width: columns.length ? `calc(100% / ${columns.length})` : '20%',
-                                                    height: "40px",
-                                                    border: "1px solid",
-                                                    borderRadius: isFirst ? "20px 0 0 20px" : isLast ? "0 20px 20px 0" : "0",
+                                                    flex: 1,
+                                                    aspectRatio: "1/1",
+                                                    minWidth: { xs: "60px", sm: "80px" },
+                                                    maxWidth: 100,
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    borderRadius: 3,
+                                                    border: isMockSelected ? "none" : "1px solid #eee",
+                                                    backgroundColor: isMockSelected ? "transparent" : "#fff",
+                                                    backgroundImage: isMockSelected
+                                                        ? `linear-gradient(135deg, #1976d2 0%, #64b5f6 100%)` // ใช้สีน้ำเงินมาตรฐานหรือ primaryColor
+                                                        : "none",
+                                                    boxShadow: isMockSelected
+                                                        ? `0 8px 15px rgba(25, 118, 210, 0.3)`
+                                                        : "none",
+                                                    transition: "all 0.3s ease",
+                                                    opacity: 0.9, // ลด opacity เล็กน้อยเพื่อให้ดูเป็นตัวอย่าง Disabled
                                                 }}
                                             >
+                                                {/* ตัวเลขคะแนน */}
                                                 <Typography
                                                     sx={{
-                                                        fontSize: "12px",
+                                                        fontSize: { xs: 18, sm: 24 },
+                                                        fontWeight: 800,
+                                                        color: isMockSelected ? "#fff" : "#ccc",
                                                     }}
                                                 >
-                                                    {col.column_label}
+                                                    {col.column_value || colIndex + 1}
                                                 </Typography>
-                                            </Button>
+
+                                                {/* คำอธิบาย (เช่น น้อยที่สุด, ปานกลาง) */}
+                                                {col.column_label && (
+                                                    <Typography
+                                                        sx={{
+                                                            fontSize: 10,
+                                                            fontWeight: 500,
+                                                            color: isMockSelected ? "rgba(255,255,255,0.8)" : "#999",
+                                                            mt: 0.5,
+                                                            textAlign: "center"
+                                                        }}
+                                                    >
+                                                        {col.column_label}
+                                                    </Typography>
+                                                )}
+                                            </Box>
                                         );
                                     })}
                                 </Box>
                             </Box>
                         ))}
                     </Box>
+                    // <Box
+                    //     sx={{
+                    //         display: "flex",
+                    //         flexDirection: "column",
+                    //         gap: 2,
+                    //         width: "100%",
+                    //     }}
+                    // >
+                    //     {rows.map((row, rowIndex) => (
+                    //         <Box key={rowIndex} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    //             <Typography variant="body2" color="text.secondary">
+                    //                 {rowIndex + 1}. {row.row_label}
+                    //             </Typography>
+                    //             <Box
+                    //                 sx={{
+                    //                     display: "flex",
+                    //                     alignItems: "center",
+                    //                     flexDirection: "row",
+                    //                     justifyContent: "center",
+                    //                     px: 2,
+                    //                 }}
+                    //             >
+                    //                 {columns.map((col, colIndex) => {
+                    //                     const isFirst = colIndex === 0;
+                    //                     const isLast = colIndex === columns.length - 1;
+                    //                     return (
+                    //                         <Button
+                    //                             key={colIndex}
+                    //                             variant="outlined"
+                    //                             sx={{
+                    //                                 minWidth: "50px",
+                    //                                 width: columns.length ? `calc(100% / ${columns.length})` : '20%',
+                    //                                 height: "40px",
+                    //                                 border: "1px solid",
+                    //                                 borderRadius: isFirst ? "20px 0 0 20px" : isLast ? "0 20px 20px 0" : "0",
+                    //                             }}
+                    //                         >
+                    //                             <Typography
+                    //                                 sx={{
+                    //                                     fontSize: "12px",
+                    //                                 }}
+                    //                             >
+                    //                                 {col.column_label}
+                    //                             </Typography>
+                    //                         </Button>
+                    //                     );
+                    //                 })}
+                    //             </Box>
+                    //         </Box>
+                    //     ))}
+                    // </Box>
                 ) : null}
             </Box>
         </Box>
