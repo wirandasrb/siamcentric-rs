@@ -40,7 +40,10 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function SurveyPage({ params }) {
-  const survey = await getSurvey(params.id);
+
+  const resolvedParams = await params;
+  const survey = await getSurvey(resolvedParams.id);
+  // const survey = await getSurvey(params.id);
   console.log("Fetched survey data:", survey);
   // ถ้าไม่พบ survey ให้แสดงข้อความ
   if (!survey) {
