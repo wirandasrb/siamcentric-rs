@@ -85,7 +85,7 @@ const QuestionSurvey = ({
                             fontWeight: 700,
                         }}
                     >
-                        {question.question}{" "}
+                        {question.display_number}{" "}{question.question}{" "}
                         {question.is_required && <span style={{ color: "red" }}>*</span>}
                     </Typography>
                 </Box>
@@ -93,15 +93,17 @@ const QuestionSurvey = ({
                 <Box sx={{ mb: 2 }}>
                     <Typography
                         sx={{
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: 700,
+                            color: "#555",
                         }}
                     >
-                        {question.question}{" "}
+                        {question.display_number}{" "}{question.question}{" "}
                         {question.is_required && <span style={{ color: "red" }}>*</span>}
                     </Typography>
                 </Box>
-            )}
+            )
+            }
             {/* <Box
                 sx={{
                     ml: 2,
@@ -137,155 +139,162 @@ const QuestionSurvey = ({
                     />
                 )} */}
 
-            {(question.question_type_id === 1 || question.question_type_id === 2) && (
-                <TextField
-                    fullWidth
-                    multiline={question.question_type_id === 2}
-                    minRows={question.question_type_id === 2 ? 4 : 1}
-                    variant="outlined" // มั่นใจว่าเป็นแบบมีขอบ
-                    value={answer?.answer_text || ""} // ใช้ตัวแปร answer ให้ตรงกับ logic ส่วนอื่น
-                    onChange={(e) => {
-                        onChange({
-                            ...question,
-                            answer: {
-                                section_id: question.section_id,
-                                question_id: question.id,
-                                answer_option_id: null,
-                                answer_value: null,
-                                attachment_url: null,
-                                answer_text: e.target.value,
-                            },
-                        });
-                    }}
-                    placeholder={"ระบุคำตอบหรือข้อเสนอแนะที่นี่..."}
-                    sx={{
-                        mt: 1.5,
-                        "& .MuiOutlinedInput-root": {
-                            borderRadius: 2.5, // ความโค้งมนตามแบบฟอร์มใหม่
-                            backgroundColor: "#fcfcfc", // สีพื้นหลังอ่อนๆ ให้ดูเด่นจาก Paper
-                            transition: "all 0.2s ease",
-                            "& fieldset": {
-                                borderColor: "#e0e0e0", // สีขอบปกติ
-                            },
-                            "&:hover fieldset": {
-                                borderColor: primaryColor, // สีขอบตอนเอาเมาส์วาง
-                            },
-                            "&.Mui-focused fieldset": {
-                                borderColor: primaryColor, // สีขอบตอนกำลังพิมพ์
-                                borderWidth: "2px",
-                            },
-                        },
-                        "& .MuiInputBase-input": {
-                            fontSize: "1rem",
-                            color: "#333",
-                        },
-                    }}
-                />
-            )}
-
-            {question.question_type_id === 3 && (
-                <Box sx={{ mt: 1, fontSize: 16 }}>
-                    <RadioGroup
-                        value={answer ? answer.answer_option_id : ""}
+            {
+                (question.question_type_id === 1 || question.question_type_id === 2) && (
+                    <TextField
+                        fullWidth
+                        multiline={question.question_type_id === 2}
+                        minRows={question.question_type_id === 2 ? 4 : 1}
+                        variant="outlined" // มั่นใจว่าเป็นแบบมีขอบ
+                        value={answer?.answer_text || ""} // ใช้ตัวแปร answer ให้ตรงกับ logic ส่วนอื่น
                         onChange={(e) => {
-                            let selectedOptionId = parseInt(e.target.value);
-                            let updatedAnswer = {
-                                section_id: question.section_id,
-                                question_id: question.id,
-                                answer_option_id: selectedOptionId,
-                                answer_text: "",
-                                answer_value: null,
-                                attachment_url: null,
-                            };
-                            onChange({ ...question, answer: updatedAnswer });
-                        }}
-                    >
-                        {/* ใช้ CSS Grid แทน */}
-                        <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: {
-                                    xs: "1fr",        // มือถือ = 1 คอลัมน์
-                                    md: "1fr 1fr",    // จอใหญ่ = 2 คอลัมน์
+                            onChange({
+                                ...question,
+                                answer: {
+                                    section_id: question.section_id,
+                                    question_id: question.id,
+                                    answer_option_id: null,
+                                    answer_value: null,
+                                    attachment_url: null,
+                                    answer_text: e.target.value,
                                 },
-                                gap: 2,
-                                width: "100%",
+                            });
+                        }}
+                        placeholder={"ระบุคำตอบหรือข้อเสนอแนะที่นี่..."}
+                        sx={{
+                            mt: 1.5,
+                            "& .MuiOutlinedInput-root": {
+                                borderRadius: 2.5, // ความโค้งมนตามแบบฟอร์มใหม่
+                                backgroundColor: "#fcfcfc", // สีพื้นหลังอ่อนๆ ให้ดูเด่นจาก Paper
+                                transition: "all 0.2s ease",
+                                "& fieldset": {
+                                    borderColor: "#e0e0e0", // สีขอบปกติ
+                                },
+                                "&:hover fieldset": {
+                                    borderColor: primaryColor, // สีขอบตอนเอาเมาส์วาง
+                                },
+                                "&.Mui-focused fieldset": {
+                                    borderColor: primaryColor, // สีขอบตอนกำลังพิมพ์
+                                    borderWidth: "2px",
+                                },
+                            },
+                            "& .MuiInputBase-input": {
+                                fontSize: "1rem",
+                                color: "#333",
+                            },
+                        }}
+                    />
+                )
+            }
+
+            {
+                question.question_type_id === 3 && (
+                    <Box sx={{ mt: 1, fontSize: 16 }}>
+                        <RadioGroup
+                            value={answer ? answer.answer_option_id : ""}
+                            onChange={(e) => {
+                                let selectedOptionId = parseInt(e.target.value);
+                                let updatedAnswer = {
+                                    section_id: question.section_id,
+                                    question_id: question.id,
+                                    answer_option_id: selectedOptionId,
+                                    answer_text: "",
+                                    answer_value: null,
+                                    attachment_url: null,
+                                };
+                                onChange({ ...question, answer: updatedAnswer });
                             }}
                         >
-                            {question.options.map((option) => {
-                                const isSelected = answer?.answer_option_id === option.id;
+                            {/* ใช้ CSS Grid แทน */}
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: {
+                                        xs: "1fr",        // มือถือ = 1 คอลัมน์
+                                        md: "1fr 1fr",    // จอใหญ่ = 2 คอลัมน์
+                                    },
+                                    gap: 2,
+                                    width: "100%",
+                                }}
+                            >
+                                {question.options.map((option) => {
+                                    const isSelected = answer?.answer_option_id === option.id;
+                                    // const isTwoOptions = question.options.length === 2;
 
-                                return (
-                                    <Box
-                                        key={option.id}
-                                        sx={{
-                                            border: isSelected
-                                                ? `1px solid ${primaryColor}`
-                                                : "1px solid #e0e0e0",
-                                            borderRadius: 2,
-                                            transition: "all 0.2s ease",
-                                            backgroundColor: isSelected
-                                                ? lighten(primaryColor, 0.85)
-                                                : "transparent",
-                                            "&:hover": {
-                                                borderColor: primaryColor,
+                                    return (
+                                        <Box
+                                            key={option.id}
+                                            sx={{
+                                                border: isSelected
+                                                    ? `1px solid ${primaryColor}`
+                                                    : "1px solid #e0e0e0",
+                                                borderRadius: 2,
+                                                transition: "all 0.2s ease",
                                                 backgroundColor: isSelected
                                                     ? lighten(primaryColor, 0.85)
-                                                    : "#f9f9f9",
-                                            },
-                                        }}
-                                    >
-                                        <FormControlLabel
-                                            value={option.id}
-                                            control={<Radio />}
-                                            label={option.option}
-                                            sx={{
-                                                width: "100%",
-                                                m: 0,
-                                                p: { xs: 1, md: 1.5 },
-                                                alignItems: "center",
-                                                "& .MuiFormControlLabel-label": {
-                                                    fontSize: 16,
-                                                    fontWeight: isSelected ? "bold" : "normal",
-                                                    color: isSelected ? primaryColor : "inherit",
+                                                    : "white",
+                                                "&:hover": {
+                                                    borderColor: primaryColor,
+                                                    backgroundColor: isSelected
+                                                        ? lighten(primaryColor, 0.85)
+                                                        : "#f9f9f9",
                                                 },
                                             }}
-                                        />
-                                    </Box>
-                                );
-                            })}
-                        </Box>
-                    </RadioGroup>
+                                        >
+                                            <FormControlLabel
+                                                value={option.id}
+                                                control={<Radio />}
+                                                // control={<Radio sx={{ display: isTwoOptions ? "none" : "inline-flex" }} />}
+                                                label={option.option}
+                                                sx={{
+                                                    width: "100%",
+                                                    m: 0,
+                                                    p: { xs: 1, md: 1.5 },
+                                                    // p: isTwoOptions ? { xs: 1.5, md: 2.5 } : { xs: 1, md: 1.5 },
+                                                    alignItems: "center",
+                                                    "& .MuiFormControlLabel-label": {
+                                                        fontSize: 16,
+                                                        fontWeight: isSelected ? "bold" : "normal",
+                                                        color: isSelected ? primaryColor : "inherit",
+                                                    },
+                                                }}
+                                            />
+                                        </Box>
+                                    );
+                                })}
+                            </Box>
+                        </RadioGroup>
 
-                    {question.options.find((option) => option.is_other) && (
-                        <TextField
-                            fullWidth
-                            variant="standard"
-                            value={answer?.answer_text || ""}
-                            onChange={(e) => {
-                                onChange({
-                                    ...question,
-                                    answer: {
-                                        ...answer,
-                                        answer_text: e.target.value,
-                                    },
-                                });
-                            }}
-                            disabled={
-                                !(
-                                    answer &&
-                                    question.options.find(
-                                        (option) =>
-                                            option.is_other && option.id === answer.answer_option_id
+                        {question.options.find((option) => option.is_other) && (
+                            <TextField
+                                fullWidth
+                                variant="standard"
+                                value={answer?.answer_text || ""}
+                                onChange={(e) => {
+                                    onChange({
+                                        ...question,
+                                        answer: {
+                                            ...answer,
+                                            answer_text: e.target.value,
+                                        },
+                                    });
+                                }}
+                                disabled={
+                                    !(
+                                        answer &&
+                                        question.options.find(
+                                            (option) =>
+                                                option.is_other && option.id === answer.answer_option_id
+                                        )
                                     )
-                                )
-                            }
-                            placeholder="โปรดระบุ"
-                            sx={{ mt: 2, mb: 2 }}
-                        />
-                    )}
-                </Box>
-            )}
+                                }
+                                placeholder="โปรดระบุ"
+                                sx={{ mt: 2, mb: 2 }}
+                            />
+                        )}
+                    </Box>
+                )
+            }
 
 
             {/* {question.question_type_id === 3 && (
@@ -384,187 +393,158 @@ const QuestionSurvey = ({
                     </Box>
                 )} */}
 
-            {question.question_type_id === 4 && (
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 2,
-                        mt: 1,
-                        fontSize: 14,
-                    }}
-                >
-                    <FormGroup>
-                        {question.options.map((option) => {
-                            const isChecked =
-                                answer?.answer_option_id?.includes(option.id) || false;
-
-                            return (
-                                <Box
-                                    key={option.id}
-                                    sx={{
-                                        border: isChecked ? `1px solid ${primaryColor}` : "1px solid #e0e0e0",
-                                        borderRadius: 2,
-                                        p: 1,
-                                        transition: "all 0.2s ease",
-                                        backgroundColor: isChecked
-                                            ? lighten(secondColor, 0.08)
-                                            : "transparent",
-                                        "&:hover": {
-                                            borderColor: primaryColor,
-                                            backgroundColor: lighten(secondColor, 0.03),
-                                        },
-                                        mb: 1,
-                                    }}
-                                >
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                checked={isChecked}
-                                                onChange={(e) => {
-                                                    let updatedOptionIds = answer
-                                                        ? [...(answer.answer_option_id || [])]
-                                                        : [];
-                                                    if (e.target.checked) {
-                                                        if (option.is_exclusive) {
-                                                            updatedOptionIds = [option.id];
-                                                        } else {
-                                                            updatedOptionIds = updatedOptionIds.filter(
-                                                                (id) => {
-                                                                    const opt = question.options.find(
-                                                                        (o) => o.id === id
-                                                                    );
-                                                                    return opt && !opt.is_exclusive;
-                                                                }
-                                                            );
-                                                            updatedOptionIds.push(option.id);
-                                                        }
-                                                    } else {
-                                                        updatedOptionIds = updatedOptionIds.filter(
-                                                            (id) => id !== option.id
-                                                        );
-                                                    }
-
-                                                    // ถ้านำออกหมด ให้เป็น null
-                                                    if (updatedOptionIds.length === 0) {
-                                                        updatedOptionIds = null;
-                                                    }
-
-                                                    const updatedAnswer = {
-                                                        section_id: question.section_id,
-                                                        question_id: question.id,
-                                                        answer_option_id: updatedOptionIds,
-                                                        answer_text: "",
-                                                        answer_value: null,
-                                                        attachment_url: null,
-                                                    };
-                                                    onChange({ ...question, answer: updatedAnswer });
-                                                }}
-                                                disabled={
-                                                    answer &&
-                                                    !answer.answer_option_id?.includes(option.id) &&
-                                                    answer.answer_option_id?.some((id) => {
-                                                        const opt = question.options.find(
-                                                            (o) => o.id === id
-                                                        );
-                                                        return opt && opt.is_exclusive;
-                                                    })
-                                                }
-                                            />
-                                        }
-                                        label={option.option}
-                                        sx={{
-                                            width: "100%",
-                                            m: 0,
-                                            "& .MuiFormControlLabel-label": {
-                                                fontSize: 16,
-                                                color: isChecked ? primaryColor : "inherit",
-                                                fontWeight: isChecked ? "bold" : "normal",
-                                            },
-                                        }}
-                                    />
-                                </Box>
-                            );
-                        })}
-                    </FormGroup>
-
-                    {/* ช่องกรอก "อื่นๆ" */}
-                    {question.options.find((option) => option.is_other) && (
-                        <TextField
-                            value={answer ? answer.answer_text : ""}
-                            variant="standard"
-                            onChange={(e) => {
-                                onChange({
-                                    ...question,
-                                    answer: {
-                                        ...answer,
-                                        answer_text: e.target.value,
-                                    },
-                                });
-                            }}
-                            disabled={
-                                !(
-                                    answer &&
-                                    question.options.find(
-                                        (option) =>
-                                            option.is_other &&
-                                            answer.answer_option_id?.includes(option.id)
-                                    )
-                                )
-                            }
-                            placeholder="โปรดระบุ"
-                        // sx={{  ml: 4 }}
-                        />
-                    )}
-                </Box>
-            )}
-
-            {question.question_type_id === 5 && (
-                <Box sx={{ mt: 1 }}>
-                    {/*แบบ autocomplete */}
-                    {question.dropdown_source_type &&
-                        question.dropdown_source_type === "external" ? (
-                        <ExternalSelection
-                            source_id={question?.external_source_id}
-                            value={answer ? answer.answer_text : null}
-                            onChange={(newValue) => {
-                                let updatedAnswer = {
-                                    section_id: question.section_id,
-                                    question_id: question.id,
-                                    answer_text: newValue ? newValue : "",
-                                    answer_option_id: null,
-                                    answer_value: null,
-                                    attachment_url: null,
-                                };
-                                onChange({
-                                    ...question,
-                                    answer: updatedAnswer,
-                                });
-                            }}
-                            primaryColor={primaryColor}
-                            disableClearable={question.is_required}
-                        />
-                    ) : (
-                        <Box sx={{
+            {
+                question.question_type_id === 4 && (
+                    <Box
+                        sx={{
                             display: "flex",
                             flexDirection: "column",
                             gap: 2,
-                        }}>
-                            <Autocomplete
-                                options={question.options || []}
-                                getOptionLabel={(option) => option.option}
-                                disableClearable={question.is_required}
-                                value={
-                                    question?.options?.find(
-                                        (opt) => opt.id === (answer ? answer?.answer_option_id : null)
-                                    ) || null
+                            mt: 1,
+                            fontSize: 14,
+                        }}
+                    >
+                        <FormGroup>
+                            {question.options.map((option) => {
+                                const isChecked =
+                                    answer?.answer_option_id?.includes(option.id) || false;
+
+                                return (
+                                    <Box
+                                        key={option.id}
+                                        sx={{
+                                            border: isChecked ? `1px solid ${primaryColor}` : "1px solid #e0e0e0",
+                                            borderRadius: 2,
+                                            p: 1,
+                                            transition: "all 0.2s ease",
+                                            backgroundColor: isChecked
+                                                ? lighten(secondColor, 0.08)
+                                                : "white",
+                                            "&:hover": {
+                                                borderColor: primaryColor,
+                                                backgroundColor: lighten(secondColor, 0.03),
+                                            },
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={isChecked}
+                                                    onChange={(e) => {
+                                                        let updatedOptionIds = answer
+                                                            ? [...(answer.answer_option_id || [])]
+                                                            : [];
+                                                        if (e.target.checked) {
+                                                            if (option.is_exclusive) {
+                                                                updatedOptionIds = [option.id];
+                                                            } else {
+                                                                updatedOptionIds = updatedOptionIds.filter(
+                                                                    (id) => {
+                                                                        const opt = question.options.find(
+                                                                            (o) => o.id === id
+                                                                        );
+                                                                        return opt && !opt.is_exclusive;
+                                                                    }
+                                                                );
+                                                                updatedOptionIds.push(option.id);
+                                                            }
+                                                        } else {
+                                                            updatedOptionIds = updatedOptionIds.filter(
+                                                                (id) => id !== option.id
+                                                            );
+                                                        }
+
+                                                        // ถ้านำออกหมด ให้เป็น null
+                                                        if (updatedOptionIds.length === 0) {
+                                                            updatedOptionIds = null;
+                                                        }
+
+                                                        const updatedAnswer = {
+                                                            section_id: question.section_id,
+                                                            question_id: question.id,
+                                                            answer_option_id: updatedOptionIds,
+                                                            answer_text: "",
+                                                            answer_value: null,
+                                                            attachment_url: null,
+                                                        };
+                                                        onChange({ ...question, answer: updatedAnswer });
+                                                    }}
+                                                    disabled={
+                                                        answer &&
+                                                        !answer.answer_option_id?.includes(option.id) &&
+                                                        answer.answer_option_id?.some((id) => {
+                                                            const opt = question.options.find(
+                                                                (o) => o.id === id
+                                                            );
+                                                            return opt && opt.is_exclusive;
+                                                        })
+                                                    }
+                                                />
+                                            }
+                                            label={option.option}
+                                            sx={{
+                                                width: "100%",
+                                                m: 0,
+                                                "& .MuiFormControlLabel-label": {
+                                                    fontSize: 16,
+                                                    color: isChecked ? primaryColor : "inherit",
+                                                    fontWeight: isChecked ? "bold" : "normal",
+                                                },
+                                            }}
+                                        />
+                                    </Box>
+                                );
+                            })}
+                        </FormGroup>
+
+                        {/* ช่องกรอก "อื่นๆ" */}
+                        {question.options.find((option) => option.is_other) && (
+                            <TextField
+                                value={answer ? answer.answer_text : ""}
+                                variant="standard"
+                                onChange={(e) => {
+                                    onChange({
+                                        ...question,
+                                        answer: {
+                                            ...answer,
+                                            answer_text: e.target.value,
+                                        },
+                                    });
+                                }}
+                                disabled={
+                                    !(
+                                        answer &&
+                                        question.options.find(
+                                            (option) =>
+                                                option.is_other &&
+                                                answer.answer_option_id?.includes(option.id)
+                                        )
+                                    )
                                 }
-                                onChange={(event, newValue) => {
+                                placeholder="โปรดระบุ"
+                            // sx={{  ml: 4 }}
+                            />
+                        )}
+                    </Box>
+                )
+            }
+
+            {
+                question.question_type_id === 5 && (
+                    <Box sx={{ mt: 1 }}>
+                        {/*แบบ autocomplete */}
+                        {question.dropdown_source_type &&
+                            question.dropdown_source_type === "external" ? (
+                            <ExternalSelection
+                                source_id={question?.external_source_id}
+                                value={answer ? answer.answer_text : null}
+                                onChange={(newValue) => {
                                     let updatedAnswer = {
                                         section_id: question.section_id,
                                         question_id: question.id,
-                                        answer_option_id: newValue ? newValue.id : null,
-                                        answer_text: "",
+                                        answer_text: newValue ? newValue : "",
+                                        answer_option_id: null,
                                         answer_value: null,
                                         attachment_url: null,
                                     };
@@ -573,144 +553,114 @@ const QuestionSurvey = ({
                                         answer: updatedAnswer,
                                     });
                                 }}
-                                sx={{
-                                    mt: 1.5,
-                                    "& .MuiOutlinedInput-root": {
-                                        borderRadius: 2.5, // ความโค้งมนเท่ากับ TextField และปุ่ม
-                                        backgroundColor: "#fcfcfc",
-                                        "& fieldset": {
-                                            borderColor: "#e0e0e0",
-                                        },
-                                        "&:hover fieldset": {
-                                            borderColor: primaryColor,
-                                        },
-                                        "&.Mui-focused fieldset": {
-                                            borderColor: primaryColor,
-                                        },
-                                    },
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        placeholder="กรุณาเลือกคำตอบ..."
-                                        // label="โปรดเลือกคำตอบ"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-
-                                    />
-                                )}
+                                primaryColor={primaryColor}
+                                disableClearable={question.is_required}
                             />
-
-                            {question.options.find((option) => option.is_other) && (
-                                <TextField
-                                    fullWidth
-                                    variant="standard"
-                                    value={answer?.answer_text || ""}
-                                    onChange={(e) => {
+                        ) : (
+                            <Box sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2,
+                            }}>
+                                <Autocomplete
+                                    options={question.options || []}
+                                    getOptionLabel={(option) => option.option}
+                                    disableClearable={question.is_required}
+                                    value={
+                                        question?.options?.find(
+                                            (opt) => opt.id === (answer ? answer?.answer_option_id : null)
+                                        ) || null
+                                    }
+                                    onChange={(event, newValue) => {
+                                        let updatedAnswer = {
+                                            section_id: question.section_id,
+                                            question_id: question.id,
+                                            answer_option_id: newValue ? newValue.id : null,
+                                            answer_text: "",
+                                            answer_value: null,
+                                            attachment_url: null,
+                                        };
                                         onChange({
                                             ...question,
-                                            answer: {
-                                                ...answer,
-                                                answer_text: e.target.value,
-                                            },
+                                            answer: updatedAnswer,
                                         });
                                     }}
-                                    disabled={
-                                        !(
-                                            answer &&
-                                            question.options.find(
-                                                (option) =>
-                                                    option.is_other && option.id === answer.answer_option_id
-                                            )
-                                        )
-                                    }
-                                    placeholder="โปรดระบุ"
-                                    sx={{ mt: 1, mb: 2 }}
+                                    sx={{
+                                        mt: 1.5,
+                                        "& .MuiOutlinedInput-root": {
+                                            borderRadius: 2.5, // ความโค้งมนเท่ากับ TextField และปุ่ม
+                                            backgroundColor: "#fcfcfc",
+                                            "& fieldset": {
+                                                borderColor: "#e0e0e0",
+                                            },
+                                            "&:hover fieldset": {
+                                                borderColor: primaryColor,
+                                            },
+                                            "&.Mui-focused fieldset": {
+                                                borderColor: primaryColor,
+                                            },
+                                        },
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            placeholder="กรุณาเลือกคำตอบ..."
+                                            // label="โปรดเลือกคำตอบ"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+
+                                        />
+                                    )}
                                 />
-                            )}
-                        </Box>
-                    )}
-                </Box>
-            )}
 
-            {question.question_type_id === 6 && (
-                <RatingQuestionSurvey
-                    question={question}
-                    answers={answers}
-                    onChange={onChange}
-                />
-            )}
+                                {question.options.find((option) => option.is_other &&
+                                    option.id === answer?.answer_option_id) && (
+                                        <TextField
+                                            fullWidth
+                                            variant="standard"
+                                            value={answer?.answer_text || ""}
+                                            onChange={(e) => {
+                                                onChange({
+                                                    ...question,
+                                                    answer: {
+                                                        ...answer,
+                                                        answer_text: e.target.value,
+                                                    },
+                                                });
+                                            }}
+                                            disabled={
+                                                !(
+                                                    answer &&
+                                                    question.options.find(
+                                                        (option) =>
+                                                            option.is_other && option.id === answer.answer_option_id
+                                                    )
+                                                )
+                                            }
+                                            placeholder="โปรดระบุ"
+                                            sx={{ mt: 1, mb: 2 }}
+                                        />
+                                    )}
+                            </Box>
+                        )}
+                    </Box>
+                )
+            }
 
-            {question.question_type_id === 7 && (
-                <LinearScaleSurvey
-                    question={question}
-                    answer={answer}
-                    onChange={(updatedQuestion) => {
-                        onChange(updatedQuestion);
-                    }}
-                    primaryColor={primaryColor}
-                    secondColor={secondColor}
-                />
-            )}
+            {
+                question.question_type_id === 6 && (
+                    <RatingQuestionSurvey
+                        question={question}
+                        answers={answers}
+                        onChange={onChange}
+                    />
+                )
+            }
 
-            {question.question_type_id === 8 && (
-                <BarScaleSurvey
-                    question={question}
-                    answer={answer}
-                    onChange={(updatedQuestion) => {
-                        onChange(updatedQuestion);
-                    }}
-                    primaryColor={primaryColor}
-                    secondColor={secondColor}
-                />
-            )}
-
-            {question.question_type_id === 9 && (
-                <MatrixQuestionSurvey
-                    primaryColor={primaryColor}
-                    question={question}
-                    answers={
-                        Array.isArray(
-                            answers.filter((ans) => ans?.question_id === question.id)
-                        )
-                            ? answers.filter((ans) => ans?.question_id === question.id)
-                            : []
-                    }
-                    handleAnswerChange={handleAnswerChange}
-                />
-            )}
-
-            {/* file upload */}
-            {question.question_type_id === 10 && (
-                <FileUploadSurvey
-                    question={question}
-                    answer={answer}
-                    onChange={(updatedQuestion) => {
-                        onChange(updatedQuestion);
-                    }}
-                    primaryColor={primaryColor}
-                    secondColor={secondColor}
-                />
-            )}
-
-            {/* Date*/}
-            {question.question_type_id === 11 && (
-                <DatePickerSurvey
-                    question={question}
-                    answer={answer}
-                    onChange={(updatedQuestion) => {
-                        onChange(updatedQuestion);
-                    }}
-                    primaryColor={primaryColor}
-                    secondColor={secondColor}
-                />
-            )}
-
-            {/* Time */}
-            {question.question_type_id === 12 && (
-                <Box sx={{ ml: 1 }}>
-                    <TimePickerSurvey
+            {
+                question.question_type_id === 7 && (
+                    <LinearScaleSurvey
                         question={question}
                         answer={answer}
                         onChange={(updatedQuestion) => {
@@ -719,10 +669,88 @@ const QuestionSurvey = ({
                         primaryColor={primaryColor}
                         secondColor={secondColor}
                     />
-                </Box>
-            )}
+                )
+            }
+
+            {
+                question.question_type_id === 8 && (
+                    <BarScaleSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
+                )
+            }
+
+            {
+                question.question_type_id === 9 && (
+                    <MatrixQuestionSurvey
+                        primaryColor={primaryColor}
+                        question={question}
+                        answers={
+                            Array.isArray(
+                                answers.filter((ans) => ans?.question_id === question.id)
+                            )
+                                ? answers.filter((ans) => ans?.question_id === question.id)
+                                : []
+                        }
+                        handleAnswerChange={handleAnswerChange}
+                    />
+                )
+            }
+
+            {/* file upload */}
+            {
+                question.question_type_id === 10 && (
+                    <FileUploadSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
+                )
+            }
+
+            {/* Date*/}
+            {
+                question.question_type_id === 11 && (
+                    <DatePickerSurvey
+                        question={question}
+                        answer={answer}
+                        onChange={(updatedQuestion) => {
+                            onChange(updatedQuestion);
+                        }}
+                        primaryColor={primaryColor}
+                        secondColor={secondColor}
+                    />
+                )
+            }
+
+            {/* Time */}
+            {
+                question.question_type_id === 12 && (
+                    <Box sx={{ ml: 1 }}>
+                        <TimePickerSurvey
+                            question={question}
+                            answer={answer}
+                            onChange={(updatedQuestion) => {
+                                onChange(updatedQuestion);
+                            }}
+                            primaryColor={primaryColor}
+                            secondColor={secondColor}
+                        />
+                    </Box>
+                )
+            }
             {/* </Box> */}
-        </Box>
+        </Box >
     );
 };
 

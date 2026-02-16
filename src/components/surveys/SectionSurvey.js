@@ -514,30 +514,72 @@ const SectionSurvey = ({
                         gap: 4, // ระยะห่างระหว่างข้อ
                     }}
                 >
-                    {section.questions.map((question) => {
-                        const visible = shouldShowQuestion(question);
-                        if (!visible) return null;
+                    {section.questions.filter((q) => shouldShowQuestion(q)) // Filter ข้อที่ซ่อนออกไปก่อน
+                        .map((question, index) => {
+                            // const visible = shouldShowQuestion(question);
+                            // if (!visible) return null;
+                            const questionNumber = index + 1;
 
-                        return (
-                            <Box
-                                key={question.id}
-                                sx={{
-                                    transition: "all 0.3s ease",
-                                    "&:hover": { transform: "translateX(4px)" } // Effect เล็กน้อยตอน hover
-                                }}
-                            >
-                                <QuestionSurvey
-                                    question={question}
-                                    answers={answers}
-                                    primaryColor={primaryColor}
-                                    secondColor={secondColor}
-                                    onChange={(updatedQuestion) => {
-                                        handleChangeAnswer(updatedQuestion.id, updatedQuestion.answer);
+                            const hasRequireCondition = sections.some((s) =>
+                                s.questions.some((q) =>
+                                    q.options.some((opt) =>
+                                        (opt.conditions || []).some(
+                                            (cond) => cond.condition_type === "require_question" && cond.target_question_id === question.id
+                                        )
+                                    )
+                                )
+                            );
+
+                            const isNegativeResponse = question.question?.includes("ไม่เห็นด้วย");
+
+                            // เลือกสี: ถ้ามีคำว่าไม่เห็นด้วยใช้สีแดง (Soft Red), ถ้าไม่มีใช้สีหลัก (Primary)
+                            const highlightColor = isNegativeResponse ? "#d32f2f" : primaryColor;
+
+                            return (
+                                <Box
+                                    key={question.id}
+                                    // sx={{
+                                    //     transition: "all 0.3s ease",
+                                    //     "&:hover": { transform: "translateX(4px)" } // Effect เล็กน้อยตอน hover
+                                    // }}
+                                    sx={{
+                                        transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                                        borderRadius: 4, // ความโค้งมนตามรูปตัวอย่าง
+
+                                        // ✨ ถ้าเป็นข้อที่มีเงื่อนไข ให้ใส่กรอบและพื้นหลังสีฟ้า
+                                        ...(hasRequireCondition && {
+                                            p: { xs: 2, md: 3 }, // เพิ่มพื้นที่ด้านในกรอบ
+                                            mb: 2,
+                                            mx: 2,               // ระยะห่างจากข้อถัดไป
+                                            backgroundColor: lighten(highlightColor, 0.97), // สีฟ้าอ่อนมากๆ
+                                            border: `1.5px solid ${lighten(highlightColor, 0.8)}`, // เส้นขอบสีฟ้าจาง
+                                            boxShadow: `0px 4px 20px rgba(0, 0, 0, 0.04)`, // เงาบางๆ
+                                            animation: "slideDownFade 0.5s ease-out",
+                                        }),
+
+                                        // Animation ตอนข้อความโผล่มา
+                                        "@keyframes slideDownFade": {
+                                            "0%": { opacity: 0, transform: "translateY(-10px)" },
+                                            "100%": { opacity: 1, transform: "translateY(0)" }
+                                        }
                                     }}
-                                />
-                            </Box>
-                        );
-                    })}
+                                >
+                                    <QuestionSurvey
+                                        // question={question}
+                                        question={{
+                                            ...question,
+                                            display_number: `${section.section_no}.${questionNumber}`
+                                        }}
+                                        answers={answers}
+                                        primaryColor={primaryColor}
+                                        secondColor={secondColor}
+                                        onChange={(updatedQuestion) => {
+                                            handleChangeAnswer(updatedQuestion.id, updatedQuestion.answer);
+                                        }}
+                                    />
+                                </Box>
+                            );
+                        })}
                 </Box>
 
                 {/* ส่วน Footer ปุ่มกด */}
