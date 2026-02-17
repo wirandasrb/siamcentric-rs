@@ -18,7 +18,12 @@ import SectionSurvey from "./SectionSurvey";
 import ThankMessage from "./ThankMessage";
 import ModalConfirm from "../modals/ModalComfirm";
 import useApi from "../../services";
-import { DescriptionOutlined, GppGoodOutlined, KeyboardArrowRight, SecurityOutlined } from "@mui/icons-material";
+import {
+  DescriptionOutlined,
+  GppGoodOutlined,
+  KeyboardArrowRight,
+  SecurityOutlined,
+} from "@mui/icons-material";
 import SurveyClosed from "./SurveyClosed";
 
 const SurveyComponent = ({ survey, responses }) => {
@@ -89,7 +94,7 @@ const SurveyComponent = ({ survey, responses }) => {
         console.error("Error checking previous submission:", error);
         setActiveStep(0);
       }
-    }
+    };
     if (survey && survey?.id && respondentToken) {
       checkPreviousSubmission();
     } else if (survey && survey?.id && !respondentToken) {
@@ -124,7 +129,6 @@ const SurveyComponent = ({ survey, responses }) => {
     } catch (error) {
       console.error("Error submitting survey answers:", error);
     }
-
   };
 
   const handleRetakeSurvey = () => {
@@ -196,7 +200,10 @@ const SurveyComponent = ({ survey, responses }) => {
               );
 
               if (targetIndex !== -1) {
-                if (skipToSectionIndex === null || targetIndex > skipToSectionIndex) {
+                if (
+                  skipToSectionIndex === null ||
+                  targetIndex > skipToSectionIndex
+                ) {
                   skipToSectionIndex = targetIndex;
                 }
               }
@@ -232,21 +239,31 @@ const SurveyComponent = ({ survey, responses }) => {
           position="static"
           elevation={0}
           sx={{
-            background: `linear-gradient(90deg, ${survey?.primary_color || "#1976d2"} 0%,  rgba(255, 255, 255, 0.4) 100%)`,
+            background: `linear-gradient(90deg, ${
+              survey?.primary_color || "#1976d2"
+            } 0%,  rgba(255, 255, 255, 0.4) 100%)`,
             // ผสมสีหลักเข้าไปในพื้นหลังด้วย เพื่อให้ gradient ไม่ออกสีขาวเกินไป
             backgroundColor: survey?.primary_color || "#1976d2",
             p: 2,
-          }}>
+          }}
+        >
           <Toolbar
             sx={{
               display: "flex",
               justifyContent: "center", // จัดการเรียงในแนวแกนหลัก (แนวนอน) ให้อยู่กลาง
-              alignItems: "center"      // จัดการเรียงในแนวตั้งให้อยู่กลาง
+              alignItems: "center", // จัดการเรียงในแนวตั้งให้อยู่กลาง
             }}
           >
-            <Box component="img" src={survey.image_url ?? "/images/online-survey.png"} sx={{ width: 50, height: 50, mr: 2 }} />
+            <Box
+              component="img"
+              src={survey.image_url ?? "/images/online-survey.png"}
+              sx={{ width: 100, height: 100, mr: 2 }}
+            />
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", lineHeight: 1.2 }}
+              >
                 {survey.title}
               </Typography>
             </Box>
@@ -345,39 +362,93 @@ const SurveyComponent = ({ survey, responses }) => {
           {!survey.is_open ? (
             <SurveyClosed survey={survey} />
           ) : !isStarted && activeStep < survey?.sections?.length ? (
-            <Box sx={{
-              width: { xs: "90%", md: "600px" },
-              backgroundColor: "white",
-              borderRadius: 3,
-              boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center"
-            }}>
+            <Box
+              sx={{
+                width: { xs: "90%", md: "600px" },
+                backgroundColor: "white",
+                borderRadius: 3,
+                boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
               {/* แถบสีด้านบนกล่องเล็กน้อย */}
-              <Box sx={{
-                height: 6, width: '100%',
-                background: `linear-gradient(90deg, ${survey?.primary_color || "#1976d2"} 0%,  rgba(255, 255, 255, 0.4) 100%)`,
-                backgroundColor: survey?.primary_color || "#1976d2",
-              }} />
+              <Box
+                sx={{
+                  height: 6,
+                  width: "100%",
+                  background: `linear-gradient(90deg, ${
+                    survey?.primary_color || "#1976d2"
+                  } 0%,  rgba(255, 255, 255, 0.4) 100%)`,
+                  backgroundColor: survey?.primary_color || "#1976d2",
+                }}
+              />
 
-              <Box sx={{ p: 4, textAlign: "center", width: '100%' }}>
-                <Box sx={{ backgroundColor: '#e3f2fd', p: 2, borderRadius: '50%', width: 'fit-content', m: '0 auto 16px' }}>
-                  <DescriptionOutlined sx={{
-                    fontSize: 48,
-                    color: survey.primary_color
-                  }} /> {/* ไอคอนรูปกระดาษ */}
+              <Box sx={{ p: 4, textAlign: "center", width: "100%" }}>
+                <Box
+                  sx={{
+                    backgroundColor: "#e3f2fd",
+                    p: 2,
+                    borderRadius: "50%",
+                    width: "fit-content",
+                    m: "0 auto 16px",
+                  }}
+                >
+                  <DescriptionOutlined
+                    sx={{
+                      fontSize: 48,
+                      color: survey.primary_color,
+                    }}
+                  />{" "}
+                  {/* ไอคอนรูปกระดาษ */}
                 </Box>
 
-                <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>คำชี้แจง</Typography>
+                <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+                  คำชี้แจง
+                </Typography>
 
-                <Box sx={{ backgroundColor: "#f8f9fa", p: 3, borderRadius: 2, textAlign: "left", mb: 4 }}>
-                  <Typography variant="body1" sx={{ color: "#555", lineHeight: 1.8 }}>
-                    {survey.description || "แบบสำรวจนี้เป็นส่วนหนึ่งของโครงการพัฒนา..."}
+                <Box
+                  sx={{
+                    backgroundColor: "#f8f9fa",
+                    p: 3,
+                    borderRadius: 2,
+                    textAlign: "left",
+                    mb: 4,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: "#555",
+                      lineHeight: 2,
+                      // เพิ่มย่อหน้าบรรทัดแรก
+                      textIndent: "2em",
+                      // ปรับการกระจายตัวอักษรภาษาไทยให้ดูเป็นธรรมชาติ (ไม่ถ่างช่องว่างมากไป)
+                      textAlign: "letf",
+                      textJustify: "inter-character",
+                      whiteSpace: "pre-line",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {survey.description ||
+                      "แบบสำรวจนี้เป็นส่วนหนึ่งของโครงการพัฒนา..."}
                   </Typography>
-                  <Typography variant="body2" sx={{ mt: 2, color: survey.primary_color, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                    <span style={{ marginRight: 8 }}><GppGoodOutlined /></span> ข้อมูลของท่านจะถูกเก็บเป็นความลับ
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: 2,
+                      color: survey.primary_color,
+                      fontWeight: "bold",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span style={{ marginRight: 8 }}>
+                      <GppGoodOutlined />
+                    </span>{" "}
+                    {survey?.note || "ข้อมูลของท่านจะถูกเก็บเป็นความลับ"}
                   </Typography>
                 </Box>
 
@@ -389,14 +460,17 @@ const SurveyComponent = ({ survey, responses }) => {
                   sx={{
                     borderRadius: 3,
                     py: 1.5,
-                    fontSize: '1.1rem',
-                    background: `linear-gradient(90deg, ${survey?.primary_color || "#1976d2"} 0%,  rgba(255, 255, 255, 0.4) 100%)`,
+                    fontSize: "1.1rem",
+                    background: `linear-gradient(90deg, ${
+                      survey?.primary_color || "#1976d2"
+                    } 0%,  rgba(255, 255, 255, 0.4) 100%)`,
                     backgroundColor: survey?.primary_color || "#1976d2",
-                    '&:hover': { backgroundColor: survey?.primary_color, filter: 'brightness(0.9)' }
+                    "&:hover": {
+                      backgroundColor: survey?.primary_color,
+                      filter: "brightness(0.9)",
+                    },
                   }}
-                  endIcon={
-                    <KeyboardArrowRight />
-                  }
+                  endIcon={<KeyboardArrowRight />}
                 >
                   เริ่มทำแบบสำรวจ
                 </Button>
@@ -404,15 +478,15 @@ const SurveyComponent = ({ survey, responses }) => {
             </Box>
           ) : (
             <>
-
               {/* Progress bar อยู่ใต้หัวข้อ */}
-              {survey?.sections?.length > 1 && activeStep < survey.sections?.length && (
-                <ProgressBarSection
-                  activeStep={activeStep}
-                  totalSteps={survey?.sections?.length}
-                  primaryColor={survey?.primary_color || "#1976d2"}
-                />
-              )}
+              {survey?.sections?.length > 1 &&
+                activeStep < survey.sections?.length && (
+                  <ProgressBarSection
+                    activeStep={activeStep}
+                    totalSteps={survey?.sections?.length}
+                    primaryColor={survey?.primary_color || "#1976d2"}
+                  />
+                )}
               {/* ส่วนของคำถาม จะมาแทนที่ตรงนี้ */}
               {survey?.sections?.length > 0 &&
                 activeStep < survey.sections.length && (
@@ -431,7 +505,6 @@ const SurveyComponent = ({ survey, responses }) => {
                         setActiveStep(activeStep + 1);
                       }
                     }}
-
                     onBack={() => {
                       if (activeStep > 0) {
                         setActiveStep(activeStep - 1);
@@ -448,7 +521,10 @@ const SurveyComponent = ({ survey, responses }) => {
 
               {/* ส่วนท้ายแบบขอบคุณหลังส่งแบบสอบถามเสร็จสิ้น */}
               {activeStep >= survey?.sections?.length && (
-                <ThankMessage form={survey} onRetakeSurvey={handleRetakeSurvey} />
+                <ThankMessage
+                  form={survey}
+                  onRetakeSurvey={handleRetakeSurvey}
+                />
               )}
             </>
           )}
