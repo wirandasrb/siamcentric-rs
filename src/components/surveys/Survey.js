@@ -412,7 +412,8 @@ const SurveyComponent = ({ survey, responses }) => {
                 <Box
                   sx={{
                     backgroundColor: "#f8f9fa",
-                    p: 3,
+                    p: 2,
+                    py: 3,
                     borderRadius: 2,
                     textAlign: "left",
                     mb: 4,
@@ -424,9 +425,10 @@ const SurveyComponent = ({ survey, responses }) => {
                       color: "#555",
                       lineHeight: 2,
                       // เพิ่มย่อหน้าบรรทัดแรก
-                      textIndent: "2em",
-                      // ปรับการกระจายตัวอักษรภาษาไทยให้ดูเป็นธรรมชาติ (ไม่ถ่างช่องว่างมากไป)
-                      textAlign: "letf",
+                      // textIndent: "2em",
+                      // เปลี่ยนจาก "letf" (ที่พิมพ์ผิด) เป็น "justify" เพื่อชิดซ้ายขวา
+                      textAlign: "justify",
+                      // ช่วยกระจายช่องไฟในภาษาไทยให้สมดุล ไม่ถ่างเฉพาะช่องว่างระหว่างคำ
                       textJustify: "inter-character",
                       whiteSpace: "pre-line",
                       wordBreak: "break-word",

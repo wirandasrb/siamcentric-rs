@@ -279,9 +279,10 @@ const FormPreviewPage = () => {
                       color: "#555",
                       lineHeight: 2,
                       // เพิ่มย่อหน้าบรรทัดแรก
-                      textIndent: "2em",
+                      //   textIndent: "2em",
                       // ปรับการกระจายตัวอักษรภาษาไทยให้ดูเป็นธรรมชาติ (ไม่ถ่างช่องว่างมากไป)
-                      textAlign: "letf",
+                      //   textAlign: "letf",
+                      textAlign: "justify",
                       textJustify: "inter-character",
                       whiteSpace: "pre-line",
                       wordBreak: "break-word",
