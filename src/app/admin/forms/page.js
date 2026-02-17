@@ -1,6 +1,7 @@
 "use client";
 import {
   Add,
+  BarChart,
   Delete,
   Edit,
   OfflineShare,
@@ -214,7 +215,7 @@ const FormsPage = () => {
                         icon: (
                           <Edit
                             sx={{
-                              color: colors.yellow[700],
+                              color: colors.grey[700],
                             }}
                           />
                         ),
@@ -222,9 +223,15 @@ const FormsPage = () => {
                       },
                       {
                         label: "ผลสำรวจ",
-                        icon: <Visibility sx={{ color: colors.blue[700] }} />,
+                        icon: <BarChart sx={{ color: colors.yellow[700] }} />,
                         onClick: () =>
                           router.push(`/admin/forms/report/${row.id}`),
+                      },
+                      {
+                        label: "ดูตัวอย่าง",
+                        icon: <Visibility sx={{ color: colors.blue[700] }} />,
+                        onClick: () =>
+                          router.push(`/admin/forms/${row.id}/preview`),
                       },
                       {
                         label: "ไปยังแบบสอบถาม",

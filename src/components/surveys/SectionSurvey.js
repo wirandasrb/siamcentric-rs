@@ -63,41 +63,73 @@ const SectionSurvey = ({
   //     onChangeAnswer(questionId, newAnswer);
   // };
 
+  //   const handleChangeAnswer = (questionId, newAnswer) => {
+  //     const question = section.questions.find((q) => q.id === questionId);
+
+  //     // ถ้าเป็นคำถาม single choice (question_type_id === 3)
+  //     if (question?.question_type_id === 3) {
+  //       // ตัวเลือกที่เลือกไว้
+  //       const selectedOptionId = Array.isArray(newAnswer)
+  //         ? newAnswer[0]?.answer_option_id
+  //         : newAnswer?.answer_option_id;
+
+  //       // หา option เดิมที่เคยตอบ (ก่อนเปลี่ยน)
+  //       const oldAnswer = answers.find((ans) => ans.question_id === questionId);
+  //       const oldOptionId = oldAnswer?.answer_option_id;
+
+  //       // ถ้ามีการเปลี่ยนตัวเลือก
+  //       if (oldOptionId && oldOptionId !== selectedOptionId) {
+  //         // ลบคำตอบของคำถามที่เคยแสดงเพราะ option เดิม
+  //         const oldConditions =
+  //           question.options.find((o) => o.id === oldOptionId)?.conditions || [];
+  //         const targetQuestionIdsToRemove = oldConditions
+  //           .filter((c) => c.condition_type === "require_question")
+  //           .map((c) => c.target_question_id);
+
+  //         if (targetQuestionIdsToRemove.length > 0) {
+  //           onChangeAnswer("__REMOVE__", targetQuestionIdsToRemove);
+  //         }
+  //       }
+  //     }
+
+  //     // อัปเดตคำตอบใหม่
+  //     onChangeAnswer(questionId, newAnswer);
+  //   };
   const handleChangeAnswer = (questionId, newAnswer) => {
-    const question = section.questions.find((q) => q.id === questionId);
+    // ฟังก์ชันหาข้อที่จะโดนผลกระทบ (โดนซ่อน) เพื่อเอาไปล้างคำตอบ
+    const findDependentIds = (qId) => {
+      let ids = [];
+      sections.forEach((s) => {
+        s.questions.forEach((q) => {
+          q.options.forEach((opt) => {
+            (opt.conditions || []).forEach((cond) => {
+              // ถ้าข้อ qId เป็นต้นทางของเงื่อนไขใดๆ ในข้ออื่น
+              if (Number(q.id) === Number(qId)) {
+                ids.push(cond.target_question_id);
+                // วิ่งหาชั้นถัดไป (Recursive)
+                ids = [...ids, ...findDependentIds(cond.target_question_id)];
+              }
+            });
+          });
+        });
+      });
+      return [...new Set(ids)]; // คืนค่าเฉพาะ ID ที่ไม่ซ้ำ
+    };
 
-    // ถ้าเป็นคำถาม single choice (question_type_id === 3)
-    if (question?.question_type_id === 3) {
-      // ตัวเลือกที่เลือกไว้
-      const selectedOptionId = Array.isArray(newAnswer)
-        ? newAnswer[0]?.answer_option_id
-        : newAnswer?.answer_option_id;
+    // 1. หาข้อคำถามลูกที่ต้องถูกล้างคำตอบ
+    // เราหาล่วงหน้าเลยว่าการเปลี่ยนคำตอบที่ข้อนี้ จะส่งผลกระทบถึงข้อไหนบ้างในสายสัมพันธ์
+    const idsToClear = findDependentIds(questionId);
 
-      // หา option เดิมที่เคยตอบ (ก่อนเปลี่ยน)
-      const oldAnswer = answers.find((ans) => ans.question_id === questionId);
-      const oldOptionId = oldAnswer?.answer_option_id;
-
-      // ถ้ามีการเปลี่ยนตัวเลือก
-      if (oldOptionId && oldOptionId !== selectedOptionId) {
-        // ลบคำตอบของคำถามที่เคยแสดงเพราะ option เดิม
-        const oldConditions =
-          question.options.find((o) => o.id === oldOptionId)?.conditions || [];
-        const targetQuestionIdsToRemove = oldConditions
-          .filter((c) => c.condition_type === "require_question")
-          .map((c) => c.target_question_id);
-
-        if (targetQuestionIdsToRemove.length > 0) {
-          onChangeAnswer("__REMOVE__", targetQuestionIdsToRemove);
-        }
-      }
+    if (idsToClear.length > 0) {
+      onChangeAnswer("__REMOVE__", idsToClear);
     }
 
-    // อัปเดตคำตอบใหม่
+    // 2. อัปเดตคำตอบใหม่ของข้อที่ User กำลังคลิก
     onChangeAnswer(questionId, newAnswer);
   };
 
   const shouldShowQuestion = (question) => {
-    // 1) เช็ค skip ก่อนเสมอ
+    // --- 1) เช็ค Skip Condition ---
     const skipConditions = sections.flatMap((s) =>
       s.questions.flatMap((q) =>
         q.options.flatMap((opt) =>
@@ -116,15 +148,25 @@ const SectionSurvey = ({
     );
 
     for (let skipCond of skipConditions) {
-      const isSkipped = answers.some(
-        (ans) =>
-          ans.question_id === skipCond.sourceQuestionId &&
-          ans.answer_option_id === skipCond.skipOptionId
+      // เช็คว่าข้อที่เป็นต้นทางของ Skip นั้น "แสดงอยู่" ไหท
+      const sourceQuestion = sections
+        .flatMap((s) => s.questions)
+        .find((q) => q.id === skipCond.sourceQuestionId);
+      if (sourceQuestion && !shouldShowQuestion(sourceQuestion)) continue;
+
+      const ans = answers.find(
+        (a) => a.question_id === skipCond.sourceQuestionId
       );
-      if (isSkipped) return false; // ❗ skip ต้อง win
+      if (ans) {
+        const optIds = Array.isArray(ans.answer_option_id)
+          ? ans.answer_option_id
+          : [ans.answer_option_id];
+        if (optIds.some((id) => Number(id) === Number(skipCond.skipOptionId)))
+          return false;
+      }
     }
 
-    // 2) หา require conditions
+    // 2) เช็ค Require Condition ---
     const requireConditions = sections.flatMap((s) =>
       s.questions.flatMap((q) =>
         q.options.flatMap((opt) =>
@@ -132,7 +174,7 @@ const SectionSurvey = ({
             .filter(
               (cond) =>
                 cond.condition_type === "require_question" &&
-                cond.target_question_id === question.id
+                Number(cond.target_question_id) === Number(question.id)
             )
             .map((cond) => ({
               sourceQuestionId: q.id,
@@ -142,18 +184,102 @@ const SectionSurvey = ({
       )
     );
 
-    // ไม่มี require → แสดงได้เลย
     if (!requireConditions.length) return true;
 
-    // 3) เช็ค require แบบ OR
-    return requireConditions.some((cond) =>
-      answers.some(
-        (ans) =>
-          Number(ans.question_id) === Number(cond.sourceQuestionId) &&
-          Number(ans.answer_option_id) === Number(cond.requiredOptionId)
-      )
-    );
+    // เช็คว่ามี Source ข้อไหนที่ "แสดงอยู่" และ "ตอบตรงเงื่อนไข" บ้าง
+    return requireConditions.some((cond) => {
+      // เช็คว่าข้อต้นทางถูกซ่อนอยู่หรือไม่ (ถ้าต้นทางซ่อน ตัวมันเองต้องซ่อนตาม)
+      const sourceQuestion = sections
+        .flatMap((s) => s.questions)
+        .find((q) => q.id === cond.sourceQuestionId);
+      if (sourceQuestion && !shouldShowQuestion(sourceQuestion)) return false;
+
+      const ans = answers.find(
+        (a) => Number(a.question_id) === Number(cond.sourceQuestionId)
+      );
+      if (!ans) return false;
+
+      const optIds = Array.isArray(ans.answer_option_id)
+        ? ans.answer_option_id
+        : [ans.answer_option_id];
+      return optIds.some((id) => Number(id) === Number(cond.requiredOptionId));
+    });
   };
+
+  //   const shouldShowQuestion = (question) => {
+  //     // 1) เช็ค skip ก่อนเสมอ
+  //     const skipConditions = sections.flatMap((s) =>
+  //       s.questions.flatMap((q) =>
+  //         q.options.flatMap((opt) =>
+  //           (opt.conditions || [])
+  //             .filter(
+  //               (cond) =>
+  //                 cond.condition_type === "skip_question" &&
+  //                 cond.target_question_id === question.id
+  //             )
+  //             .map((cond) => ({
+  //               sourceQuestionId: q.id,
+  //               skipOptionId: cond.required_option_id || opt.id,
+  //             }))
+  //         )
+  //       )
+  //     );
+
+  //     for (let skipCond of skipConditions) {
+  //       const isSkipped = answers.some(
+  //         (ans) =>
+  //           ans.question_id === skipCond.sourceQuestionId &&
+  //           ans.answer_option_id === skipCond.skipOptionId
+  //       );
+  //       if (isSkipped) return false; // ❗ skip ต้อง win
+  //     }
+
+  //     // 2) หา require conditions
+  //     const requireConditions = sections.flatMap((s) =>
+  //       s.questions.flatMap((q) =>
+  //         q.options.flatMap((opt) =>
+  //           (opt.conditions || [])
+  //             .filter(
+  //               (cond) =>
+  //                 cond.condition_type === "require_question" &&
+  //                 Number(cond.target_question_id) === Number(question.id)
+  //             )
+  //             .map((cond) => ({
+  //               sourceQuestionId: q.id,
+  //               requiredOptionId: cond.required_option_id || opt.id,
+  //             }))
+  //         )
+  //       )
+  //     );
+
+  //     // ไม่มี require → แสดงได้เลย
+  //     if (!requireConditions.length) return true;
+
+  //     // 3) เช็ค require แบบ OR
+  //     // return requireConditions.some((cond) =>
+  //     //   answers.some(
+  //     //     (ans) =>
+  //     //       Number(ans.question_id) === Number(cond.sourceQuestionId) &&
+  //     //       Number(ans.answer_option_id) === Number(cond.requiredOptionId)
+  //     //   )
+  //     // );
+  //     return requireConditions.some((cond) =>
+  //       answers.some((ans) => {
+  //         if (Number(ans.question_id) !== Number(cond.sourceQuestionId))
+  //           return false;
+
+  //         // ถ้าคำตอบมาเป็น Array (Multiple Choice)
+  //         if (Array.isArray(ans.answer_option_id)) {
+  //           return ans.answer_option_id.some(
+  //             (id) => Number(id) === Number(cond.requiredOptionId)
+  //           );
+  //         }
+
+  //         // ถ้าคำตอบมาเป็นค่าเดียว (Single Choice)
+  //         return Number(ans.answer_option_id) === Number(cond.requiredOptionId);
+  //       })
+  //     );
+  //   };
 
   const checkNextDisabled = () => {
     if (isPreview) return false;
@@ -162,7 +288,7 @@ const SectionSurvey = ({
       if (!q.is_required) return false;
 
       const visible = shouldShowQuestion(q);
-      if (!visible) return false; // ❗ ถ้าไม่แสดง ไม่ต้องบังคับตอบ
+      if (!visible) return false; //ถ้าไม่แสดง ไม่ต้องบังคับตอบ
 
       // หาคำตอบของคำถามนี้
       const ans = answers.find((a) => a.question_id === q.id);
