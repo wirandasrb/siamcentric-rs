@@ -231,7 +231,10 @@ const FormsPage = () => {
                         label: "ดูตัวอย่าง",
                         icon: <Visibility sx={{ color: colors.blue[700] }} />,
                         onClick: () =>
-                          router.push(`/admin/forms/${row.id}/preview`),
+                          window.open(
+                            `/admin/forms/${row.id}/preview`,
+                            "_blank"
+                          ),
                       },
                       {
                         label: "ไปยังแบบสอบถาม",
