@@ -30,7 +30,7 @@ const QuestionSurvey = ({
 }) => {
   const answer = answers.find((ans) => ans?.question_id === question.id);
 
-  const maxLength = question.question_type_id === 1 ? 150 : 255;
+  const maxLength = question.question_type_id === 1 ? 150 : 300;
   const textValue = answer?.answer_text || "";
   const textLength = [...textValue].length || 0;
 
@@ -292,14 +292,14 @@ const QuestionSurvey = ({
               fullWidth
               variant="standard"
               value={answer?.answer_text || ""}
-              inputProps={{ maxLength: 100 }}
+              inputProps={{ maxLength: 120 }}
               helperText={
                 answer &&
                 question.options.find(
                   (option) =>
                     option.is_other && option.id === answer.answer_option_id
                 )
-                  ? `${textLength} / 100 ตัวอักษร`
+                  ? `${textLength} / 120 ตัวอักษร`
                   : ""
               }
               onChange={(e) => {
@@ -534,7 +534,7 @@ const QuestionSurvey = ({
             <TextField
               value={answer ? answer.answer_text : ""}
               variant="standard"
-              inputProps={{ maxLength: 100 }}
+              inputProps={{ maxLength: 120 }}
               helperText={
                 answer &&
                 question.options.find(
@@ -542,7 +542,7 @@ const QuestionSurvey = ({
                     option.is_other &&
                     answer.answer_option_id?.includes(option.id)
                 )
-                  ? `${textLength} / 100 ตัวอักษร`
+                  ? `${textLength} / 120 ตัวอักษร`
                   : ""
               }
               onChange={(e) => {
@@ -664,8 +664,8 @@ const QuestionSurvey = ({
                   fullWidth
                   variant="standard"
                   value={answer?.answer_text || ""}
-                  inputProps={{ maxLength: 100 }}
-                  helperText={`${textLength} / 100 ตัวอักษร`}
+                  inputProps={{ maxLength: 120 }}
+                  helperText={`${textLength} / 120 ตัวอักษร`}
                   onChange={(e) => {
                     onChange({
                       ...question,

@@ -303,11 +303,25 @@ const SectionSurvey = ({
       const hasAttachment = ans.attachment_url && ans.attachment_url !== "";
 
       // ถ้าตอบตัวเลือกที่เป็น is_other ต้องมีข้อความ
-      const optionSelected = q.options.find(
-        (o) => o.id === ans.answer_option_id
-      );
-      if (optionSelected?.is_other) {
-        if (!hasText) return true;
+      if (q.question_type_id === 4) {
+        // ✅ multi choice (checkbox)
+        const selectedOptions = q.options.filter((o) =>
+          ans.answer_option_id?.includes(o.id)
+        );
+
+        const isOtherSelected = selectedOptions.some((o) => o.is_other);
+
+        if (isOtherSelected && !hasText) {
+          return true;
+        }
+      } else {
+        // type 3,5
+        const optionSelected = q.options.find(
+          (o) => o.id === ans.answer_option_id
+        );
+        if (optionSelected?.is_other) {
+          if (!hasText) return true;
+        }
       }
 
       // ถ้า matrix question ตอนนี้จะต้องตรวจสอบทุก row
