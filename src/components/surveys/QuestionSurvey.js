@@ -20,6 +20,7 @@ import TimePickerSurvey from "./TimePrickerSurvey";
 import FileUploadSurvey from "./FileUploadSurvey";
 import LinearScaleSurvey from "./LinearScaleSurver";
 import BarScaleSurvey from "./BarScaleSurvey";
+import { useMemo, useRef } from "react";
 
 const QuestionSurvey = ({
   question,
@@ -57,6 +58,69 @@ const QuestionSurvey = ({
       answer: updatedAnswersForThisQuestion || [],
     });
   };
+
+  const shuffledOptionsRef = useRef({
+    questionId: null,
+    optionsKey: null,
+    isShuffle: null,
+    options: [],
+  });
+
+  const displayOptions = useMemo(() => {
+    const options = question.options || [];
+
+    const shouldShuffle =
+      [3, 4].includes(Number(question.question_type_id)) &&
+      Boolean(question.is_shuffle_options);
+
+    const optionsKey = options
+      .map((option) => `${option.id}:${option.is_other}`)
+      .join("|");
+
+    const cache = shuffledOptionsRef.current;
+
+    // ใช้ลำดับเดิม หากคำถามและตัวเลือกไม่เปลี่ยน
+    if (
+      cache.questionId === question.id &&
+      cache.optionsKey === optionsKey &&
+      cache.isShuffle === shouldShuffle
+    ) {
+      return cache.options;
+    }
+
+    let result = [...options];
+
+    if (shouldShuffle) {
+      const normalOptions = result.filter((option) => !option.is_other);
+      const otherOptions = result.filter((option) => option.is_other);
+
+      // Fisher-Yates Shuffle
+      for (let i = normalOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [normalOptions[i], normalOptions[j]] = [
+          normalOptions[j],
+          normalOptions[i],
+        ];
+      }
+
+      result = [...normalOptions, ...otherOptions];
+    }
+
+    shuffledOptionsRef.current = {
+      questionId: question.id,
+      optionsKey,
+      isShuffle: shouldShuffle,
+      options: result,
+    };
+
+    return result;
+  }, [
+    question.id,
+    question.options,
+    question.question_type_id,
+    question.is_shuffle_options,
+  ]);
 
   return (
     <Box
@@ -239,7 +303,7 @@ const QuestionSurvey = ({
                 width: "100%",
               }}
             >
-              {question.options.map((option) => {
+              {displayOptions.map((option) => {
                 const isSelected = answer?.answer_option_id === option.id;
                 // const isTwoOptions = question.options.length === 2;
 
@@ -434,7 +498,7 @@ const QuestionSurvey = ({
           }}
         >
           <FormGroup>
-            {question.options.map((option) => {
+            {displayOptions.map((option) => {
               const isChecked =
                 answer?.answer_option_id?.includes(option.id) || false;
 
