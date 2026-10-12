@@ -62,7 +62,11 @@ const FormCreatePage = () => {
 
   const [loading, setLoading] = useState(false);
   const [alertConfirm, setAlertConfirm] = useState({
-    open: false, title: '', description: '', sub_description: null, onConfirm: null
+    open: false,
+    title: "",
+    description: "",
+    sub_description: null,
+    onConfirm: null,
   });
 
   const [openThemeMenu, setOpenThemeMenu] = useState(false);
@@ -133,21 +137,21 @@ const FormCreatePage = () => {
             temp_id: question.id,
             options: question.options
               ? question.options.map((option, oIndex) => ({
-                ...option,
-                temp_id: option.id,
-              }))
+                  ...option,
+                  temp_id: option.id,
+                }))
               : [],
             matrix_rows: question.matrix_rows
               ? question.matrix_rows.map((row, rIndex) => ({
-                ...row,
-                temp_id: row.id,
-              }))
+                  ...row,
+                  temp_id: row.id,
+                }))
               : [],
             matrix_columns: question.matrix_columns
               ? question.matrix_columns.map((col, cIndex) => ({
-                ...col,
-                temp_id: col.id,
-              }))
+                  ...col,
+                  temp_id: col.id,
+                }))
               : [],
           })),
         }));
@@ -203,14 +207,14 @@ const FormCreatePage = () => {
     formData.append("sections", JSON.stringify(sections));
     formData.append(
       "allow_multiple_answers",
-      formDetail.allow_multiple_answers || false
+      formDetail.allow_multiple_answers ?? false
     );
     formData.append("thank_you_message", formDetail.thank_you_message || "");
     formData.append(
       "show_facebook_share",
-      formDetail.show_facebook_share || true
+      formDetail.show_facebook_share ?? true
     );
-    formData.append("show_line_share", formDetail.show_line_share || true);
+    formData.append("show_line_share", formDetail.show_line_share ?? true);
     formData.append("meta_title", formDetail.meta_title || "");
     formData.append("meta_description", formDetail?.meta_description || "");
     formData.append("display_title", formDetail.display_title || "all_pages");
@@ -224,7 +228,7 @@ const FormCreatePage = () => {
         router.push("/admin/forms");
       } else if (response.success && isSavePreview) {
         router.replace(`/admin/forms/${response.data.id}`);
-        window.open(`/admin/forms/${response.data.id}/preview`, '_blank');
+        window.open(`/admin/forms/${response.data.id}/preview`, "_blank");
       }
     } else {
       // call update form API
@@ -235,7 +239,7 @@ const FormCreatePage = () => {
         router.push("/admin/forms");
       } else if (response.success && isSavePreview) {
         fetchFormDetail(id); // reload form detail
-        window.open(`/admin/forms/${id}/preview`, '_blank');
+        window.open(`/admin/forms/${id}/preview`, "_blank");
       }
     }
     // if (isSavePreview && id !== "create") {
@@ -410,7 +414,7 @@ const FormCreatePage = () => {
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={formDetail.allow_multiple_answers || false}
+                      checked={formDetail.allow_multiple_answers ?? false}
                       onChange={(e) =>
                         setFormDetail({
                           ...formDetail,
@@ -453,7 +457,7 @@ const FormCreatePage = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={formDetail?.show_facebook_share || true}
+                        checked={formDetail?.show_facebook_share ?? true}
                         onChange={(e) =>
                           setFormDetail({
                             ...formDetail,
@@ -467,7 +471,7 @@ const FormCreatePage = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={formDetail?.show_line_share || true}
+                        checked={formDetail?.show_line_share ?? true}
                         onChange={(e) =>
                           setFormDetail({
                             ...formDetail,
@@ -664,7 +668,10 @@ const FormCreatePage = () => {
               backgroundColor: "white",
               color: colors.red[800],
               boxShadow: "none",
-              "&:hover": { backgroundColor: colors.red[100], boxShadow: "none" },
+              "&:hover": {
+                backgroundColor: colors.red[100],
+                boxShadow: "none",
+              },
               borderRadius: 3,
               fontSize: 14,
               textTransform: "none",
@@ -674,10 +681,16 @@ const FormCreatePage = () => {
             onClick={() => {
               setAlertConfirm({
                 open: true,
-                title: id === "create" ? 'ยกเลิกการสร้างแบบสอบถาม' : 'ยกเลิกการแก้ไขแบบสอบถาม',
-                description: id === "create" ? 'คุณแน่ใจหรือว่าต้องการยกเลิกการสร้างแบบสอบถาม?' : 'คุณแน่ใจหรือว่าต้องการยกเลิกการแก้ไขแบบสอบถาม?',
-                sub_description: 'ข้อมูลที่กรอกจะไม่ถูกบันทึก',
-                onConfirm: () => router.push('/admin/forms'),
+                title:
+                  id === "create"
+                    ? "ยกเลิกการสร้างแบบสอบถาม"
+                    : "ยกเลิกการแก้ไขแบบสอบถาม",
+                description:
+                  id === "create"
+                    ? "คุณแน่ใจหรือว่าต้องการยกเลิกการสร้างแบบสอบถาม?"
+                    : "คุณแน่ใจหรือว่าต้องการยกเลิกการแก้ไขแบบสอบถาม?",
+                sub_description: "ข้อมูลที่กรอกจะไม่ถูกบันทึก",
+                onConfirm: () => router.push("/admin/forms"),
               });
             }}
           >
@@ -689,8 +702,9 @@ const FormCreatePage = () => {
               // บังคับ save ให้ก่อน แล้วค่อย preview
               setAlertConfirm({
                 open: true,
-                title: 'ไปที่โหมดแสดงตัวอย่างแบบฟอร์ม',
-                description: 'คุณต้องการบันทึกการเปลี่ยนแปลงก่อนดูตัวอย่างแบบฟอร์มหรือไม่?',
+                title: "ไปที่โหมดแสดงตัวอย่างแบบฟอร์ม",
+                description:
+                  "คุณต้องการบันทึกการเปลี่ยนแปลงก่อนดูตัวอย่างแบบฟอร์มหรือไม่?",
                 sub_description: null,
                 onConfirm: () => {
                   handleSave(true);
