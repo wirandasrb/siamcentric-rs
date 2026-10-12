@@ -35,7 +35,7 @@ const BarScaleSurvey = ({
           px: { xs: 0, md: 2 },
         }}
       > */}
-      <Box
+      {/* <Box
         sx={{
           display: "grid",
           gridTemplateColumns: {
@@ -45,6 +45,18 @@ const BarScaleSurvey = ({
           },
           gap: { xs: 1, sm: 1.5, md: 2 },
           px: { xs: 0, md: 2 },
+        }}
+      > */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          gap: { xs: 1, sm: 1.5, md: 2 },
+          px: { xs: 0, md: 2 },
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         {scaleValues.map((currentVal) => {
@@ -72,70 +84,71 @@ const BarScaleSurvey = ({
                   },
                 });
               }}
-              sx={{
-                flex: 1,
-                aspectRatio: "1/1", // ทำให้เป็นสี่เหลี่ยมจตุรัส
-                maxWidth: 100,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                borderRadius: 3,
-                border: isSelected ? "none" : "1px solid #eee",
-                backgroundColor: isSelected ? "transparent" : "#fff",
-                // ใช้ Gradient สีตามที่กำหนดใน primaryColor
-                backgroundImage: isSelected
-                  ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(
-                      primaryColor,
-                      0.3
-                    )} 100%)`
-                  : "none",
-                boxShadow: isSelected
-                  ? `0 10px 20px ${lighten(primaryColor, 0.6)}`
-                  : "none",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "translateY(-4px)",
-                  borderColor: primaryColor,
-                },
-              }}
               //   sx={{
-              //     width: { xs: "calc(25% - 6px)", sm: 85, md: 95 },
-              //     height: { xs: 76, sm: 85, md: 95 },
-              //     flexShrink: 0,
-              //     boxSizing: "border-box",
-
+              //     flex: 1,
+              //     aspectRatio: "1/1", // ทำให้เป็นสี่เหลี่ยมจตุรัส
+              //     maxWidth: 100,
               //     display: "flex",
               //     flexDirection: "column",
               //     alignItems: "center",
               //     justifyContent: "center",
-
               //     cursor: "pointer",
               //     borderRadius: 3,
-              //     border: isSelected ? "1px solid transparent" : "1px solid #eee",
+              //     border: isSelected ? "none" : "1px solid #eee",
               //     backgroundColor: isSelected ? "transparent" : "#fff",
-
+              //     // ใช้ Gradient สีตามที่กำหนดใน primaryColor
               //     backgroundImage: isSelected
               //       ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(
               //           primaryColor,
               //           0.3
               //         )} 100%)`
               //       : "none",
-
               //     boxShadow: isSelected
               //       ? `0 10px 20px ${lighten(primaryColor, 0.6)}`
               //       : "none",
-
               //     transition: "all 0.3s ease",
-
-              //     "@media (hover: hover)": {
-              //       "&:hover": {
-              //         transform: "translateY(-2px)",
-              //         borderColor: primaryColor,
-              //       },
+              //     "&:hover": {
+              //       transform: "translateY(-4px)",
+              //       borderColor: primaryColor,
               //     },
               //   }}
+              sx={{
+                width: { xs: "calc(25% - 6px)", sm: 85, md: 95 },
+                height: { xs: 85, sm: 95, md: 100 },
+                flexShrink: 0,
+                boxSizing: "border-box",
+
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+
+                cursor: "pointer",
+                borderRadius: 3,
+                border: "1px solid",
+                borderColor: isSelected ? "transparent" : "#eee",
+                backgroundColor: isSelected ? "transparent" : "#fff",
+
+                backgroundImage: isSelected
+                  ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(
+                      primaryColor,
+                      0.3
+                    )} 100%)`
+                  : "none",
+
+                boxShadow: isSelected
+                  ? `0 10px 20px ${lighten(primaryColor, 0.6)}`
+                  : "none",
+
+                transition: "all 0.3s ease",
+
+                "@media (hover: hover)": {
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    borderColor: primaryColor,
+                  },
+                },
+              }}
             >
               {/* ตัวเลขคะแนน */}
               <Typography
