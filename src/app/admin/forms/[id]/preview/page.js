@@ -291,21 +291,23 @@ const FormPreviewPage = () => {
                     {form.description ||
                       "แบบสำรวจนี้เป็นส่วนหนึ่งของโครงการพัฒนา..."}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mt: 2,
-                      color: form.primary_color,
-                      fontWeight: "bold",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span style={{ marginRight: 8 }}>
-                      <GppGoodOutlined />
-                    </span>{" "}
-                    {form?.note || "ข้อมูลของท่านจะถูกเก็บเป็นความลับ"}
-                  </Typography>
+                  {form?.note?.trim() && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 2,
+                        color: form.primary_color,
+                        fontWeight: "bold",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ marginRight: 8 }}>
+                        <GppGoodOutlined />
+                      </span>{" "}
+                      {form?.note}
+                    </Typography>
+                  )}
                 </Box>
 
                 <Button

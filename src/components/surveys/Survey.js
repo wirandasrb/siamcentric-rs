@@ -437,21 +437,23 @@ const SurveyComponent = ({ survey, responses }) => {
                     {survey.description ||
                       "แบบสำรวจนี้เป็นส่วนหนึ่งของโครงการพัฒนา..."}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      mt: 2,
-                      color: survey.primary_color,
-                      fontWeight: "bold",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span style={{ marginRight: 8 }}>
-                      <GppGoodOutlined />
-                    </span>{" "}
-                    {survey?.note || "ข้อมูลของท่านจะถูกเก็บเป็นความลับ"}
-                  </Typography>
+                  {survey?.note?.trim() && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 2,
+                        color: survey.primary_color,
+                        fontWeight: "bold",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ marginRight: 8 }}>
+                        <GppGoodOutlined />
+                      </span>{" "}
+                      {survey?.note}
+                    </Typography>
+                  )}
                 </Box>
 
                 <Button
