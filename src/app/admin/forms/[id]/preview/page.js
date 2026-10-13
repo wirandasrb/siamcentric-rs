@@ -186,12 +186,23 @@ const FormPreviewPage = () => {
               display: "flex",
               justifyContent: "center", // จัดการเรียงในแนวแกนหลัก (แนวนอน) ให้อยู่กลาง
               alignItems: "center", // จัดการเรียงในแนวตั้งให้อยู่กลาง
+              gap: { xs: 1.5, sm: 3 },
+              py: { xs: 2, sm: 1 },
             }}
           >
             <Box
               component="img"
               src={form.image_url ?? "/images/online-survey.png"}
-              sx={{ width: 100, height: 100, mr: 2 }}
+              // sx={{ width: 100, height: 100, mr: 2 }}
+              sx={{
+                width: "auto",
+                height: "auto",
+                maxWidth: { xs: 100, sm: 160, md: 200 },
+                maxHeight: { xs: 70, sm: 90, md: 110 },
+                objectFit: "contain",
+                flexShrink: 0,
+                mr: 2,
+              }}
             />
             <Box>
               <Typography
