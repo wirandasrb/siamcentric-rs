@@ -249,32 +249,84 @@ const MatrixQuestionSurvey = ({
                       <Box
                         key={col.id}
                         onClick={() => handleSelect(row, col)}
+                        // sx={{
+                        //   flex: 1,
+                        //   aspectRatio: "1/1", // ทำให้เป็นสี่เหลี่ยมจตุรัส
+                        //   maxWidth: 100, // จำกัดขนาดไม่ให้ใหญ่เกินไปบนจอคอม
+                        //   display: "flex",
+                        //   flexDirection: "column",
+                        //   alignItems: "center",
+                        //   justifyContent: "center",
+                        //   cursor: "pointer",
+                        //   borderRadius: 3, // ความโค้งมนตามรูป
+                        //   border: isSelected ? "none" : "1px solid #eee",
+                        //   backgroundColor: isSelected ? "transparent" : "#fff",
+                        //   // ใส่ Gradient เมื่อถูกเลือก
+                        //   backgroundImage: isSelected
+                        //     ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(
+                        //         primaryColor,
+                        //         0.3
+                        //       )} 100%)`
+                        //     : "none",
+                        //   boxShadow: isSelected
+                        //     ? `0 10px 20px ${lighten(primaryColor, 0.6)}`
+                        //     : "none",
+                        //   transition: "all 0.3s ease",
+                        //   "&:hover": {
+                        //     transform: "translateY(-4px)",
+                        //     borderColor: primaryColor,
+                        //   },
+                        // }}
                         sx={{
                           flex: 1,
-                          aspectRatio: "1/1", // ทำให้เป็นสี่เหลี่ยมจตุรัส
-                          maxWidth: 100, // จำกัดขนาดไม่ให้ใหญ่เกินไปบนจอคอม
+                          aspectRatio: "1/1",
+                          maxWidth: 100,
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
                           cursor: "pointer",
-                          borderRadius: 3, // ความโค้งมนตามรูป
-                          border: isSelected ? "none" : "1px solid #eee",
-                          backgroundColor: isSelected ? "transparent" : "#fff",
-                          // ใส่ Gradient เมื่อถูกเลือก
-                          backgroundImage: isSelected
-                            ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(
-                                primaryColor,
-                                0.3
-                              )} 100%)`
-                            : "none",
+                          borderRadius: 3,
+
+                          // สีขอบ
+                          border: "1px solid",
+                          borderColor: isNA
+                            ? isSelected
+                              ? "#94A3B8"
+                              : "#CBD5E1"
+                            : isSelected
+                            ? "transparent"
+                            : "#eee",
+
+                          // สีพื้นหลัง
+                          backgroundColor: isNA
+                            ? isSelected
+                              ? "#9e9e9e"
+                              : "#F1F5F9"
+                            : isSelected
+                            ? "transparent"
+                            : "#fff",
+
+                          // Gradient ใช้เฉพาะคะแนนปกติ
+                          backgroundImage:
+                            !isNA && isSelected
+                              ? `linear-gradient(135deg, ${primaryColor} 0%, ${lighten(
+                                  primaryColor,
+                                  0.3
+                                )} 100%)`
+                              : "none",
+
                           boxShadow: isSelected
-                            ? `0 10px 20px ${lighten(primaryColor, 0.6)}`
+                            ? isNA
+                              ? "0 4px 12px rgba(100, 116, 139, 0.18)"
+                              : `0 10px 20px ${lighten(primaryColor, 0.6)}`
                             : "none",
+
                           transition: "all 0.3s ease",
+
                           "&:hover": {
                             transform: "translateY(-4px)",
-                            borderColor: primaryColor,
+                            borderColor: isNA ? "#94A3B8" : primaryColor,
                           },
                         }}
                       >

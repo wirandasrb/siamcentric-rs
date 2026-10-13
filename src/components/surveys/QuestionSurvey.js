@@ -69,9 +69,13 @@ const QuestionSurvey = ({
   const displayOptions = useMemo(() => {
     const options = question.options || [];
 
-    const shouldShuffle =
-      [3, 4].includes(Number(question.question_type_id)) &&
-      Boolean(question.is_shuffle_options);
+    const questionType = Number(question.question_type_id);
+
+    const canShuffle =
+      [3, 4].includes(questionType) ||
+      (questionType === 5 && question.dropdown_source_type !== "external");
+
+    const shouldShuffle = canShuffle && question.is_shuffle_options === true;
 
     const optionsKey = options
       .map((option) => `${option.id}:${option.is_other}`)
@@ -120,6 +124,7 @@ const QuestionSurvey = ({
     question.options,
     question.question_type_id,
     question.is_shuffle_options,
+    question.dropdown_source_type,
   ]);
 
   return (
@@ -181,30 +186,6 @@ const QuestionSurvey = ({
                     mb: 2,
                 }}
             > */}
-      {/* {(question.question_type_id === 1 ||
-                question.question_type_id === 2) && (
-                    <TextField
-                        fullWidth
-                        multiline={question.question_type_id === 2}
-                        minRows={question.question_type_id === 2 ? 4 : 1}
-                        value={question.answer_text || ""}
-                        onChange={(e) => {
-                            onChange({
-                                ...question,
-                                answer: {
-                                    section_id: question.section_id,
-                                    question_id: question.id,
-                                    answer_option_id: null,
-                                    answer_value: null,
-                                    attachment_url: null,
-                                    answer_text: e.target.value,
-                                },
-                            });
-                        }}
-                        placeholder="พิมพ์คำตอบที่นี่"
-                        sx={{ mt: 1 }}
-                    />
-                )} */}
 
       {(question.question_type_id === 1 || question.question_type_id === 2) && (
         <Box sx={{ position: "relative", mt: 1.5 }}>
@@ -391,102 +372,6 @@ const QuestionSurvey = ({
         </Box>
       )}
 
-      {/* {question.question_type_id === 3 && (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 1,
-                            mt: 1,
-                            fontSize: 16,
-                        }}
-                    >
-                        <RadioGroup
-                            value={answer ? answer.answer_option_id : ""}
-                            onChange={(e) => {
-                                let selectedOptionId = parseInt(e.target.value);
-                                let updatedAnswer = {
-                                    section_id: question.section_id,
-                                    question_id: question.id,
-                                    answer_option_id: selectedOptionId,
-                                    answer_text: "",
-                                    answer_value: null,
-                                    attachment_url: null,
-                                };
-                                onChange({ ...question, answer: updatedAnswer });
-                            }}
-                        >
-                            {question.options.map((option) => {
-                                const isSelected = answer?.answer_option_id === option.id;
-
-                                return (
-                                    <Box
-                                        key={option.id}
-                                        sx={{
-                                            border: isSelected ? `1px solid ${primaryColor}` : "none",
-                                            borderRadius: 2,
-                                            p: 1,
-                                            transition: "all 0.2s ease",
-                                            backgroundColor: isSelected
-                                                ? lighten(secondColor, 0.08)
-                                                : "transparent",
-                                            "&:hover": {
-                                                borderColor: primaryColor,
-                                                backgroundColor: lighten(secondColor, 0.03),
-                                            },
-                                            mb: 1,
-                                        }}
-                                    >
-                                        <FormControlLabel
-                                            control={<Radio />}
-                                            label={option.option}
-                                            value={option.id}
-                                            sx={{
-                                                width: "100%",
-                                                m: 0,
-                                                "& .MuiFormControlLabel-label": {
-                                                    fontSize: 16,
-                                                    color: isSelected ? primaryColor : "inherit",
-                                                    fontWeight: isSelected ? "bold" : "normal",
-                                                },
-                                            }}
-                                        />
-                                    </Box>
-                                );
-                            })}
-
-                            {question.options.find((option) => option.is_other) && (
-                                <TextField
-                                    fullWidth
-                                    variant="standard"
-                                    value={answer?.answer_text || ""}
-                                    onChange={(e) => {
-                                        onChange({
-                                            ...question,
-                                            answer: {
-                                                ...answer,
-                                                answer_text: e.target.value,
-                                            },
-                                        });
-                                    }}
-                                    disabled={
-                                        !(
-                                            answer &&
-                                            question.options.find(
-                                                (option) =>
-                                                    option.is_other &&
-                                                    option.id === answer.answer_option_id
-                                            )
-                                        )
-                                    }
-                                    placeholder="โปรดระบุ"
-                                    sx={{ mt: 1, mb: 2, ml: 4 }}
-                                />
-                            )}
-                        </RadioGroup>
-                    </Box>
-                )} */}
-
       {question.question_type_id === 4 && (
         <Box
           sx={{
@@ -669,7 +554,7 @@ const QuestionSurvey = ({
               }}
             >
               <Autocomplete
-                options={question.options || []}
+                options={displayOptions || []}
                 getOptionLabel={(option) => option.option}
                 disableClearable={question.is_required}
                 value={

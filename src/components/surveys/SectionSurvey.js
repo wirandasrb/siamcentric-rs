@@ -555,21 +555,36 @@ const SectionSurvey = ({
           </Box>
         )}
 
-        {section.section_note && (
+        {section.section_note?.trim() && (
           <Box
             sx={{
               display: "flex",
+              alignItems: "flex-start",
               gap: 1,
               mt: 2,
               px: { xs: 3, md: 4 },
-              // borderRadius: 2,
-              // backgroundColor: lighten(primaryColor, 0.95), // พื้นหลังสีอ่อนๆ
-              // borderLeft: `4px solid ${primaryColor}`,
             }}
           >
-            <Info sx={{ color: primaryColor, fontSize: 20, mt: 0.3 }} />
+            <Info
+              sx={{
+                color: primaryColor,
+                fontSize: 20,
+                mt: 0.3,
+                flexShrink: 0,
+              }}
+            />
+
             <Typography
-              sx={{ fontSize: 15, color: "#555", fontStyle: "italic" }}
+              sx={{
+                fontSize: 15,
+                color: "#555",
+                fontStyle: "italic",
+                whiteSpace: "pre-wrap",
+                overflowWrap: "break-word",
+                lineHeight: 1.8,
+                flex: 1,
+                minWidth: 0,
+              }}
             >
               {section.section_note}
             </Typography>
@@ -624,13 +639,11 @@ const SectionSurvey = ({
                     borderRadius: 4, // ความโค้งมนตามรูปตัวอย่าง
 
                     // ถ้าเป็นข้อที่มีเงื่อนไข ให้ใส่กรอบและพื้นหลังสีฟ้า
-                    ...// กรณีที่ 1: ไม่ใช่ Matrix และมี Require Condition
-                    (((hasRequireCondition &&
-                      question.question_type_id !== 9) ||
-                      // กรณีที่ 2: เป็น Matrix (Type 9) และมี row เดียวเท่านั้น
-                      (question.question_type_id === 9 &&
-                        question.matrix_rows?.length === 1)) && {
-                      p: { xs: 2, md: 3 }, // เพิ่มพื้นที่ด้านในกรอบ
+                    ...// กรณีที่ 1: มี Require Condition
+                    ((hasRequireCondition ||
+                      // กรณีที่ 2: มีบังคับ highlight
+                      question.is_highlight_background === true) && {
+                      p: { xs: 0.5, md: 1.5 }, // เพิ่มพื้นที่ด้านในกรอบ
                       mb: 2,
                       mx: 2, // ระยะห่างจากข้อถัดไป
                       backgroundColor: lighten(highlightColor, 0.97), // สีฟ้าอ่อนมากๆ

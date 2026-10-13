@@ -477,7 +477,7 @@ function QuestionItem({
                   </Button>
                 </Box>
 
-                {[3, 4].includes(Number(question.question_type_id)) && (
+                {[3, 4, 5].includes(Number(question.question_type_id)) && (
                   <Box
                     sx={{
                       display: "inline-flex",
@@ -593,7 +593,27 @@ function QuestionItem({
               label="บังคับตอบคำถามนี้"
               sx={{
                 userSelect: "none",
-                "& .MuiTypography-root": { fontSize: 14 },
+                "& .MuiTypography-root": { fontSize: 16 },
+              }}
+            />
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={question.is_highlight_background === true}
+                  onChange={(e) =>
+                    onChange({
+                      ...question,
+                      is_highlight_background: e.target.checked,
+                    })
+                  }
+                />
+              }
+              label="เน้นคำถามด้วยสีพื้นหลัง"
+              sx={{
+                userSelect: "none",
+                "& .MuiTypography-root": { fontSize: 16 },
               }}
             />
           </Box>
