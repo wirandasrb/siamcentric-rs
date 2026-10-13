@@ -413,6 +413,53 @@ const SectionSurvey = ({
     return `${dynamicText || ""} ${displayText}`.trim();
   };
 
+  // ID ของ Section ที่ต้องการจัดหัวข้อพิเศษ
+  // เปลี่ยน 123 เป็น section.id จริง
+  const SPECIAL_SECTION_ID = process.env.NEXT_PUBLIC_SPECIAL_SECTION_ID;
+  // console.log({ SPECIAL_SECTION_ID });
+
+  const isSpecialSection =
+    SPECIAL_SECTION_ID !== undefined &&
+    Number(section.id) === Number(SPECIAL_SECTION_ID);
+
+  // เลข Section สำหรับการแสดงผลเท่านั้น
+  const DISPLAY_SECTION_NO = section.section_no;
+
+  const getSpecialDisplayNumber = (questionNo) => {
+    const no = Number(questionNo);
+
+    // คำถาม 2.1 และ 2.2
+    if (no <= 2) {
+      return `${DISPLAY_SECTION_NO}.${no}`;
+    }
+
+    // กลุ่ม 2.3.1 - 2.3.3
+    if (no >= 3 && no <= 5) {
+      return `${DISPLAY_SECTION_NO}.3.${no - 2}`;
+    }
+
+    // หลังจบกลุ่ม 2.3 ให้ต่อเป็น 2.4, 2.5, 2.6 ...
+    return `${DISPLAY_SECTION_NO}.${no - 2}`;
+  };
+
+  // ใช้เงื่อนไขการซ่อนคำถามเดิม
+  const visibleQuestions = section.questions.filter((q) =>
+    shouldShowQuestion(q)
+  );
+
+  // เรียงลำดับเฉพาะ Section พิเศษ
+  if (isSpecialSection) {
+    visibleQuestions.sort(
+      (a, b) => Number(a.question_no) - Number(b.question_no)
+    );
+  }
+
+  // หา Matrix ตัวแรกในกลุ่ม 2.3 ที่ยังแสดงอยู่
+  const firstServiceQuestionId = isSpecialSection
+    ? visibleQuestions.find((q) => [3, 4, 5].includes(Number(q.question_no)))
+        ?.id
+    : null;
+
   return (
     <Box
       sx={{
@@ -600,34 +647,62 @@ const SectionSurvey = ({
             gap: 4, // ระยะห่างระหว่างข้อ
           }}
         >
-          {section.questions
-            .filter((q) => shouldShowQuestion(q)) // Filter ข้อที่ซ่อนออกไปก่อน
-            .map((question, index) => {
-              // const visible = shouldShowQuestion(question);
-              // if (!visible) return null;
-              const questionNumber = index + 1;
+          {visibleQuestions.map((question, index) => {
+            // const visible = shouldShowQuestion(question);
+            // if (!visible) return null;
+            const questionNumber = index + 1;
 
-              const hasRequireCondition = sections.some((s) =>
-                s.questions.some((q) =>
-                  q.options.some((opt) =>
-                    (opt.conditions || []).some(
-                      (cond) =>
-                        cond.condition_type === "require_question" &&
-                        cond.target_question_id === question.id
-                    )
+            const displayNumber = isSpecialSection
+              ? getSpecialDisplayNumber(question.question_no)
+              : `${section.section_no}.${questionNumber}`;
+
+            const displayQuestion = question.question;
+
+            const hasRequireCondition = sections.some((s) =>
+              s.questions.some((q) =>
+                q.options.some((opt) =>
+                  (opt.conditions || []).some(
+                    (cond) =>
+                      cond.condition_type === "require_question" &&
+                      cond.target_question_id === question.id
                   )
                 )
-              );
+              )
+            );
 
-              const isNegativeResponse =
-                question.question?.includes("ไม่เห็นด้วย");
+            const isNegativeResponse =
+              question.question?.includes("ไม่เห็นด้วย");
 
-              // เลือกสี: ถ้ามีคำว่าไม่เห็นด้วยใช้สีแดง (Soft Red), ถ้าไม่มีใช้สีหลัก (Primary)
-              const highlightColor = isNegativeResponse
-                ? "#d32f2f"
-                : primaryColor;
+            // เลือกสี: ถ้ามีคำว่าไม่เห็นด้วยใช้สีแดง (Soft Red), ถ้าไม่มีใช้สีหลัก (Primary)
+            const highlightColor = isNegativeResponse
+              ? "#d32f2f"
+              : primaryColor;
 
-              return (
+            return (
+              <React.Fragment key={question.id}>
+                {isSpecialSection &&
+                  firstServiceQuestionId != null &&
+                  Number(question.id) === Number(firstServiceQuestionId) && (
+                    <Box
+                      sx={{
+                        color: primaryColor,
+                        p: 1,
+                        ml: 2,
+                        mt: 2,
+                        // borderRadius: 2,
+                        borderLeft: `4px solid ${primaryColor}`,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: 18,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {section.section_no}.3 การให้บริการของผู้แทนของบริษัท
+                      </Typography>
+                    </Box>
+                  )}
                 <Box
                   key={question.id}
                   // sx={{
@@ -663,7 +738,11 @@ const SectionSurvey = ({
                     // question={question}
                     question={{
                       ...question,
-                      display_number: `${section.section_no}.${questionNumber}`,
+                      display_number: displayNumber,
+                      display_question: displayQuestion,
+                      is_nested_display:
+                        isSpecialSection &&
+                        [3, 4, 5].includes(Number(question.question_no)),
                     }}
                     answers={answers}
                     primaryColor={primaryColor}
@@ -676,8 +755,9 @@ const SectionSurvey = ({
                     }}
                   />
                 </Box>
-              );
-            })}
+              </React.Fragment>
+            );
+          })}
         </Box>
 
         {/* ส่วน Footer ปุ่มกด */}

@@ -145,21 +145,25 @@ const QuestionSurvey = ({
       {question.question_type_id === 9 ? (
         <Box
           sx={{
-            mb: 2,
-            color: primaryColor,
-            p: 1,
-            // borderRadius: 2,
-            borderLeft: `4px solid ${primaryColor}`,
+            mb: question.is_nested_display ? 1 : 2,
+            ml: question.is_nested_display ? 2 : 0,
+            p: question.is_nested_display ? 0.5 : 1,
+            color: question.is_nested_display ? "#333" : primaryColor,
+            borderLeft: question.is_nested_display
+              ? "none"
+              : `4px solid ${primaryColor}`,
           }}
         >
           <Typography
             sx={{
               fontSize: 18,
               fontWeight: 700,
+              color: primaryColor,
             }}
           >
-            {question.display_number} {question.question}{" "}
-            {question.is_required && <span style={{ color: "red" }}>*</span>}
+            {question.display_number}{" "}
+            {question.display_question ?? question.question}
+            {question.is_required && <span style={{ color: "red" }}> *</span>}
           </Typography>
         </Box>
       ) : (
