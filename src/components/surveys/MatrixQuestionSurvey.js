@@ -18,6 +18,7 @@ const MatrixQuestionSurvey = ({
         col.column_value !== "N/A" ? Number(col.column_value) : null,
       answer_text: col.column_value === "N/A" ? col.column_label : null,
     };
+    console.log("Selected Matrix Answer:", updatedAnswer);
 
     // filter เฉพาะ row เดิมของ question นี้
     const filtered = answers.filter((ans) => ans.matrix_row_id !== row.id);
@@ -116,15 +117,27 @@ const MatrixQuestionSurvey = ({
                     size="small"
                     color="primary"
                     checked={Boolean(
-                      answers.find(
-                        (ans) =>
-                          ans.question_id === question.id &&
-                          ans.matrix_row_id === row.id &&
-                          ((col.column_value === "N/A" &&
-                            ans.answer_text === col.column_label) ||
-                            Number(ans.answer_value) ===
-                              Number(col.column_value))
-                      )
+                      answers.find((ans) => {
+                        if (
+                          ans.question_id !== question.id ||
+                          ans.matrix_row_id !== row.id
+                        ) {
+                          return false;
+                        }
+
+                        if (col.column_value === "N/A") {
+                          return (
+                            ans.answer_value == null &&
+                            ans.answer_text === col.column_label
+                          );
+                        }
+
+                        return (
+                          ans.answer_value != null &&
+                          ans.answer_value !== "" &&
+                          Number(ans.answer_value) === Number(col.column_value)
+                        );
+                      })
                     )}
                     onChange={() => handleSelect(row, col)}
                   />
@@ -215,10 +228,22 @@ const MatrixQuestionSurvey = ({
                   }}
                 >
                   {question.matrix_columns.map((col) => {
-                    const isSelected =
+                    // const isSelected =
+                    //   existingAnswer &&
+                    //   Number(existingAnswer.answer_value) ===
+                    //     Number(col.column_value);
+                    const isNA = col.column_value === "N/A";
+
+                    const isSelected = Boolean(
                       existingAnswer &&
-                      Number(existingAnswer.answer_value) ===
-                        Number(col.column_value);
+                        (isNA
+                          ? existingAnswer.answer_value == null &&
+                            existingAnswer.answer_text === col.column_label
+                          : existingAnswer.answer_value != null &&
+                            existingAnswer.answer_value !== "" &&
+                            Number(existingAnswer.answer_value) ===
+                              Number(col.column_value))
+                    );
 
                     return (
                       <Box
