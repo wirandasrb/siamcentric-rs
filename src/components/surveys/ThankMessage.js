@@ -1,5 +1,10 @@
 "use client";
-import { AutorenewOutlined, CheckCircle, MarkChatRead, Share } from "@mui/icons-material";
+import {
+  AutorenewOutlined,
+  CheckCircle,
+  MarkChatRead,
+  Share,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -15,6 +20,11 @@ import React from "react";
 
 const ThankMessage = ({ form, onRetakeSurvey }) => {
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const showCopyLink = form?.show_copy_link ?? true;
+
+  const showShareActions =
+    showCopyLink || form?.show_facebook_share || form?.show_line_share;
+
   const handleShare = (platform) => {
     const surveyLink = window.location.href;
     let shareUrl = "";
@@ -47,7 +57,7 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
         alignItems: "flex-start", // ให้เริ่มจากด้านบนเพื่อให้ดูเหมือนลอยอยู่
         minHeight: "80vh",
         mt: 8,
-        px: 2
+        px: 2,
       }}
     >
       <Paper
@@ -80,7 +90,7 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
           <CheckCircle
             sx={{
               fontSize: 50,
-              color: "#4caf50" // สีเขียว Success
+              color: "#4caf50", // สีเขียว Success
             }}
           />
         </Box>
@@ -91,7 +101,7 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
             fontWeight: 700,
             color: "#2C3E50",
             mb: 1.5,
-            fontSize: { xs: "1.5rem", md: "1.75rem" }
+            fontSize: { xs: "1.5rem", md: "1.75rem" },
           }}
         >
           บันทึกข้อมูลสำเร็จ
@@ -103,7 +113,7 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
             color: "text.secondary",
             lineHeight: 1.6,
             mb: 4,
-            maxWidth: "80%" // บีบข้อความไม่ให้ยาวเต็มบรรทัดเกินไป
+            maxWidth: "80%", // บีบข้อความไม่ให้ยาวเต็มบรรทัดเกินไป
           }}
         >
           {form?.thank_you_message ||
@@ -111,7 +121,6 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
         </Typography>
 
         {/* ส่วนของ Social & Copy Link */}
-
 
         {form?.allow_multiple_answers && (
           <>
@@ -133,7 +142,7 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
                   color: form?.primary_color,
                   backgroundColor: lighten(form?.primary_color, 0.8),
                   boxShadow: "none",
-                }
+                },
               }}
               startIcon={<AutorenewOutlined />}
             >
@@ -142,61 +151,62 @@ const ThankMessage = ({ form, onRetakeSurvey }) => {
           </>
         )}
 
-        <Divider sx={{ width: "100%", mt: 4, opacity: 0.5 }} />
+        {showShareActions && (
+          <>
+            <Divider sx={{ width: "100%", mt: 4, opacity: 0.5 }} />
 
-        <Box sx={{ width: "100%", mt: 2 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: 1.5,
-            }}
-          >
-            <Button
-              variant="text"
-              startIcon={<Share />}
-              onClick={() => handleShare("copy")}
-              sx={{
-                color: colors.grey[800],
-                fontWeight: 600,
-                textTransform: "none",
-                borderRadius: 3,
-                minWidth: 130,
-                "&:hover": { backgroundColor: colors.grey[200] },
-              }}
-            >
-              คัดลอกลิงก์
-            </Button>
-
-            {form?.show_facebook_share && (
-              <IconButton
-                onClick={() => {
-                  handleShare("facebook");
+            <Box sx={{ width: "100%", mt: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 1.5,
                 }}
               >
-                <img
-                  src="/icons/facebook.png"
-                  alt="Facebook"
-                  style={{ width: 30, height: 30 }}
-                />
-              </IconButton>
-            )}
-            {form?.show_line_share && (
-              <IconButton
-                onClick={() => {
-                  handleShare("line");
-                }}
-              >
-                <img
-                  src="/icons/line.png"
-                  alt="Line"
-                  style={{ width: 30, height: 30 }}
-                />
-              </IconButton>
-            )}
-          </Box>
-        </Box>
+                {showCopyLink && (
+                  <Button
+                    variant="text"
+                    startIcon={<Share />}
+                    onClick={() => handleShare("copy")}
+                    sx={{
+                      color: colors.grey[800],
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 3,
+                      minWidth: 130,
+                      "&:hover": {
+                        backgroundColor: colors.grey[200],
+                      },
+                    }}
+                  >
+                    คัดลอกลิงก์
+                  </Button>
+                )}
+
+                {form?.show_facebook_share && (
+                  <IconButton onClick={() => handleShare("facebook")}>
+                    <img
+                      src="/icons/facebook.png"
+                      alt="Facebook"
+                      style={{ width: 30, height: 30 }}
+                    />
+                  </IconButton>
+                )}
+
+                {form?.show_line_share && (
+                  <IconButton onClick={() => handleShare("line")}>
+                    <img
+                      src="/icons/line.png"
+                      alt="Line"
+                      style={{ width: 30, height: 30 }}
+                    />
+                  </IconButton>
+                )}
+              </Box>
+            </Box>
+          </>
+        )}
       </Paper>
 
       <SnackbarCustomized

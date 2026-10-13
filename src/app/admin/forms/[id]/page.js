@@ -84,6 +84,7 @@ const FormCreatePage = () => {
     title: "",
     description: "",
     note: "",
+    show_copy_link: true,
   });
   const [sections, setSections] = useState([
     {
@@ -125,6 +126,7 @@ const FormCreatePage = () => {
           thank_you_message: formData.thank_you_message,
           show_facebook_share: formData.show_facebook_share,
           show_line_share: formData.show_line_share,
+          show_copy_link: formData.show_copy_link ?? true,
           meta_title: formData.meta_title,
           meta_description: formData.meta_description,
           display_title: formData.display_title || "all_pages",
@@ -213,6 +215,10 @@ const FormCreatePage = () => {
     formData.append(
       "show_facebook_share",
       formDetail.show_facebook_share ?? true
+    );
+    formData.append(
+      "show_copy_link",
+      String(formDetail.show_copy_link ?? true)
     );
     formData.append("show_line_share", formDetail.show_line_share ?? true);
     formData.append("meta_title", formDetail.meta_title || "");
@@ -481,6 +487,20 @@ const FormCreatePage = () => {
                       />
                     }
                     label="Line"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={formDetail.show_copy_link ?? true}
+                        onChange={(e) =>
+                          setFormDetail({
+                            ...formDetail,
+                            show_copy_link: e.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="แสดงปุ่มคัดลอกลิงก์"
                   />
                 </Box>
               </Box>
