@@ -32,10 +32,23 @@ const checkResponseToken = async (survey_id, token) => {
   }
 };
 
+const checkInviteCode = async (survey_id, token) => {
+  try {
+    const response = await apiWithoutAuth.get(
+      `/surveys/${survey_id}/invite/${token}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error checking response token:", error);
+    throw error;
+  }
+};
+
 const surveyService = {
   getSurveyById,
   submitSurveyAnswers,
   checkResponseToken,
+  checkInviteCode,
 };
 
 export default surveyService;

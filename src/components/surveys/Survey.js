@@ -26,8 +26,13 @@ import {
 } from "@mui/icons-material";
 import SurveyClosed from "./SurveyClosed";
 import { calculateSurveyProgress } from "./surveyProgress";
+import { useParams } from "next/navigation";
 
 const SurveyComponent = ({ survey, responses }) => {
+  const params = useParams();
+  const urlCode = params?.id || "";
+  const isPrivate = urlCode.startsWith("i_");
+
   const customTheme = useMemo(
     () =>
       createTheme({
@@ -84,14 +89,19 @@ const SurveyComponent = ({ survey, responses }) => {
   useEffect(() => {
     const checkPreviousSubmission = async () => {
       try {
-        const response = await useApi.surveys.checkResponseToken(
-          survey.id,
-          respondentToken
-        );
+        let response = null;
+        if (isPrivate) {
+          response = await useApi.surveys.checkInviteCode(survey.id, urlCode);
+        } else {
+          response = await useApi.surveys.checkResponseToken(
+            survey.id,
+            respondentToken
+          );
+        }
         console.log("Check previous submission response:", response);
         if (response.status === "success" && response.alreadyAnswered) {
           // ไปหน้าท้ายเลย
-          setActiveStep(survey?.sections.length);
+          setActiveStep(survey?.sections?.length);
         } else {
           // ยังไม่เคยส่ง ให้เริ่มต้นที่หน้าแรก
           setActiveStep(0);
@@ -106,7 +116,7 @@ const SurveyComponent = ({ survey, responses }) => {
     } else if (survey && survey?.id && !respondentToken) {
       setActiveStep(0);
     }
-  }, [respondentToken, survey]);
+  }, [respondentToken, survey, isPrivate]);
 
   const handleSubmit = async () => {
     setIsConfirmOpen(false);
@@ -117,17 +127,27 @@ const SurveyComponent = ({ survey, responses }) => {
       const response = await useApi.surveys.submitSurveyAnswers({
         answers: answers,
         form_id: survey.id,
-        respondent_token: "",
+        respondent_token: isPrivate ? urlCode : "",
       });
 
       console.log("Survey submission response:", response);
       if (response.success) {
-        const token = response.respondent_token;
-        if (typeof window !== "undefined" && token) {
-          const existingToken = localStorage.getItem("respondent_token");
-          if (!existingToken) {
-            localStorage.setItem("respondent_token", token);
-            setRespondentToken(token);
+        if (isPrivate) {
+          await useApi.invitation.updateSubmitSurveyInvitation(
+            survey.id,
+            urlCode,
+            {
+              form_answer_id: response.form_answer_id,
+            }
+          );
+        } else {
+          const token = response.respondent_token;
+          if (typeof window !== "undefined" && token) {
+            const existingToken = localStorage.getItem("respondent_token");
+            if (!existingToken) {
+              localStorage.setItem("respondent_token", token);
+              setRespondentToken(token);
+            }
           }
         }
         setActiveStep((prev) => prev + 1);
@@ -222,38 +242,103 @@ const SurveyComponent = ({ survey, responses }) => {
     });
   };
 
+  // const skipSectionByConditions = () => {
+  //   let skipToSectionIndex = null;
+
+  //   answers.forEach((answer) => {
+  //     const question = survey.sections
+  //       .flatMap((s) => s.questions)
+  //       .find((q) => q.id === answer.question_id);
+
+  //     if (question && question.options) {
+  //       const option = question.options.find(
+  //         (o) => o.id === answer.answer_option_id
+  //       );
+
+  //       if (option && option.is_have_condition && option.conditions) {
+  //         option.conditions.forEach((condition) => {
+  //           if (condition.condition_type === "skip_section") {
+  //             const targetIndex = survey.sections.findIndex(
+  //               (s) => s.id === condition.target_section_id
+  //             );
+
+  //             if (targetIndex !== -1) {
+  //               if (
+  //                 skipToSectionIndex === null ||
+  //                 targetIndex > skipToSectionIndex
+  //               ) {
+  //                 skipToSectionIndex = targetIndex;
+  //               }
+  //             }
+  //           }
+  //         });
+  //       }
+  //     }
+  //   });
+
+  //   return skipToSectionIndex;
+  // };
+
   const skipSectionByConditions = () => {
     let skipToSectionIndex = null;
 
-    answers.forEach((answer) => {
-      const question = survey.sections
-        .flatMap((s) => s.questions)
-        .find((q) => q.id === answer.question_id);
+    const sections = survey.sections || [];
 
-      if (question && question.options) {
-        const option = question.options.find(
-          (o) => o.id === answer.answer_option_id
+    // Section ที่อยู่ในเส้นทางปัจจุบันจริง
+    const visitedIndexes = new Set(
+      navigation.path.slice(0, navigation.cursor + 1)
+    );
+
+    answers.forEach((answer) => {
+      const sourceSectionIndex = sections.findIndex((section) =>
+        (section.questions || []).some(
+          (q) => String(q.id) === String(answer.question_id)
+        )
+      );
+
+      // ไม่ให้คำตอบจาก Section ที่ข้ามหรือ
+      // Section ข้างหน้ามากำหนดปลายทาง
+      if (
+        sourceSectionIndex === -1 ||
+        !visitedIndexes.has(sourceSectionIndex) ||
+        sourceSectionIndex > activeStep
+      ) {
+        return;
+      }
+
+      const question = sections[sourceSectionIndex].questions.find(
+        (q) => String(q.id) === String(answer.question_id)
+      );
+
+      if (!question?.options) return;
+
+      const selectedIds = Array.isArray(answer.answer_option_id)
+        ? answer.answer_option_id
+        : [answer.answer_option_id];
+
+      question.options.forEach((option) => {
+        const selected = selectedIds.some(
+          (id) => String(id) === String(option.id)
         );
 
-        if (option && option.is_have_condition && option.conditions) {
-          option.conditions.forEach((condition) => {
-            if (condition.condition_type === "skip_section") {
-              const targetIndex = survey.sections.findIndex(
-                (s) => s.id === condition.target_section_id
-              );
+        if (!selected || !option.is_have_condition) return;
 
-              if (targetIndex !== -1) {
-                if (
-                  skipToSectionIndex === null ||
-                  targetIndex > skipToSectionIndex
-                ) {
-                  skipToSectionIndex = targetIndex;
-                }
-              }
-            }
-          });
-        }
-      }
+        (option.conditions || []).forEach((condition) => {
+          if (condition.condition_type !== "skip_section") return;
+
+          const targetIndex = sections.findIndex(
+            (s) => String(s.id) === String(condition.target_section_id)
+          );
+
+          // ต้องเป็น Section ที่อยู่ข้างหน้าเท่านั้น
+          if (targetIndex <= activeStep) return;
+
+          // รักษา Logic เลือกปลายทางที่ไกลที่สุด
+          if (skipToSectionIndex === null || targetIndex > skipToSectionIndex) {
+            skipToSectionIndex = targetIndex;
+          }
+        });
+      });
     });
 
     return skipToSectionIndex;

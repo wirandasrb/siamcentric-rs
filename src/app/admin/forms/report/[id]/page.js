@@ -23,11 +23,11 @@ import {
 } from "@mui/material";
 import { useParams } from "next/navigation";
 import Cardboard from "../../../../../components/Cardboard";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useApi from "../../../../../services";
 import ModalCreateGoogleSheet from "../../../../../components/modals/form/ModalCreateGoogleSheet";
 import SnackbarCustomized from "../../../../../components/Snackbar";
-
+import SurveyEmailCampaign from "../../../../../components/surveys/SurveyEmailCampaign";
 const ReportPage = () => {
   const { id } = useParams();
   const [details, setDetails] = React.useState(null);
@@ -39,6 +39,7 @@ const ReportPage = () => {
     message: "",
     severity: "info",
   });
+  const [invitationList, setInvitationList] = useState([]);
 
   useEffect(() => {
     // ดึงข้อมูลรายงานจาก API โดยใช้ id
@@ -48,7 +49,6 @@ const ReportPage = () => {
       fetchGoogleSheetLink();
     }
   }, [id]);
-
   const fetchData = async () => {
     // ตัวอย่างการดึงข้อมูล
     try {
@@ -92,7 +92,6 @@ const ReportPage = () => {
       console.error("Error creating Google Sheet:", error);
     }
   };
-
   const handleUpdateGoogleSheet = async () => {
     // Logic สำหรับการอัปเดตข้อมูลภายใน Google Sheet
     try {
@@ -113,7 +112,6 @@ const ReportPage = () => {
       });
     }
   };
-
   const handleAddEmail = async (emails) => {
     try {
       const response = await useApi.forms.addEmailSyncGoogleSheet(id, emails);
@@ -126,7 +124,6 @@ const ReportPage = () => {
       console.error("Error adding emails:", error);
     }
   };
-
   const handleExportExcel = async () => {
     // ตัวอย่างการส่งคำขอเพื่อดาวน์โหลดไฟล์ Excel
     try {
@@ -145,7 +142,6 @@ const ReportPage = () => {
       console.error("Error exporting Excel:", error);
     }
   };
-
   const handleExportDataCoding = async () => {
     // ตัวอย่างการส่งคำขอเพื่อดาวน์โหลดไฟล์ Excel
     try {
@@ -164,12 +160,10 @@ const ReportPage = () => {
       console.error("Error exporting Excel:", error);
     }
   };
-
   return (
     <>
       <Box sx={{ p: 2, width: "100%", flexGrow: 1 }}>
         <Typography variant="h5">ผลสำรวจ</Typography>
-
         {/* ปุ่มด้านบน */}
         <Box
           sx={{
@@ -202,7 +196,6 @@ const ReportPage = () => {
           >
             Google Sheet
           </Button>
-
           <Button
             variant="contained"
             sx={{
@@ -218,7 +211,6 @@ const ReportPage = () => {
           >
             Export Excel
           </Button>
-
           <Button
             variant="outlined"
             sx={{
@@ -238,7 +230,6 @@ const ReportPage = () => {
             Data Coding
           </Button>
         </Box>
-
         {/* ส่วนรายงาน */}
         <Box sx={{ mt: 2, mb: 2, width: "100%" }}>
           <Grid container spacing={2} alignItems="stretch">
@@ -315,7 +306,7 @@ const ReportPage = () => {
                       )}
                     </Typography>
                   </Box>
-                  {!googleSheet && !googleSheet?.sheet_url ? (
+                  {!googleSheet?.sheet_url ? (
                     <Box
                       sx={{
                         mt: 2,
@@ -410,6 +401,12 @@ const ReportPage = () => {
             </Grid>
           </Grid>
         </Box>
+        <Box sx={{ mt: 3, mb: 3 }}>
+          <SurveyEmailCampaign
+            formId={id}
+            formTitle={details?.form?.title || ""}
+          />
+        </Box>
       </Box>
       <ModalCreateGoogleSheet
         open={isOpenCreateGoogleSheet}
@@ -428,5 +425,4 @@ const ReportPage = () => {
     </>
   );
 };
-
 export default ReportPage;
