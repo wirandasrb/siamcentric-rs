@@ -25,6 +25,7 @@ import {
   SecurityOutlined,
 } from "@mui/icons-material";
 import SurveyClosed from "./SurveyClosed";
+import { calculateSurveyProgress } from "./surveyProgress";
 
 const SurveyComponent = ({ survey, responses }) => {
   const customTheme = useMemo(
@@ -42,6 +43,11 @@ const SurveyComponent = ({ survey, responses }) => {
   );
   const [respondentToken, setRespondentToken] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
+  // เก็บเส้นทาง Section ที่เดินผ่านจริง
+  const [navigation, setNavigation] = useState({
+    path: [0],
+    cursor: 0,
+  });
   const [answers, setAnswers] = useState(responses || []);
   const [conditionMap, setConditionMap] = useState({}); // เก็บเงื่อนไขของคำถาม
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -134,45 +140,82 @@ const SurveyComponent = ({ survey, responses }) => {
   const handleRetakeSurvey = () => {
     setAnswers([]);
     setActiveStep(0);
+    setNavigation({
+      path: [0],
+      cursor: 0,
+    });
     setIsStarted(false);
+
     if (typeof window !== "undefined") {
       localStorage.removeItem("respondent_token");
       setRespondentToken(null);
     }
   };
 
+  // const handleChangeAnswer = (questionId, newAnswer) => {
+  //   setAnswers((prev) => {
+  //     // กรณีลบคำตอบของคำถามตาม condition
+  //     if (questionId === "__REMOVE__" && Array.isArray(newAnswer)) {
+  //       return prev.filter((ans) => !newAnswer.includes(ans.question_id));
+  //     }
+
+  //     // // ปกติ (รวมถึง matrix logic)
+  //     // let otherAnswers = [];
+
+  //     // if (Array.isArray(newAnswer)) {
+  //     //   const rowIds = newAnswer.map((a) => a.matrix_row_id);
+  //     //   otherAnswers = prev.filter(
+  //     //     (ans) =>
+  //     //       ans.question_id !== questionId ||
+  //     //       (ans.question_id === questionId && !rowIds.includes(ans.matrix_row_id))
+  //     //   );
+  //     // } else {
+  //     //   otherAnswers = prev.filter(
+  //     //     (ans) =>
+  //     //       ans.question_id !== questionId ||
+  //     //       (ans.matrix_row_id &&
+  //     //         newAnswer.matrix_row_id &&
+  //     //         ans.matrix_row_id !== newAnswer.matrix_row_id)
+  //     //   );
+  //     // }
+
+  //     const otherAnswers = prev.filter(
+  //       (ans) => ans?.question_id !== questionId
+  //     );
+
+  //     // สำหรับ matrix question, newAnswer อาจเป็น array
+  //     const newAnswers = Array.isArray(newAnswer) ? newAnswer : [newAnswer];
+
+  //     return [...otherAnswers, ...newAnswers];
+  //   });
+  // };
+
   const handleChangeAnswer = (questionId, newAnswer) => {
+    // เพิ่มใหม่: ถ้าย้อนกลับมาแก้คำตอบ
+    // ให้ล้างเส้นทางข้างหน้าที่อาจใช้ไม่ได้แล้ว
+    if (questionId !== "__REMOVE__") {
+      setNavigation((prev) => {
+        if (prev.cursor === prev.path.length - 1) {
+          return prev;
+        }
+
+        return {
+          path: prev.path.slice(0, prev.cursor + 1),
+          cursor: prev.cursor,
+        };
+      });
+    }
+
+    // setAnswers เดิมของคุณ ไม่ต้องแก้
     setAnswers((prev) => {
-      // กรณีลบคำตอบของคำถามตาม condition
       if (questionId === "__REMOVE__" && Array.isArray(newAnswer)) {
         return prev.filter((ans) => !newAnswer.includes(ans.question_id));
       }
-
-      // // ปกติ (รวมถึง matrix logic)
-      // let otherAnswers = [];
-
-      // if (Array.isArray(newAnswer)) {
-      //   const rowIds = newAnswer.map((a) => a.matrix_row_id);
-      //   otherAnswers = prev.filter(
-      //     (ans) =>
-      //       ans.question_id !== questionId ||
-      //       (ans.question_id === questionId && !rowIds.includes(ans.matrix_row_id))
-      //   );
-      // } else {
-      //   otherAnswers = prev.filter(
-      //     (ans) =>
-      //       ans.question_id !== questionId ||
-      //       (ans.matrix_row_id &&
-      //         newAnswer.matrix_row_id &&
-      //         ans.matrix_row_id !== newAnswer.matrix_row_id)
-      //   );
-      // }
 
       const otherAnswers = prev.filter(
         (ans) => ans?.question_id !== questionId
       );
 
-      // สำหรับ matrix question, newAnswer อาจเป็น array
       const newAnswers = Array.isArray(newAnswer) ? newAnswer : [newAnswer];
 
       return [...otherAnswers, ...newAnswers];
@@ -215,6 +258,14 @@ const SurveyComponent = ({ survey, responses }) => {
 
     return skipToSectionIndex;
   };
+
+  const questionProgress = useMemo(() => {
+    return calculateSurveyProgress(
+      survey?.sections || [],
+      answers,
+      navigation.path
+    );
+  }, [survey?.sections, answers, navigation.path]);
 
   // console.log("SurveyComponent render with answers:", answers);
 
@@ -500,6 +551,9 @@ const SurveyComponent = ({ survey, responses }) => {
                     activeStep={activeStep}
                     totalSteps={survey?.sections?.length}
                     primaryColor={survey?.primary_color || "#1976d2"}
+                    answeredQuestions={questionProgress.answeredQuestions}
+                    totalQuestions={questionProgress.totalQuestions}
+                    progress={questionProgress.progress}
                   />
                 )}
               {/* ส่วนของคำถาม จะมาแทนที่ตรงนี้ */}
@@ -511,23 +565,78 @@ const SurveyComponent = ({ survey, responses }) => {
                     conditions={conditionMap}
                     primaryColor={survey.primary_color || "#1976d2"}
                     secondColor={survey.second_color || "#f5f5f5"}
+                    // onNext={() => {
+                    //   const skipToIndex = skipSectionByConditions();
+                    //   // console.log("Determined skip to section index:", skipToIndex);
+                    //   if (skipToIndex !== null) {
+                    //     setActiveStep(skipToIndex);
+                    //   } else {
+                    //     setActiveStep(activeStep + 1);
+                    //   }
+                    // }}
+                    // onBack={() => {
+                    //   if (activeStep > 0) {
+                    //     setActiveStep(activeStep - 1);
+                    //   } else if (activeStep === 0) {
+                    //     setIsStarted(false);
+                    //   }
+                    // }}
+
                     onNext={() => {
                       const skipToIndex = skipSectionByConditions();
-                      // console.log("Determined skip to section index:", skipToIndex);
-                      if (skipToIndex !== null) {
-                        setActiveStep(skipToIndex);
-                      } else {
-                        setActiveStep(activeStep + 1);
+
+                      const nextStep =
+                        skipToIndex !== null ? skipToIndex : activeStep + 1;
+
+                      // ถ้ามีการข้าม Section
+                      if (nextStep > activeStep + 1) {
+                        // หา ID คำถามทั้งหมดใน Section ที่ถูกข้าม
+                        const skippedQuestionIds = new Set(
+                          survey.sections
+                            .slice(activeStep + 1, nextStep)
+                            .flatMap((section) => section.questions || [])
+                            .map((question) => String(question.id))
+                        );
+
+                        // ลบคำตอบของ Section ที่ถูกข้าม
+                        setAnswers((prev) =>
+                          prev.filter(
+                            (answer) =>
+                              !skippedQuestionIds.has(
+                                String(answer.question_id)
+                              )
+                          )
+                        );
                       }
+
+                      // เก็บ Navigation History
+                      setNavigation((prev) => ({
+                        path: [
+                          ...prev.path.slice(0, prev.cursor + 1),
+                          nextStep,
+                        ],
+                        cursor: prev.cursor + 1,
+                      }));
+
+                      setActiveStep(nextStep);
                     }}
                     onBack={() => {
-                      if (activeStep > 0) {
-                        setActiveStep(activeStep - 1);
-                      } else if (activeStep === 0) {
+                      if (navigation.cursor > 0) {
+                        const previousCursor = navigation.cursor - 1;
+                        const previousStep = navigation.path[previousCursor];
+
+                        setNavigation((prev) => ({
+                          ...prev,
+                          cursor: previousCursor,
+                        }));
+
+                        setActiveStep(previousStep);
+                      } else {
                         setIsStarted(false);
                       }
                     }}
-                    onSubmit={() => setIsConfirmOpen(true)}
+                    // onSubmit={() => setIsConfirmOpen(true)}
+                    onSubmit={handleSubmit}
                     is_last_section={activeStep === survey.sections.length - 1}
                     onChangeAnswer={handleChangeAnswer}
                     answers={answers}

@@ -23,8 +23,15 @@ async function getSurvey(id) {
 export async function generateMetadata({ params }) {
   const resolvedParams = await params; // ✅ ต้อง await ก่อน
   const survey = await getSurvey(resolvedParams.id);
+
+  if (!survey) {
+    return {
+      title: "ไม่พบแบบสอบถาม",
+    };
+  }
+
   return {
-    title: (survey.meta_title ?? survey.title) || "Survey",
+    title: survey.meta_title || survey.title || "Survey",
     description: survey.description || "แบบสอบถามออนไลน์",
     icons: {
       icon: survey.image_url || "/images/contact-form.png",
@@ -40,7 +47,6 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function SurveyPage({ params }) {
-
   const resolvedParams = await params;
   const survey = await getSurvey(resolvedParams.id);
   // const survey = await getSurvey(params.id);
