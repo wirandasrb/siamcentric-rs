@@ -1,59 +1,47 @@
+const BASE_URL =
+  "https://raw.githubusercontent.com/kongvut/thai-province-data/refs/heads/master/api/latest";
+
 const getExternalOptions = async (source_id) => {
-  try {
-    if (source_id === 1) {
-      const response = await fetch(
-        "https://raw.githubusercontent.com/kongvut/thai-province-data/refs/heads/master/api/latest/province.json"
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch province data");
-      }
+  const endpoint = {
+    1: "province.json",
+    2: "district.json",
+  }[source_id];
 
-      const data = await response.json();
-      console.log("Fetched external options:", data);
+  if (!endpoint) return [];
 
-      // Sort ตามตัวอักษรภาษาไทย (ก-ฮ)
-      const sortedData = data.sort((a, b) =>
-        a.name_th.localeCompare(b.name_th, "th")
-      );
+  const response = await fetch(`${BASE_URL}/${endpoint}`);
 
-      // แปลงข้อมูลให้อยู่ในรูปแบบ dropdown-friendly
-      return sortedData.map((province) => ({
-        id: province.id,
-        name_th: province.name_th,
-        name_en: province.name_en,
-        option: province.name_th, // ใช้ชื่อไทยเป็นตัวเลือก
-      }));
-    } else if (source_id === 2) {
-      const response = await fetch(
-        "https://raw.githubusercontent.com/kongvut/thai-province-data/refs/heads/master/api/latest/district.json"
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch amphur data");
-      }
-
-      let data = await response.json();
-
-      // ✨ เพิ่ม Logic การกรอง: ถ้ามีการส่ง province_id มา ให้กรองเฉพาะอำเภอในจังหวัดนั้น
-      //   if (filterId) {
-      //     data = data.filter(
-      //       (amphur) => amphur.province_id === parseInt(filterId)
-      //     );
-      //   }
-
-      // แปลงข้อมูลให้อยู่ในรูปแบบ dropdown-friendly
-      return data.map((amphur) => ({
-        id: amphur.id,
-        name_th: amphur.name_th,
-        name_en: amphur.name_en,
-        option: amphur.name_th, // ใช้ชื่อไทยเป็นตัวเลือก
-      }));
-    }
-  } catch (error) {
-    throw error;
+  if (!response.ok) {
+    throw new Error("Failed to fetch external options");
   }
+
+  const data = await response.json();
+
+  return data
+    .map((item) => {
+      const name_th =
+        typeof item.name === "object"
+          ? `${item.prefix?.th || ""}${item.name?.th || ""}`
+          : item.name_th;
+
+      const name_en =
+        typeof item.name === "object"
+          ? [item.prefix?.en, item.name?.en].filter(Boolean).join(" ")
+          : item.name_en;
+
+      return {
+        id: item.id,
+        name_th,
+        name_en,
+        province_id: item.province_id ?? null,
+        option: name_th,
+      };
+    })
+    .sort((a, b) => a.name_th.localeCompare(b.name_th, "th"));
 };
 
 const externalService = {
   getExternalOptions,
 };
+
 export default externalService;
