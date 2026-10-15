@@ -10,6 +10,7 @@ import {
   colors,
   Divider,
   Grid,
+  IconButton,
   Paper,
   Snackbar,
   Stack,
@@ -21,11 +22,13 @@ import {
   TablePagination,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
   AddLink,
   ContentCopy,
+  Email,
   EmailOutlined,
   Refresh,
   SaveOutlined,
@@ -71,7 +74,10 @@ const PAGE_SIZE = 25;
 // ใช้ 1 Campaign ต่อ 1 Form, ส่ง Bulk จากรายชื่อใน DB ที่ Backend คัดเลือก
 export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
   const [campaign, setCampaign] = useState(defaultCampaign);
+  const [campaignId, setCampaignId] = useState(null);
   const [campaignReady, setCampaignReady] = useState(false);
+  const [sendingId, setSendingId] = useState(null);
+
   const [isDirty, setIsDirty] = useState(false);
   const [campaignLoading, setCampaignLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -190,33 +196,50 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
 
   useEffect(() => {
     if (!formId) return;
+
     let active = true;
-    setCampaignLoading(true);
-    setCampaign(defaultCampaign);
-    setCampaignReady(false);
-    setIsDirty(false);
-    setSummary(null);
-    setPage(0);
-    Promise.resolve()
-      .then(() => useApi.emailCampaigns.getCampaign(formId))
-      .then((response) => {
+
+    const fetchCampaign = async () => {
+      setCampaignLoading(true);
+      setCampaign(defaultCampaign);
+      setCampaignId(null);
+      setCampaignReady(false);
+      setIsDirty(false);
+
+      try {
+        const response = await useApi.emailCampaigns.getCampaignByFormId(
+          formId
+        );
+
         if (!active) return;
-        const data = unwrap(response);
-        setCampaign({
-          name: data?.name || "",
-          subject: data?.subject || defaultCampaign.subject,
-          body: data?.body || defaultCampaign.body,
-        });
-        setCampaignReady(Boolean(data?.id));
-        setIsDirty(false);
-      })
-      .catch((err) => {
+
+        const result = unwrap(response);
+        const data = Array.isArray(result) ? result[0] : result;
+
+        if (data?.id) {
+          setCampaignId(data.id);
+          setCampaign({
+            name: data.name || "",
+            subject: data.subject || defaultCampaign.subject,
+            body: data.body || defaultCampaign.body,
+          });
+          setCampaignReady(true);
+        }
+      } catch (err) {
         if (!active) return;
-        if (err?.response?.status !== 404) setError(errorMessage(err));
-      })
-      .finally(() => {
-        if (active) setCampaignLoading(false);
-      });
+
+        if (err?.response?.status !== 404) {
+          setError(errorMessage(err));
+        }
+      } finally {
+        if (active) {
+          setCampaignLoading(false);
+        }
+      }
+    };
+
+    fetchCampaign();
+
     return () => {
       active = false;
     };
@@ -242,6 +265,7 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
 
   const save = async () => {
     setError("");
+
     if (
       !campaign.name.trim() ||
       !campaign.subject.trim() ||
@@ -250,23 +274,49 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
       setError("กรุณากรอกชื่อ Campaign, หัวข้อ และเนื้อหาอีเมล");
       return;
     }
+
     if (!campaign.body.includes("{{survey_link}}")) {
       setError(
         "ข้อความอีเมลต้องมี {{survey_link}} สำหรับลิงก์ของผู้รับแต่ละคน"
       );
       return;
     }
+
     setSaving(true);
+
     try {
-      const response = await useApi.emailCampaigns.saveCampaign(formId, {
+      const payload = {
         name: campaign.name.trim(),
         subject: campaign.subject.trim(),
         body: campaign.body.trim(),
-      });
+      };
+
+      const response = campaignId
+        ? await useApi.emailCampaigns.updateCampaign(campaignId, payload)
+        : await useApi.emailCampaigns.createCampaign(formId, payload);
+
       const saved = unwrap(response);
-      setCampaignReady(Boolean(saved?.id));
+      let savedId = saved?.id ?? campaignId;
+
+      // กรณี Create API ไม่ได้ส่ง ID กลับมา
+      if (!savedId) {
+        const result = await useApi.emailCampaigns.getCampaignByFormId(formId);
+
+        const data = unwrap(result);
+        const existing = Array.isArray(data) ? data[0] : data;
+        savedId = existing?.id ?? null;
+      }
+
+      setCampaignId(savedId);
+      setCampaignReady(Boolean(savedId));
       setIsDirty(false);
-      notify("บันทึก Email Campaign สำหรับแบบสอบถามนี้แล้ว");
+
+      notify(
+        campaignId
+          ? "อัปเดต Email Campaign สำเร็จ"
+          : "สร้าง Email Campaign สำเร็จ"
+      );
+
       await refreshSummary();
     } catch (err) {
       setError(errorMessage(err));
@@ -274,7 +324,6 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
       setSaving(false);
     }
   };
-
   const openCreate = (mode) => {
     setCreateMode(mode);
     setCreateOpen(true);
@@ -292,6 +341,36 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
     await navigator.clipboard.writeText(inviteUrl);
 
     notify("คัดลอกลิงก์สำเร็จ");
+  };
+
+  const handleSendEmailRow = async (row) => {
+    if (sendingId !== null) return;
+
+    // const confirmed = window.confirm(
+    //   `ยืนยันส่งอีเมลไปยัง ${row.recipient_name || row.email} (${
+    //     row.email
+    //   }) หรือไม่?`
+    // );
+
+    // if (!confirmed) return;
+
+    setSendingId(row.id);
+    setError("");
+
+    try {
+      await useApi.invitation.sendInvitationEmailById(formId, row.id);
+
+      notify(`Resend รับคำขอส่งอีเมลไปยัง ${row.email} แล้ว`);
+
+      await refreshAll();
+    } catch (error) {
+      const message = errorMessage(error);
+
+      setError(message);
+      notify(message, "error");
+    } finally {
+      setSendingId(null);
+    }
   };
 
   const jobActive = ["queued", "sending"].includes(summary?.status);
@@ -587,19 +666,45 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
                     <TableCell>{fmtDate(row.sent_at)}</TableCell>
                     <TableCell>{fmtDate(row.completed_at)}</TableCell>
                     <TableCell align="right">
-                      <Button
-                        size="small"
-                        startIcon={<ContentCopy />}
-                        disabled={
-                          copyingId === row.id ||
-                          ["revoked", "expired", "completed"].includes(
-                            row.status
-                          )
-                        }
-                        onClick={() => copyExistingLink(row.invite_code)}
-                      >
-                        คัดลอก
-                      </Button>
+                      <Tooltip title="คัดลอกลิงก์">
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={
+                              copyingId === row.id ||
+                              ["revoked", "expired", "completed"].includes(
+                                row.status
+                              )
+                            }
+                            onClick={() => copyExistingLink(row.invite_code)}
+                          >
+                            <ContentCopy fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+
+                      <Tooltip title="ส่งอีเมล">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            disabled={
+                              sendingId !== null ||
+                              !campaignReady ||
+                              isDirty ||
+                              jobActive ||
+                              !["pending", "failed"].includes(row.status)
+                            }
+                            onClick={() => handleSendEmailRow(row)}
+                          >
+                            {sendingId === row.id ? (
+                              <CircularProgress size={20} />
+                            ) : (
+                              <Email fontSize="small" />
+                            )}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))
@@ -637,8 +742,8 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
       <ModalImportRecipients
         open={importOpen}
         onClose={() => setImportOpen(false)}
-        onPreviewFile={(file) =>
-          useApi.emailCampaigns.previewRecipientsFile(formId, file)
+        onImportFile={(file) =>
+          useApi.invitation.importExcelInvitations(formId, file)
         }
         onPreviewSheet={(sheetUrl) =>
           useApi.emailCampaigns.previewRecipientsSheet(formId, sheetUrl)
@@ -649,6 +754,7 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
         onImported={async () => {
           setPage(0);
           await refreshAll();
+
           notify("นำเข้ารายชื่อผู้รับเรียบร้อยแล้ว");
         }}
       />

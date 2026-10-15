@@ -36,11 +36,40 @@ const updateSubmitSurveyInvitation = async (formId, invite_code, data) => {
   );
   return response.data;
 };
+
+const importExcelInvitations = async (formId, file) => {
+  const formData = new FormData();
+
+  formData.append("file", file, file.name);
+
+  const response = await apiWithAuth.post(
+    `/invites/${formId}/import-excel`,
+    formData,
+    {
+      headers: {
+        "Content-Type": undefined,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+const sendInvitationEmailById = async (formId, invitationId) => {
+  const response = await apiWithAuth.post(
+    `/invites/${formId}/${invitationId}/send-email`
+  );
+
+  return response.data;
+};
+
 const invitationService = {
   getInvitations,
   createInvitation,
   sendInvitationEmail,
   updateSubmitSurveyInvitation,
+  importExcelInvitations,
+  sendInvitationEmailById,
 };
 
 export default invitationService;

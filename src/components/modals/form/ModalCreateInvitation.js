@@ -20,7 +20,6 @@ import { ContentCopy, EmailOutlined, LinkOutlined } from "@mui/icons-material";
 const errorMessage = (err) =>
   err?.response?.data?.message || err?.message || "ไม่สามารถดำเนินการได้";
 
-// result มี invite_url เฉพาะโหมด copy และคืนมาจาก Backend เท่านั้น
 export default function ModalCreateInvitation({
   open,
   onClose,
