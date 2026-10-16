@@ -1,10 +1,5 @@
 import { apiWithAuth } from "./apiConfig";
 
-/**
- * กติกาการคืนค่าเหมือน formService/reportService:
- * คืน response.data ซึ่งในโปรเจกต์มักมีรูปร่าง { data: ... } อีกชั้น
- * Token/URL แบบเฉพาะคนจะคืนเฉพาะผลของ createInvitation เท่านั้น
- */
 const getInvitations = async (formId, params = {}) => {
   try {
     const response = await apiWithAuth.get(`/invites/${formId}`, { params });
@@ -14,6 +9,12 @@ const getInvitations = async (formId, params = {}) => {
     console.error("Error fetching invitations:", error);
     throw error;
   }
+};
+
+const getInvitationSummary = async (formId) => {
+  const response = await apiWithAuth.get(`/invites/${formId}/summary`);
+
+  return response.data;
 };
 
 const createInvitation = async (formId, payload) => {
@@ -70,6 +71,7 @@ const invitationService = {
   updateSubmitSurveyInvitation,
   importExcelInvitations,
   sendInvitationEmailById,
+  getInvitationSummary,
 };
 
 export default invitationService;

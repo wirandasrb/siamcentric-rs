@@ -139,8 +139,16 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
 
   const refreshSummary = useCallback(async () => {
     if (!formId) return;
-    const result = await useApi.emailCampaigns.getCampaignSummary(formId);
-    setSummary(unwrap(result));
+
+    try {
+      const response = await useApi.invitation.getInvitationSummary(formId);
+
+      const data = response?.data ?? response;
+
+      setSummary(data);
+    } catch (error) {
+      setError(errorMessage(error));
+    }
   }, [formId]);
 
   const refreshRows = useCallback(async () => {
@@ -693,9 +701,18 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
                               !campaignReady ||
                               isDirty ||
                               jobActive ||
-                              !["pending", "failed"].includes(row.status)
+                              ![
+                                "pending",
+                                "sent",
+                                "opened",
+                                "started",
+                                "failed",
+                              ].includes(row.status) ||
+                              (row.expires_at &&
+                                new Date(row.expires_at) <= new Date()) ||
+                              Boolean(row.form_answer_id || row.completed_at)
                             }
-                            onClick={() => handleSendEmailRow(row)}
+                            onClick={() => handleSendEmail(row)}
                           >
                             {sendingId === row.id ? (
                               <CircularProgress size={20} />
