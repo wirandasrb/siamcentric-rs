@@ -834,7 +834,7 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
                                 new Date(row.expires_at) <= new Date()) ||
                               Boolean(row.form_answer_id || row.completed_at)
                             }
-                            onClick={() => handleSendEmail(row)}
+                            onClick={() => handleSendEmailRow(row)}
                           >
                             {sendingId === row.id ? (
                               <CircularProgress size={20} />
