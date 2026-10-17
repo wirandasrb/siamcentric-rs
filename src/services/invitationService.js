@@ -1,14 +1,15 @@
 import { apiWithAuth } from "./apiConfig";
 
 const getInvitations = async (formId, params = {}) => {
-  try {
-    const response = await apiWithAuth.get(`/invites/${formId}`, { params });
+  const response = await apiWithAuth.get(`/invites/${formId}`, {
+    params: {
+      page: params.page ?? 1,
+      page_size: params.page_size ?? 25,
+      search: params.search ?? "",
+    },
+  });
 
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching invitations:", error);
-    throw error;
-  }
+  return response.data;
 };
 
 const getInvitationSummary = async (formId) => {
@@ -64,6 +65,23 @@ const sendInvitationEmailById = async (formId, invitationId) => {
   return response.data;
 };
 
+const dispatchInvitations = async (formId, scope) => {
+  const response = await apiWithAuth.post(`/invites/${formId}/dispatch-email`, {
+    scope,
+  });
+
+  return response.data;
+};
+
+const exportInvitations = async (formId, search = "") => {
+  const response = await apiWithAuth.get(`/invites/${formId}/export`, {
+    params: { search },
+    responseType: "blob",
+  });
+
+  return response.data;
+};
+
 const invitationService = {
   getInvitations,
   createInvitation,
@@ -72,6 +90,8 @@ const invitationService = {
   importExcelInvitations,
   sendInvitationEmailById,
   getInvitationSummary,
+  dispatchInvitations,
+  exportInvitations,
 };
 
 export default invitationService;

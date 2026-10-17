@@ -30,6 +30,7 @@ import {
   ContentCopy,
   Email,
   EmailOutlined,
+  FileDownloadOutlined,
   Refresh,
   SaveOutlined,
   SendOutlined,
@@ -83,12 +84,18 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
   const [saving, setSaving] = useState(false);
   const [copyingId, setCopyingId] = useState(null);
   const [summary, setSummary] = useState(null);
+
   const [rows, setRows] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
+
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+
   const [search, setSearch] = useState("");
   const [searchValue, setSearchValue] = useState("");
+
   const [listLoading, setListLoading] = useState(false);
+
   const [createMode, setCreateMode] = useState("copy");
   const [createOpen, setCreateOpen] = useState(false);
   const [dispatchOpen, setDispatchOpen] = useState(false);
@@ -100,7 +107,15 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
     severity: "success",
   });
 
+  const [exporting, setExporting] = useState(false);
+
   const summaryCards = [
+    // {
+    //   label: "รายชื่อทั้งหมด",
+    //   value: summary?.total_count,
+    //   color: "#6366F1",
+    //   bgcolor: "#EEF2FF",
+    // },
     {
       label: "รายชื่อที่ใช้ส่งได้",
       value: summary?.eligible_count,
@@ -178,7 +193,7 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
     try {
       const response = await useApi.invitation.getInvitations(formId, {
         page: page + 1,
-        page_size: PAGE_SIZE,
+        page_size: pageSize,
         search,
       });
 
@@ -187,12 +202,52 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
       setRows(Array.isArray(data?.items) ? data.items : []);
       setTotalRows(Number(data?.total ?? 0));
     } catch (error) {
-      console.error("Error fetching invitation list:", error);
+      console.error("Error fetching invitations:", error);
       setError(errorMessage(error));
     } finally {
       setListLoading(false);
     }
-  }, [formId, page, search]);
+  }, [formId, page, pageSize, search]);
+
+  const handleSearch = () => {
+    setPage(0);
+    setSearch(searchValue.trim());
+  };
+
+  const handleClearSearch = () => {
+    setSearchValue("");
+    setSearch("");
+    setPage(0);
+  };
+
+  const handleExportInvitations = async () => {
+    if (exporting) return;
+
+    setExporting(true);
+
+    try {
+      const blob = await useApi.invitation.exportInvitations(formId, search);
+
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `invitations-${formId}.xlsx`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+
+      notify("Export รายการลิงก์เรียบร้อยแล้ว");
+    } catch (error) {
+      notify("ไม่สามารถ Export ข้อมูลได้", "error");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const refreshAll = useCallback(async () => {
     try {
@@ -258,13 +313,17 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
   }, [refreshAll]);
 
   useEffect(() => {
-    if (!formId || !["queued", "sending"].includes(summary?.status)) return;
+    if (!formId || !["queued", "sending"].includes(summary?.status)) {
+      return;
+    }
+
     const timer = setInterval(() => {
-      refreshSummary().catch((err) => setError(errorMessage(err)));
-      refreshRows();
+      refreshSummary();
+      fetchInviteList();
     }, 10000);
+
     return () => clearInterval(timer);
-  }, [formId, summary?.status, refreshSummary, refreshRows]);
+  }, [formId, summary?.status, refreshSummary, fetchInviteList]);
 
   const setValue = (field) => (event) => {
     setCampaign((prev) => ({ ...prev, [field]: event.target.value }));
@@ -336,11 +395,22 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
     setCreateMode(mode);
     setCreateOpen(true);
   };
+
   const queueBulk = async (scope) => {
-    await useApi.emailCampaigns.dispatchCampaign(formId, scope);
-    setDispatchOpen(false);
-    notify("รับคำขอส่งอีเมลแล้ว ระบบกำลังจัดคิวส่งด้วย Resend");
-    await refreshAll();
+    const response = await useApi.invitation.dispatchInvitations(formId, scope);
+
+    notify(
+      `สร้างงานส่งอีเมล ${response.data.queued_count} รายชื่อเรียบร้อยแล้ว`
+    );
+
+    // การ Refresh ล้มเหลวไม่ควรถูกแสดงว่า Dispatch ล้มเหลว
+    try {
+      await refreshAll();
+    } catch (error) {
+      console.error("Refresh after dispatch failed:", error);
+    }
+
+    return response;
   };
 
   const copyExistingLink = async (invite_code) => {
@@ -561,11 +631,13 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
               !campaignReady ||
               isDirty ||
               jobActive ||
-              Number(summary?.unsent_count ?? 0) +
-                Number(summary?.failed_count ?? 0) ===
-                0
+              Number(summary?.eligible_count ?? 0) === 0
             }
             onClick={() => setDispatchOpen(true)}
+            sx={{
+              color: "white",
+              boxShadow: "none",
+            }}
           >
             ส่งอีเมลจากรายชื่อในฐานข้อมูล
           </Button>
@@ -605,31 +677,81 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
 
       <Paper variant="outlined" sx={{ borderRadius: 3, overflow: "hidden" }}>
         <Box sx={{ p: 2 }}>
-          <Typography fontWeight={700} variant="h6">
-            รายการลิงก์เฉพาะบุคคล
-          </Typography>
-          <Stack direction={{ xs: "column", sm: "row" }} gap={1} sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="ค้นหาชื่อหรืออีเมล (ค้นหาจากฐานข้อมูล)"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  setPage(0);
-                  setSearch(searchValue.trim());
-                }
-              }}
-            />
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            spacing={2}
+          >
+            <Typography fontWeight={700} variant="h6">
+              รายการลิงก์เฉพาะบุคคล
+            </Typography>
+
             <Button
               variant="outlined"
-              onClick={() => {
-                setPage(0);
-                setSearch(searchValue.trim());
+              color="success"
+              startIcon={<FileDownloadOutlined />}
+              onClick={handleExportInvitations}
+              disabled={exporting || totalRows === 0}
+              sx={{
+                borderRadius: 2,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {exporting ? "กำลัง Export..." : "Export Excel"}
+            </Button>
+          </Stack>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={1}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            sx={{ mt: 2, width: "100%" }}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="ค้นหาชื่อผู้รับ หรืออีเมล"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
+            </Box>
+
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              disabled={listLoading}
+              sx={{
+                height: 40,
+                minWidth: 100,
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                borderRadius: 2,
+                color: "white",
+                boxShadow: "none",
               }}
             >
               ค้นหา
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={handleClearSearch}
+              disabled={!search && !searchValue}
+              sx={{
+                height: 40,
+                minWidth: 100,
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+                borderRadius: 2,
+              }}
+            >
+              ล้างค่า
             </Button>
           </Stack>
         </Box>
@@ -733,9 +855,15 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
           component="div"
           count={totalRows}
           page={page}
-          rowsPerPage={PAGE_SIZE}
-          rowsPerPageOptions={[PAGE_SIZE]}
-          onPageChange={(_, nextPage) => setPage(nextPage)}
+          rowsPerPage={pageSize}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          onPageChange={(_, nextPage) => {
+            setPage(nextPage);
+          }}
+          onRowsPerPageChange={(event) => {
+            setPageSize(Number(event.target.value));
+            setPage(0);
+          }}
           labelRowsPerPage="รายการต่อหน้า"
           labelDisplayedRows={({ from, to, count }) =>
             `${from}–${to} จาก ${count}`
