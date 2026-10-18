@@ -250,12 +250,12 @@ export default function ModalImportRecipients({
                     label="Excel / CSV"
                     disabled={locked}
                   />
-                  <FormControlLabel
+                  {/* <FormControlLabel
                     value="sheet"
                     control={<Radio />}
                     label="Google Sheets"
                     disabled={locked}
-                  />
+                  /> */}
                 </RadioGroup>
               </Box>
 
