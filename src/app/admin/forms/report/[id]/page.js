@@ -18,6 +18,7 @@ import {
   IconButton,
   Link,
   Paper,
+  Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -233,170 +234,194 @@ const ReportPage = () => {
         {/* ส่วนรายงาน */}
         <Box sx={{ mt: 2, mb: 2, width: "100%" }}>
           <Grid container spacing={2} alignItems="stretch">
+            {/* จำนวนผู้ตอบ */}
             <Grid item xs={12} md={3} sx={{ display: "flex" }}>
-              <Cardboard
-                title="จำนวนผู้ตอบแบบสอบถาม"
-                value={details ? details.count_respondents : 0}
-                icon={<Person />}
-                color={colors.lightGreen[700]}
-              />
+              <Box sx={{ width: "100%", display: "flex" }}>
+                <Cardboard
+                  title="จำนวนผู้ตอบแบบสอบถาม"
+                  value={details?.count_respondents ?? 0}
+                  icon={<Person />}
+                  color={colors.lightGreen[700]}
+                />
+              </Box>
             </Grid>
+
+            {/* รายละเอียดแบบสอบถาม */}
             <Grid item xs={12} md={9} sx={{ display: "flex" }}>
               <Box
                 sx={{
-                  p: 2,
+                  p: { xs: 2, md: 3 },
+                  width: "100%",
+                  bgcolor: "white",
+                  boxShadow: "0 0 16px rgba(91, 71, 188, 0.12)",
+                  borderRadius: 3,
                   display: "flex",
                   flexDirection: "column",
-                  gap: 1,
-                  backgroundColor: "white",
-                  boxShadow: "0 0 16px rgba(91, 71, 188, 0.2)",
-                  borderRadius: 3,
-                  minHeight: 200,
+                  gap: 2,
                 }}
               >
-                <Box
-                  sx={{
-                    gap: 2,
-                    border: "1px solid",
-                    borderColor: "divider",
-                    borderRadius: 3,
-                    width: "100%",
-                    minHeight: 100,
-                    p: 2,
-                  }}
-                >
-                  <Box
+                {/* ชื่อแบบสอบถาม */}
+                <Box>
+                  <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                    {details?.form?.title || "-"}
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
                     sx={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 1,
+                      whiteSpace: "pre-line",
+                      wordBreak: "break-word",
                     }}
                   >
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        my: "auto",
-                        color: colors.grey[800],
-                        fontWeight: 600,
-                        noWrap: true,
-                      }}
-                    >
-                      Link Google Sheet :
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color:
-                          googleSheet && googleSheet?.sheet_url
-                            ? "primary.main"
-                            : "text.secondary",
-                      }}
-                    >
-                      {googleSheet && googleSheet?.sheet_url ? (
-                        <Link
-                          href={googleSheet?.sheet_url}
-                          target="_blank"
-                          rel="noopener"
-                        >
-                          {googleSheet?.sheet_url}
-                        </Link>
-                      ) : (
-                        "ยังไม่มีการสร้าง Google Sheet"
-                      )}
-                    </Typography>
-                  </Box>
-                  {!googleSheet?.sheet_url ? (
-                    <Box
-                      sx={{
-                        mt: 2,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<NoteAdd />}
-                        sx={{
-                          borderRadius: 3,
-                        }}
-                        onClick={() => setIsOpenCreateGoogleSheet(true)}
+                    {details?.form?.description || "-"}
+                  </Typography>
+                </Box>
+
+                <Divider />
+
+                {/* Google Sheet */}
+                <Box
+                  sx={{
+                    p: 2,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Stack
+                    direction={{ xs: "column", lg: "row" }}
+                    alignItems={{
+                      xs: "stretch",
+                      lg: "center",
+                    }}
+                    justifyContent="space-between"
+                    spacing={2}
+                  >
+                    {/* รายละเอียด Google Sheet */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={700}
+                        sx={{ mb: 0.5 }}
                       >
-                        สร้าง Google Sheet
-                      </Button>
-                    </Box>
-                  ) : (
-                    <Box
-                      sx={{
-                        mt: 2,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <Tooltip title="คัดลอกลิงก์">
-                        <IconButton
-                          color="primary"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              googleSheet?.sheet_url
-                            );
-                            setToast({
-                              open: true,
-                              message: "คัดลอกลิงก์สำเร็จ",
-                              severity: "success",
-                            });
+                        Google Sheet
+                      </Typography>
+
+                      {googleSheet?.sheet_url ? (
+                        <Link
+                          href={googleSheet.sheet_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          underline="hover"
+                          sx={{
+                            display: "block",
+                            fontSize: 14,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            maxWidth: "100%",
                           }}
                         >
-                          <ContentCopy />
-                        </IconButton>
-                      </Tooltip>
-                      <Button
-                        variant="outlined"
-                        color="primary"
-                        startIcon={<Edit />}
-                        sx={{
-                          borderRadius: 3,
-                        }}
-                        onClick={handleUpdateGoogleSheet}
-                      >
-                        อัปเดตข้อมูลชีท
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="success"
-                        startIcon={<Add />}
-                        sx={{
-                          borderRadius: 3,
-                          ml: 2,
-                        }}
-                        onClick={() => {
-                          setIsOpenCreateGoogleSheet(true);
-                        }}
-                      >
-                        เพิ่มอีเมล
-                      </Button>
+                          {googleSheet.sheet_url}
+                        </Link>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">
+                          ยังไม่มีการสร้าง Google Sheet
+                        </Typography>
+                      )}
                     </Box>
-                  )}
+
+                    {/* ปุ่มจัดการ */}
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      useFlexGap
+                      flexWrap="wrap"
+                      alignItems="center"
+                      justifyContent={{
+                        xs: "flex-start",
+                        lg: "flex-end",
+                      }}
+                      sx={{ flexShrink: 0 }}
+                    >
+                      {!googleSheet?.sheet_url ? (
+                        <Button
+                          variant="contained"
+                          startIcon={<NoteAdd />}
+                          onClick={() => setIsOpenCreateGoogleSheet(true)}
+                          sx={{
+                            borderRadius: 2,
+                            boxShadow: "none",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          สร้าง Google Sheet
+                        </Button>
+                      ) : (
+                        <>
+                          <Tooltip title="คัดลอกลิงก์">
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(
+                                    googleSheet.sheet_url
+                                  );
+
+                                  setToast({
+                                    open: true,
+                                    message: "คัดลอกลิงก์สำเร็จ",
+                                    severity: "success",
+                                  });
+                                } catch {
+                                  setToast({
+                                    open: true,
+                                    message: "ไม่สามารถคัดลอกลิงก์ได้",
+                                    severity: "error",
+                                  });
+                                }
+                              }}
+                            >
+                              <ContentCopy fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<Edit />}
+                            onClick={handleUpdateGoogleSheet}
+                            sx={{
+                              minHeight: 36,
+                              borderRadius: 2,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            อัปเดตชีต
+                          </Button>
+
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="success"
+                            startIcon={<Add />}
+                            onClick={() => setIsOpenCreateGoogleSheet(true)}
+                            sx={{
+                              minHeight: 36,
+                              borderRadius: 2,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            เพิ่มอีเมล
+                          </Button>
+                        </>
+                      )}
+                    </Stack>
+                  </Stack>
                 </Box>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    mt: 2,
-                  }}
-                >
-                  {details ? details.form?.title : ""}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: "text.secondary",
-                    mt: 2,
-                    marginLeft: 1,
-                  }}
-                >
-                  {details ? details.form?.description : ""}
-                </Typography>
               </Box>
             </Grid>
           </Grid>
