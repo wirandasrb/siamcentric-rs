@@ -193,8 +193,7 @@ export default function ModalImportRecipients({
         <Stack spacing={2.5}>
           <Alert severity="info">
             ขั้นตอนนี้นำเข้ารายชื่อและสร้าง Invitation เฉพาะบุคคลเท่านั้น
-            <strong> ยังไม่ส่งอีเมล</strong> เมื่อพร้อมจึงค่อยกดส่งผ่าน Resend
-            จากหน้า Campaign
+            <strong> ยังไม่ส่งอีเมล</strong> เมื่อพร้อมจึงค่อยกดส่ง
           </Alert>
           {result ? (
             <Alert severity="success">

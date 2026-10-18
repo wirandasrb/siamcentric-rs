@@ -551,7 +551,7 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
               การส่งคำเชิญ
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              นำเข้ารายชื่อจาก Excel / Google Sheets แล้วค่อยเลือกส่งอีเมล
+              นำเข้ารายชื่อจาก Excel แล้วค่อยเลือกส่งอีเมล
               หรือสร้างลิงก์เป็นรายคน
             </Typography>
           </Box>
@@ -647,7 +647,7 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
             disabled={!campaignReady || isDirty || jobActive}
             onClick={() => setImportOpen(true)}
           >
-            นำเข้ารายชื่อ Excel / Google Sheets
+            นำเข้ารายชื่อ Excel
           </Button>
           <Button
             variant="outlined"
@@ -671,7 +671,6 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
         <Typography sx={{ mt: 1 }} variant="caption" color="text.secondary">
           การนำเข้าจะสร้าง Invitation เป็นสถานะยังไม่ส่ง
           และไม่ส่งอีเมลอัตโนมัติ; บันทึก Campaign ก่อนนำเข้า/ส่ง
-          การส่งหลายพันคนทำงานใน Background ที่ Backend
         </Typography>
       </Paper>
 
