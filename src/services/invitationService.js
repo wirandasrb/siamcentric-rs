@@ -1,4 +1,4 @@
-import { apiWithAuth } from "./apiConfig";
+import { apiWithAuth, apiWithoutAuth } from "./apiConfig";
 
 const getInvitations = async (formId, params = {}) => {
   const response = await apiWithAuth.get(`/invites/${formId}`, {
@@ -32,7 +32,7 @@ const sendInvitationEmail = async (formId, payload) => {
 };
 
 const updateSubmitSurveyInvitation = async (formId, invite_code, data) => {
-  const response = await apiWithAuth.put(
+  const response = await apiWithoutAuth.put(
     `/invites/${formId}/${invite_code}`,
     data
   );
