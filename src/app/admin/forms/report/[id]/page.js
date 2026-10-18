@@ -354,6 +354,7 @@ const ReportPage = () => {
                             borderRadius: 2,
                             boxShadow: "none",
                             whiteSpace: "nowrap",
+                            color: "white",
                           }}
                         >
                           สร้าง Google Sheet
