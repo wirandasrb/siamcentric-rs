@@ -128,22 +128,17 @@ const SurveyComponent = ({ survey, responses }) => {
         answers: answers,
         form_id: survey.id,
         respondent_token: isPrivate ? urlCode : "",
+        invite_code: isPrivate ? urlCode : "",
       });
 
       console.log("Survey submission response:", response);
       if (response.success) {
-        if (isPrivate) {
-          await useApi.invitation.updateSubmitSurveyInvitation(
-            survey.id,
-            urlCode,
-            {
-              form_answer_id: response.form_answer_id,
-            }
-          );
-        } else {
+        if (!isPrivate) {
           const token = response.respondent_token;
+
           if (typeof window !== "undefined" && token) {
             const existingToken = localStorage.getItem("respondent_token");
+
             if (!existingToken) {
               localStorage.setItem("respondent_token", token);
               setRespondentToken(token);

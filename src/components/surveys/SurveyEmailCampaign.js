@@ -656,14 +656,14 @@ export default function SurveyEmailCampaign({ formId, formTitle = "" }) {
           >
             สร้างลิงก์และคัดลอก
           </Button>
-          <Button
+          {/* <Button
             variant="outlined"
             startIcon={<EmailOutlined />}
             disabled={!campaignReady || isDirty}
             onClick={() => openCreate("email")}
           >
             ส่งอีเมลรายบุคคล
-          </Button>
+          </Button> */}
           <Button variant="text" startIcon={<Refresh />} onClick={refreshAll}>
             รีเฟรช
           </Button>
