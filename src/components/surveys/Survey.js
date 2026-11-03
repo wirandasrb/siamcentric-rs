@@ -147,8 +147,20 @@ const SurveyComponent = ({ survey, responses }) => {
         }
         setActiveStep((prev) => prev + 1);
       }
+      // กรณี API คืน success: false โดยไม่ throw error
+      else if (response.error === "Invitation นี้ตอบแบบสอบถามแล้ว") {
+        setActiveStep((prev) => prev + 1);
+      }
     } catch (error) {
       console.error("Error submitting survey answers:", error);
+      const errorMessage =
+        error?.response?.data?.message || error?.message || "";
+
+      // Invitation นี้ตอบแบบสอบถามแล้ว
+      if (errorMessage.includes("Invitation นี้ตอบแบบสอบถามแล้ว")) {
+        setActiveStep((prev) => prev + 1);
+        return;
+      }
     }
   };
 
